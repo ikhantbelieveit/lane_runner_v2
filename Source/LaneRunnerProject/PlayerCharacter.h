@@ -53,6 +53,8 @@ protected:
 
 	EPlayerSpeedState CurrentSpeedState;
 
+	int CurrentLaneIndex;	//0-4 left-right
+
 public:	
 	UPROPERTY(EditAnywhere)
 	float DefaultRunSpeed = 600.0f;
@@ -72,6 +74,15 @@ public:
 	UPROPERTY(EditAnywhere)
 	float JumpApexHangTime = 0.1f;
 
+	UPROPERTY(EditAnywhere)
+	float LaneDistance = 200.0f;
+
+	UPROPERTY(EditAnywhere)
+	float CameraHeight = 175.0f;
+
+	UPROPERTY(EditAnywhere)
+	int HoldShoot_MaxProjectiles = 1;
+
 	bool JumpedThisFrame;
 
 
@@ -82,7 +93,6 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	//input methods
-
 	void Input_LeftStart();
 	void Input_RightStart();
 
@@ -90,6 +100,15 @@ public:
 
 	//character update methods
 	void UpdateLaneScroll();
+	void UpdateLaneFromInput();
 
+	//lane
+	bool MoveLane_Left();
+	bool MoveLane_Right();
+	bool SetLane(int laneIndex);
+	bool CanPlayerOccupyLane(int laneIndex);
+
+
+	//run/scroll
 	virtual float GetCurrentRunSpeed();
 };

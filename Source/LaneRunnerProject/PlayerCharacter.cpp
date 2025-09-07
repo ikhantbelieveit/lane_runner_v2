@@ -65,6 +65,9 @@ void APlayerCharacter::BeginPlay()
 	//assign camera FOV
 	CameraComponent->SetFieldOfView(100.0f);
 	
+
+	//set lane to middle
+	SetLane(2);
 }
 
 // Called every frame
@@ -73,6 +76,7 @@ void APlayerCharacter::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	UpdateLaneScroll();
+	UpdateLaneFromInput();
 
 	ClearInputValues();
 }
@@ -114,6 +118,88 @@ void APlayerCharacter::ClearInputValues()
 void APlayerCharacter::UpdateLaneScroll()
 {
 	AddMovementInput(FVector(GetCurrentRunSpeed(), 0.0f, 0.0f));
+}
+
+void APlayerCharacter::UpdateLaneFromInput()
+{
+	if (LeftInput_Pressed)
+	{
+		MoveLane_Left();
+	}
+
+	if (RightInput_Pressed)
+	{
+		MoveLane_Right();
+	}
+}
+
+bool APlayerCharacter::MoveLane_Left()
+{
+	return (SetLane(CurrentLaneIndex - 1));
+}
+
+bool APlayerCharacter::MoveLane_Right()
+{
+	return (SetLane(CurrentLaneIndex + 1));
+}
+
+bool APlayerCharacter::SetLane(int laneIndex)
+{
+	if (!CanPlayerOccupyLane(laneIndex))
+	{
+		return false;
+	}
+
+	bool moveLeft = false;
+	bool moveRight = false;
+
+	if (laneIndex == CurrentLaneIndex - 1)
+	{
+		moveLeft = true;
+	}
+
+	if (laneIndex == CurrentLaneIndex + 1)
+	{
+		moveRight = true;
+	}
+
+	CurrentLaneIndex = laneIndex;
+
+	if (moveLeft)
+	{
+		FVector offset = FVector(0, -LaneDistance, 0);
+		AddActorWorldOffset(offset);
+
+		CameraComponent->SetWorldLocation(FVector(
+			CameraComponent->GetComponentLocation().X,
+			0,
+			CameraComponent->GetComponentLocation().Z));
+	}
+
+	if (moveRight)
+	{
+		FVector offset = FVector(0, LaneDistance, 0);
+		AddActorWorldOffset(offset);
+
+
+		CameraComponent->SetWorldLocation(FVector(
+			CameraComponent->GetComponentLocation().X,
+			0,
+			CameraComponent->GetComponentLocation().Z));
+	}
+
+	return true;
+}
+
+bool APlayerCharacter::CanPlayerOccupyLane(int laneIndex)
+{
+	//cancel if outside the 5 valid lanes
+	if (laneIndex < 0 || laneIndex > 4)
+	{
+		return false;
+	}
+
+	return true;
 }
 
 float APlayerCharacter::GetCurrentRunSpeed()
