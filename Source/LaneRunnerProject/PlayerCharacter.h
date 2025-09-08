@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "PlayerConfigData.h"
 #include "EPlayerJumpState.h"
 #include "PaperSpriteComponent.h"
 #include "PaperSprite.h"
@@ -32,41 +33,20 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAccess = "true"))
 	UCameraComponent* CameraComponent;
 
-	// Input mapping context
-	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	UInputMappingContext* InputMap;
-
-	// Input actions
-	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	UInputAction* Input_LeftAction;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	UInputAction* Input_RightAction;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	UInputAction* Input_SpeedUpAction;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	UInputAction* Input_SlowDownAction;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	UInputAction* Input_ShootRightAction;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	UInputAction* Input_ShootLeftAction;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	UInputAction* Input_ShootUpAction;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Input")
-	UInputAction* Input_ShootDownAction;
+	UInputAction* Input_ShootForwardAction;
 
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Visuals", meta = (AllowPrivateAccess = "true"))
 	UPaperSpriteComponent* SpriteComponent;
 
-	/** The sprite asset to assign (set this in the Blueprint defaults) */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Visuals", meta = (AllowPrivateAccess = "true"))
 	UPaperSprite* PlayerSprite;
 
 	bool LeftInput_Pressed;
@@ -103,32 +83,26 @@ protected:
 	
 
 public:	
-	UPROPERTY(EditAnywhere)
 	float DefaultRunSpeed = 600.0f;
 
-	UPROPERTY(EditAnywhere)
 	float FastRunSpeed = 1200.0f;
 
-	UPROPERTY(EditAnywhere)
 	float SlowRunSpeed = 200.0f;
 
-	UPROPERTY(EditAnywhere)
 	float JumpRiseGravity = 0.7f;
 
-	UPROPERTY(EditAnywhere)
 	float JumpFallGravity = 0.2f;
 
-	UPROPERTY(EditAnywhere)
 	float JumpApexHangTime = 0.1f;
 
-	UPROPERTY(EditAnywhere)
 	float LaneDistance = 200.0f;
 
-	UPROPERTY(EditAnywhere)
 	float CameraHeight = 175.0f;
 
-	UPROPERTY(EditAnywhere)
+	float CameraFOV = 100.0f;
+
 	int HoldShoot_MaxProjectiles = 1;
+	float ShootHoldInputDelay = 0.5f;
 
 
 	// Called every frame
@@ -136,6 +110,9 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	void BeginPlay_SetupFromConfig();
+	void Input_SetupFromConfig();
 
 	//input methods
 	void Input_LeftStart();
@@ -183,6 +160,8 @@ public:
 	bool JumpedThisFrame;
 
 protected:
-	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	UInputAction* Input_JumpAction;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Config")
+	UPlayerConfigData* ConfigData;
 };

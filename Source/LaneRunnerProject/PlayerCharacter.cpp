@@ -39,6 +39,10 @@ void APlayerCharacter::BeginPlay()
 	// The -1 "Key" value argument prevents the message from being updated or refreshed.
 	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("PlayerCharacter start."));
 
+
+	//load serialized data from config asset
+	BeginPlay_SetupFromConfig();
+
 	//input map
 	if (APlayerController* PlayerController = Cast<APlayerController>(Controller))
 	{
@@ -63,7 +67,7 @@ void APlayerCharacter::BeginPlay()
 
 
 	//assign camera FOV
-	CameraComponent->SetFieldOfView(100.0f);
+	CameraComponent->SetFieldOfView(CameraFOV);
 	
 
 	//set lane to middle
@@ -93,6 +97,8 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
+	Input_SetupFromConfig();
+
 	if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent))
 	{
 		// Bind actions
@@ -110,6 +116,62 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 		EnhancedInputComponent->BindAction(Input_JumpAction, ETriggerEvent::Started, this, &APlayerCharacter::Input_JumpStart);
 		EnhancedInputComponent->BindAction(Input_JumpAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Input_Jump);
 		EnhancedInputComponent->BindAction(Input_JumpAction, ETriggerEvent::Completed, this, &APlayerCharacter::Input_JumpCancel);
+	}
+
+}
+
+void APlayerCharacter::BeginPlay_SetupFromConfig()
+{
+	if (ConfigData)
+	{
+		InputMap = ConfigData->InputConfig.InputMap;
+
+		PlayerSprite = ConfigData->VisualsConfig.PlayerSprite;
+
+		DefaultRunSpeed = ConfigData->MovementConfig.DefaultRunSpeed;
+		FastRunSpeed = ConfigData->MovementConfig.FastRunSpeed;
+		SlowRunSpeed = ConfigData->MovementConfig.SlowRunSpeed;
+		JumpRiseGravity = ConfigData->MovementConfig.JumpRiseGravity;
+		JumpFallGravity = ConfigData->MovementConfig.JumpFallGravity;
+		JumpApexHangTime = ConfigData->MovementConfig.JumpApexHangTime;
+		LaneDistance = ConfigData->MovementConfig.LaneDistance;
+
+		GetCharacterMovement()->GravityScale = ConfigData->MovementConfig.GeneralGravityScale;
+		GetCharacterMovement()->JumpZVelocity = ConfigData->MovementConfig.JumpZVelocity;
+
+		CameraHeight = ConfigData->MiscConfig.CameraHeight;
+		CameraFOV = ConfigData->MiscConfig.CameraFOV;
+
+		ShootHoldInputDelay = ConfigData->ShootConfig.ShootHoldInputDelay;
+		HoldShoot_MaxProjectiles = ConfigData->ShootConfig.HoldShoot_MaxProjectiles;
+
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("set up config data."));
+	}
+	else
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("set up config data EPIC FAIL."));
+	}
+}
+
+void APlayerCharacter::Input_SetupFromConfig()
+{
+	if (ConfigData)
+	{
+		Input_LeftAction = ConfigData->InputConfig.Input_LeftAction;
+		Input_RightAction = ConfigData->InputConfig.Input_RightAction;
+		Input_SpeedUpAction = ConfigData->InputConfig.Input_SpeedUpAction;
+		Input_SlowDownAction = ConfigData->InputConfig.Input_SlowDownAction;
+		Input_ShootRightAction = ConfigData->InputConfig.Input_ShootRightAction;
+		Input_ShootLeftAction = ConfigData->InputConfig.Input_ShootLeftAction;
+		Input_ShootUpAction = ConfigData->InputConfig.Input_ShootUpAction;
+		Input_ShootForwardAction = ConfigData->InputConfig.Input_ShootForwardAction;
+		Input_JumpAction = ConfigData->InputConfig.Input_JumpAction;
+
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("set up input data."));
+	}
+	else
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("set up input data EPIC FAIL."));
 	}
 
 }
