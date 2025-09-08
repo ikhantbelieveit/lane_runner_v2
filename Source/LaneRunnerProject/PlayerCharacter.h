@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "EPlayerJumpState.h"
 #include "PaperSpriteComponent.h"
 #include "PaperSprite.h"
 #include "Camera/CameraComponent.h"
@@ -79,9 +80,27 @@ protected:
 	bool SlowInput_Pressed;
 	bool SlowInput_Released;
 
+	bool JumpInput_Active;
+	bool JumpInput_Pressed;
+	bool JumpInput_Released;
+
+	bool ShootLeftInput_Active;
+	bool ShootRightInput_Active;
+	bool ShootUpInput_Active;
+	bool ShootForwardInput_Active;
+
+	bool ShootLeftInput_Pressed;
+	bool ShootRightInput_Pressed;
+	bool ShootUpInput_Pressed;
+	bool ShootForwardInput_Pressed;
+
 	EPlayerSpeedState CurrentSpeedState;
 
 	int CurrentLaneIndex;	//0-4 left-right
+
+	EPlayerJumpState CurrentJumpState;
+
+	
 
 public:	
 	UPROPERTY(EditAnywhere)
@@ -111,8 +130,6 @@ public:
 	UPROPERTY(EditAnywhere)
 	int HoldShoot_MaxProjectiles = 1;
 
-	bool JumpedThisFrame;
-
 
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -132,12 +149,19 @@ public:
 	virtual void Input_SlowDown(const FInputActionValue& Value);
 	virtual void Input_SlowDownCancel(const FInputActionValue& Value);
 
+	virtual void Input_JumpStart(const FInputActionValue& Value);
+	virtual void Input_Jump(const FInputActionValue& Value);
+	virtual void Input_JumpCancel(const FInputActionValue& Value);
+
 	void ClearInputValues();
 
 	//character update methods
 	void UpdateLaneScroll();
 	void UpdateLaneFromInput();
 	void UpdateSpeedFromInput();
+	void UpdateJumpFromInput();
+	void UpdateJumpState(float DeltaTime);
+	void UpdateCameraPos();
 
 	//lane
 	bool MoveLane_Left();
@@ -149,4 +173,16 @@ public:
 	//run/scroll
 	virtual float GetCurrentRunSpeed();
 	void SetSpeedState(EPlayerSpeedState newState);
+
+
+	//jump
+	void SetJumpState(EPlayerJumpState newState);
+	void CancelVerticalSpeed();
+
+	float TimeSinceJumpStateChange;
+	bool JumpedThisFrame;
+
+protected:
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	UInputAction* Input_JumpAction;
 };

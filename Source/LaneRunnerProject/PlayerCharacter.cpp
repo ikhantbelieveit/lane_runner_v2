@@ -80,6 +80,11 @@ void APlayerCharacter::Tick(float DeltaTime)
 
 	UpdateLaneFromInput();
 
+	UpdateJumpState(DeltaTime);
+	UpdateJumpFromInput();
+
+	UpdateCameraPos();
+
 	ClearInputValues();
 }
 
@@ -101,6 +106,10 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 		EnhancedInputComponent->BindAction(Input_SlowDownAction, ETriggerEvent::Started, this, &APlayerCharacter::Input_SlowDownStart);
 		EnhancedInputComponent->BindAction(Input_SlowDownAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Input_SlowDown);
 		EnhancedInputComponent->BindAction(Input_SlowDownAction, ETriggerEvent::Completed, this, &APlayerCharacter::Input_SlowDownCancel);
+
+		EnhancedInputComponent->BindAction(Input_JumpAction, ETriggerEvent::Started, this, &APlayerCharacter::Input_JumpStart);
+		EnhancedInputComponent->BindAction(Input_JumpAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Input_Jump);
+		EnhancedInputComponent->BindAction(Input_JumpAction, ETriggerEvent::Completed, this, &APlayerCharacter::Input_JumpCancel);
 	}
 
 }
@@ -149,6 +158,21 @@ void APlayerCharacter::Input_SlowDownCancel(const FInputActionValue& Value)
 	SlowInput_Released = true;
 }
 
+void APlayerCharacter::Input_JumpStart(const FInputActionValue& Value)
+{
+	JumpInput_Pressed = true;
+}
+
+void APlayerCharacter::Input_Jump(const FInputActionValue& Value)
+{
+	JumpInput_Active = true;
+}
+
+void APlayerCharacter::Input_JumpCancel(const FInputActionValue& Value)
+{
+	JumpInput_Released = true;
+}
+
 void APlayerCharacter::ClearInputValues()
 {
 	LeftInput_Pressed = false;
@@ -161,6 +185,20 @@ void APlayerCharacter::ClearInputValues()
 	SlowInput_Active = false;
 	SlowInput_Pressed = false;
 	SlowInput_Released = false;
+
+	JumpInput_Pressed = false;
+	JumpInput_Released = false;
+	JumpInput_Active = false;
+
+	ShootLeftInput_Active = false;
+	ShootRightInput_Active = false;
+	ShootUpInput_Active = false;
+	ShootForwardInput_Active = false;
+
+	ShootLeftInput_Pressed = false;
+	ShootRightInput_Pressed = false;
+	ShootUpInput_Pressed = false;
+	ShootForwardInput_Pressed = false;
 }
 
 void APlayerCharacter::UpdateLaneScroll()
@@ -220,6 +258,40 @@ void APlayerCharacter::UpdateSpeedFromInput()
 void APlayerCharacter::SetSpeedState(EPlayerSpeedState newState)
 {
 	CurrentSpeedState = newState;
+}
+
+void APlayerCharacter::SetJumpState(EPlayerJumpState newState)
+{
+	CurrentJumpState = newState;
+	TimeSinceJumpStateChange = 0.0f;
+
+	UCharacterMovementComponent* characterMovement = (UCharacterMovementComponent*)GetComponentByClass(UCharacterMovementComponent::StaticClass());
+
+	switch (CurrentJumpState)
+	{
+	case EPlayerJumpState::Rise:
+		characterMovement->GravityScale = JumpRiseGravity;
+		//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, TEXT("Rise."));
+		break;
+	case EPlayerJumpState::Apex:
+		CancelVerticalSpeed();
+		characterMovement->GravityScale = 0;
+		//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, TEXT("Apex."));
+		break;
+	case EPlayerJumpState::Fall:
+		characterMovement->GravityScale = JumpFallGravity;
+		//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, TEXT("Fall."));
+		break;
+	case EPlayerJumpState::Grounded:
+		characterMovement->GravityScale = JumpRiseGravity;
+		//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, TEXT("Grounded."));
+		break;
+	}
+}
+
+void APlayerCharacter::CancelVerticalSpeed()
+{
+	GetRootComponent()->ComponentVelocity = FVector(GetRootComponent()->ComponentVelocity.X, GetRootComponent()->ComponentVelocity.Y, 0);
 }
 
 bool APlayerCharacter::MoveLane_Left()
@@ -304,3 +376,67 @@ float APlayerCharacter::GetCurrentRunSpeed()
 	}
 }
 
+void APlayerCharacter::UpdateJumpFromInput()
+{
+	if (JumpInput_Pressed)
+	{
+		if (CurrentJumpState == EPlayerJumpState::Grounded)
+		{
+			bPressedJump = true;
+			SetJumpState(EPlayerJumpState::Rise);
+			JumpedThisFrame = true;
+		}
+	}
+
+	if (JumpInput_Released)
+	{
+		bPressedJump = false;
+		SetJumpState(EPlayerJumpState::Fall);
+	}
+}
+
+void APlayerCharacter::UpdateJumpState(float DeltaTime)
+{
+	bool apexToFall = false;
+
+	if (TimeSinceJumpStateChange < JumpApexHangTime)
+	{
+		TimeSinceJumpStateChange += DeltaTime;
+	}
+	else
+	{
+		apexToFall = true;
+	}
+
+	switch (CurrentJumpState)
+	{
+	case EPlayerJumpState::Rise:
+		if (!JumpedThisFrame)
+		{
+			if (GetVelocity().Z <= 0.01f)
+			{
+				SetJumpState(EPlayerJumpState::Apex);
+			}
+		}
+		break;
+	case EPlayerJumpState::Fall:
+		if (GetVelocity().Z == 0.0f)
+		{
+			SetJumpState(EPlayerJumpState::Grounded);
+		}
+		break;
+	case EPlayerJumpState::Apex:
+		if (apexToFall)
+		{
+			SetJumpState(EPlayerJumpState::Fall);
+		}
+		break;
+	}
+}
+
+void APlayerCharacter::UpdateCameraPos()
+{
+	//clamp camera Z pos
+	FVector CameraClampZPos = FVector(CameraComponent->GetComponentLocation().X, CameraComponent->GetComponentLocation().Y, CameraHeight);
+	CameraComponent->SetWorldLocation(CameraClampZPos);
+}
