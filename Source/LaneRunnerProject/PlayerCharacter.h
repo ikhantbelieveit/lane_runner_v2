@@ -12,6 +12,7 @@
 #include "EnhancedInputComponent.h"
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "PlayerCharacter.generated.h"
 
 UCLASS()
@@ -41,6 +42,25 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	UInputAction* Input_RightAction;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	UInputAction* Input_SpeedUpAction;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	UInputAction* Input_SlowDownAction;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	UInputAction* Input_ShootRightAction;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	UInputAction* Input_ShootLeftAction;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	UInputAction* Input_ShootUpAction;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	UInputAction* Input_ShootDownAction;
+
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Visuals", meta = (AllowPrivateAccess = "true"))
 	UPaperSpriteComponent* SpriteComponent;
 
@@ -50,6 +70,14 @@ protected:
 
 	bool LeftInput_Pressed;
 	bool RightInput_Pressed;
+
+	bool SpeedInput_Active;
+	bool SpeedInput_Pressed;
+	bool SpeedInput_Released;
+
+	bool SlowInput_Active;
+	bool SlowInput_Pressed;
+	bool SlowInput_Released;
 
 	EPlayerSpeedState CurrentSpeedState;
 
@@ -96,11 +124,20 @@ public:
 	void Input_LeftStart();
 	void Input_RightStart();
 
+	virtual void Input_SpeedUpStart(const FInputActionValue& Value);
+	virtual void Input_SpeedUp(const FInputActionValue& Value);
+	virtual void Input_SpeedUpCancel(const FInputActionValue& Value);
+
+	virtual void Input_SlowDownStart(const FInputActionValue& Value);
+	virtual void Input_SlowDown(const FInputActionValue& Value);
+	virtual void Input_SlowDownCancel(const FInputActionValue& Value);
+
 	void ClearInputValues();
 
 	//character update methods
 	void UpdateLaneScroll();
 	void UpdateLaneFromInput();
+	void UpdateSpeedFromInput();
 
 	//lane
 	bool MoveLane_Left();
@@ -111,4 +148,5 @@ public:
 
 	//run/scroll
 	virtual float GetCurrentRunSpeed();
+	void SetSpeedState(EPlayerSpeedState newState);
 };

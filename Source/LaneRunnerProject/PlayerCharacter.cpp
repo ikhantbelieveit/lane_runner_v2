@@ -76,6 +76,8 @@ void APlayerCharacter::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	UpdateLaneScroll();
+	UpdateSpeedFromInput();
+
 	UpdateLaneFromInput();
 
 	ClearInputValues();
@@ -91,6 +93,14 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 		// Bind actions
 		EnhancedInputComponent->BindAction(Input_LeftAction, ETriggerEvent::Started, this, &APlayerCharacter::Input_LeftStart);
 		EnhancedInputComponent->BindAction(Input_RightAction, ETriggerEvent::Started, this, &APlayerCharacter::Input_RightStart);
+
+		EnhancedInputComponent->BindAction(Input_SpeedUpAction, ETriggerEvent::Started, this, &APlayerCharacter::Input_SpeedUpStart);
+		EnhancedInputComponent->BindAction(Input_SpeedUpAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Input_SpeedUp);
+		EnhancedInputComponent->BindAction(Input_SpeedUpAction, ETriggerEvent::Completed, this, &APlayerCharacter::Input_SpeedUpCancel);
+
+		EnhancedInputComponent->BindAction(Input_SlowDownAction, ETriggerEvent::Started, this, &APlayerCharacter::Input_SlowDownStart);
+		EnhancedInputComponent->BindAction(Input_SlowDownAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Input_SlowDown);
+		EnhancedInputComponent->BindAction(Input_SlowDownAction, ETriggerEvent::Completed, this, &APlayerCharacter::Input_SlowDownCancel);
 	}
 
 }
@@ -109,10 +119,48 @@ void APlayerCharacter::Input_RightStart()
 	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("RIGHT"));
 }
 
+void APlayerCharacter::Input_SpeedUp(const FInputActionValue& Value)
+{
+	SpeedInput_Active = true;
+}
+
+void APlayerCharacter::Input_SpeedUpStart(const FInputActionValue& Value)
+{
+	SpeedInput_Pressed = true;
+}
+
+void APlayerCharacter::Input_SpeedUpCancel(const FInputActionValue& Value)
+{
+	SpeedInput_Released = true;
+}
+
+void APlayerCharacter::Input_SlowDownStart(const FInputActionValue& Value)
+{
+	SlowInput_Pressed = true;
+}
+
+void APlayerCharacter::Input_SlowDown(const FInputActionValue& Value)
+{
+	SlowInput_Active = true;
+}
+
+void APlayerCharacter::Input_SlowDownCancel(const FInputActionValue& Value)
+{
+	SlowInput_Released = true;
+}
+
 void APlayerCharacter::ClearInputValues()
 {
 	LeftInput_Pressed = false;
 	RightInput_Pressed = false;
+
+	SpeedInput_Active = false;
+	SpeedInput_Pressed = false;
+	SpeedInput_Released = false;
+
+	SlowInput_Active = false;
+	SlowInput_Pressed = false;
+	SlowInput_Released = false;
 }
 
 void APlayerCharacter::UpdateLaneScroll()
@@ -131,6 +179,47 @@ void APlayerCharacter::UpdateLaneFromInput()
 	{
 		MoveLane_Right();
 	}
+}
+
+void APlayerCharacter::UpdateSpeedFromInput()
+{
+	EPlayerSpeedState newState = EPlayerSpeedState::Default;
+
+	if (SpeedInput_Active)
+	{
+		newState = EPlayerSpeedState::Fast;
+	}
+
+	if (SlowInput_Active)
+	{
+		newState = EPlayerSpeedState::Slow;
+	}
+
+	if (SpeedInput_Active && SlowInput_Active)
+	{
+		newState = EPlayerSpeedState::Default;
+	}
+
+	SetSpeedState(newState);
+
+
+	switch (CurrentSpeedState)
+	{
+	case EPlayerSpeedState::Fast:
+		GetCharacterMovement()->MaxWalkSpeed = FastRunSpeed;
+		break;
+	case EPlayerSpeedState::Slow:
+		GetCharacterMovement()->MaxWalkSpeed = SlowRunSpeed;
+		break;
+	default:
+		GetCharacterMovement()->MaxWalkSpeed = DefaultRunSpeed;
+		break;
+	}
+}
+
+void APlayerCharacter::SetSpeedState(EPlayerSpeedState newState)
+{
+	CurrentSpeedState = newState;
 }
 
 bool APlayerCharacter::MoveLane_Left()
