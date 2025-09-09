@@ -59,9 +59,12 @@ void UReactToProjComponent::HandleBeginOverlap(
 		return;
 	}
 
+	
+
 	// Check for tag
 	if (OtherActor->ActorHasTag(ProjTag))
 	{
+		
 		HitByProjectile(OtherActor);
 	}
 }

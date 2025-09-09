@@ -109,6 +109,9 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	float CameraFOV = 100.0f;
+
+	UPROPERTY(EditAnywhere)
+	FVector ScrollTriggerBoxScale = FVector(1.0f);
 };
 
 USTRUCT(BlueprintType)

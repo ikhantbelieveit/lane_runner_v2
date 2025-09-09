@@ -28,6 +28,13 @@ APlayerCharacter::APlayerCharacter()
 	SpriteComponent->SetRelativeLocation(FVector(0.0f, 0.0f, 0.0f));
 	
 
+	//Scroll Trigger Box
+	ScrollTriggerBox = CreateDefaultSubobject<UBoxComponent>(TEXT("ScrollTriggerBox"));
+	ScrollTriggerBox->SetupAttachment(GetRootComponent());
+	ScrollTriggerBox->SetRelativeLocation(FVector(0.0f, 0.0f, 0.0f));
+	ScrollTriggerBox->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	
+	
 }
 
 // Called when the game starts or when spawned
@@ -164,6 +171,14 @@ void APlayerCharacter::BeginPlay_SetupFromConfig()
 
 		ProjectileClass = ConfigData->ShootConfig.ProjectileClass;
 
+		ScrollTriggerBox->SetRelativeScale3D(ConfigData->MiscConfig.ScrollTriggerBoxScale);
+		if (ScrollTriggerBox)
+		{
+			FString boxSize = ScrollTriggerBox->GetRelativeScale3D().ToString();
+			//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, boxSize);
+		}
+
+		ScrollTriggerBox->ComponentTags.Add(FName("PlayerArea"));
 		//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("set up config data."));
 	}
 	else

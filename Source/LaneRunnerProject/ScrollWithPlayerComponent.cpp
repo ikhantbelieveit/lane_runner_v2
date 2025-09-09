@@ -19,6 +19,8 @@ void UScrollWithPlayerComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
+	Enabled = StartEnabled;
+
 	UWorld* World = GetWorld();
 	if (World)
 	{

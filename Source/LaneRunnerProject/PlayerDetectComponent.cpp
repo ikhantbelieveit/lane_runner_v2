@@ -1,0 +1,79 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
+#include "ScrollWithPlayerComponent.h"
+#include "PlayerDetectComponent.h"
+
+// Sets default values for this component's properties
+UPlayerDetectComponent::UPlayerDetectComponent()
+{
+	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
+	// off to improve performance if you don't need them.
+	PrimaryComponentTick.bCanEverTick = true;
+
+	// ...
+}
+
+
+// Called when the game starts
+void UPlayerDetectComponent::BeginPlay()
+{
+	Super::BeginPlay();
+
+
+	if (!CollisionComponent)
+	{
+		// Automatically find the first primitive component with UPrimitiveComponent
+		CollisionComponent = GetOwner()->FindComponentByClass<UPrimitiveComponent>();
+	}
+
+	if (CollisionComponent)
+	{
+		CollisionComponent->OnComponentBeginOverlap.AddDynamic(this, &UPlayerDetectComponent::HandleBeginOverlap);
+
+	}
+}
+
+
+// Called every frame
+void UPlayerDetectComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+{
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	// ...
+}
+
+void UPlayerDetectComponent::HandleBeginOverlap(
+	UPrimitiveComponent* OverlappedComp,
+	AActor* OtherActor,
+	UPrimitiveComponent* OtherComp,
+	int32 OtherBodyIndex,
+	bool bFromSweep,
+	const FHitResult& SweepResult)
+{
+
+	if (!OtherActor || OtherActor == GetOwner())
+	{
+		return;
+	}
+
+	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("GO GO GO"));
+
+	if (OtherComp->ComponentHasTag(PlayerAreaTag))
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("GOTTEM"));
+
+		//do stuff
+		if (TriggerScrollWithPlayer)
+		{
+			UScrollWithPlayerComponent* scrollWithPlayer = (UScrollWithPlayerComponent*)GetOwner()->GetComponentByClass(UScrollWithPlayerComponent::StaticClass());
+
+			if (scrollWithPlayer)
+			{
+				GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("WE DA BEST"));
+				scrollWithPlayer->Enabled = true;
+			}
+			
+			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("LETS GO GOLFING"));
+		}
+	}
+}

@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
+#include "Components/BoxComponent.h"
 #include "EProjectileDirection.h"
 #include "PlayerConfigData.h"
 #include "EPlayerJumpState.h"
@@ -193,4 +194,7 @@ protected:
 	UPlayerConfigData* ConfigData;
 
 	TSubclassOf<class AProjectile> ProjectileClass;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Scroll", meta = (AllowPrivateAccess = "true"))
+	UBoxComponent* ScrollTriggerBox;
 };
