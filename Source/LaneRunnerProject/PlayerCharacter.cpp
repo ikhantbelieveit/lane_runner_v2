@@ -1,6 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
-
-
+#include "ScrollWithPlayerComponent.h"
+#include "GameFramework/ProjectileMovementComponent.h"
+#include "Projectile.h"
+#include "PlayerProjectile.h"
 #include "PlayerCharacter.h"
 
 // Sets default values
@@ -87,6 +89,9 @@ void APlayerCharacter::Tick(float DeltaTime)
 	UpdateJumpState(DeltaTime);
 	UpdateJumpFromInput();
 
+	UpdateShootValues(DeltaTime);
+	UpdateShootFromInput();
+
 	UpdateCameraPos();
 
 	ClearInputValues();
@@ -116,6 +121,18 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 		EnhancedInputComponent->BindAction(Input_JumpAction, ETriggerEvent::Started, this, &APlayerCharacter::Input_JumpStart);
 		EnhancedInputComponent->BindAction(Input_JumpAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Input_Jump);
 		EnhancedInputComponent->BindAction(Input_JumpAction, ETriggerEvent::Completed, this, &APlayerCharacter::Input_JumpCancel);
+
+		EnhancedInputComponent->BindAction(Input_ShootRightAction, ETriggerEvent::Started, this, &APlayerCharacter::Input_ShootRightStart);
+		EnhancedInputComponent->BindAction(Input_ShootRightAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Input_ShootRight);
+
+		EnhancedInputComponent->BindAction(Input_ShootLeftAction, ETriggerEvent::Started, this, &APlayerCharacter::Input_ShootLeftStart);
+		EnhancedInputComponent->BindAction(Input_ShootLeftAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Input_ShootLeft);
+
+		EnhancedInputComponent->BindAction(Input_ShootUpAction, ETriggerEvent::Started, this, &APlayerCharacter::Input_ShootUpStart);
+		EnhancedInputComponent->BindAction(Input_ShootUpAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Input_ShootUp);
+
+		EnhancedInputComponent->BindAction(Input_ShootForwardAction, ETriggerEvent::Started, this, &APlayerCharacter::Input_ShootForwardStart);
+		EnhancedInputComponent->BindAction(Input_ShootForwardAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Input_ShootForward);
 	}
 
 }
@@ -145,11 +162,13 @@ void APlayerCharacter::BeginPlay_SetupFromConfig()
 		ShootHoldInputDelay = ConfigData->ShootConfig.ShootHoldInputDelay;
 		HoldShoot_MaxProjectiles = ConfigData->ShootConfig.HoldShoot_MaxProjectiles;
 
-		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("set up config data."));
+		ProjectileClass = ConfigData->ShootConfig.ProjectileClass;
+
+		//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("set up config data."));
 	}
 	else
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("set up config data EPIC FAIL."));
+		//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("set up config data EPIC FAIL."));
 	}
 }
 
@@ -167,11 +186,11 @@ void APlayerCharacter::Input_SetupFromConfig()
 		Input_ShootForwardAction = ConfigData->InputConfig.Input_ShootForwardAction;
 		Input_JumpAction = ConfigData->InputConfig.Input_JumpAction;
 
-		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("set up input data."));
+		//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("set up input data."));
 	}
 	else
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("set up input data EPIC FAIL."));
+		//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("set up input data EPIC FAIL."));
 	}
 
 }
@@ -180,14 +199,14 @@ void APlayerCharacter::Input_LeftStart()
 {
 	LeftInput_Pressed = true;
 
-	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("LEFT"));
+	//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("LEFT"));
 }
 
 void APlayerCharacter::Input_RightStart()
 {
 	RightInput_Pressed = true;
 
-	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("RIGHT"));
+	//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("RIGHT"));
 }
 
 void APlayerCharacter::Input_SpeedUp(const FInputActionValue& Value)
@@ -233,6 +252,46 @@ void APlayerCharacter::Input_Jump(const FInputActionValue& Value)
 void APlayerCharacter::Input_JumpCancel(const FInputActionValue& Value)
 {
 	JumpInput_Released = true;
+}
+
+void APlayerCharacter::Input_ShootLeft(const FInputActionValue& Value)
+{
+	ShootLeftInput_Active = true;
+}
+
+void APlayerCharacter::Input_ShootRight(const FInputActionValue& Value)
+{
+	ShootRightInput_Active = true;
+}
+
+void APlayerCharacter::Input_ShootUp(const FInputActionValue& Value)
+{
+	ShootUpInput_Active = true;
+}
+
+void APlayerCharacter::Input_ShootForward(const FInputActionValue& Value)
+{
+	ShootForwardInput_Active = true;
+}
+
+void APlayerCharacter::Input_ShootLeftStart(const FInputActionValue& Value)
+{
+	ShootLeftInput_Pressed = true;
+}
+
+void APlayerCharacter::Input_ShootRightStart(const FInputActionValue& Value)
+{
+	ShootRightInput_Pressed = true;
+}
+
+void APlayerCharacter::Input_ShootUpStart(const FInputActionValue& Value)
+{
+	ShootUpInput_Pressed = true;
+}
+
+void APlayerCharacter::Input_ShootForwardStart(const FInputActionValue& Value)
+{
+	ShootForwardInput_Pressed = true;
 }
 
 void APlayerCharacter::ClearInputValues()
@@ -501,4 +560,221 @@ void APlayerCharacter::UpdateCameraPos()
 	//clamp camera Z pos
 	FVector CameraClampZPos = FVector(CameraComponent->GetComponentLocation().X, CameraComponent->GetComponentLocation().Y, CameraHeight);
 	CameraComponent->SetWorldLocation(CameraClampZPos);
+}
+
+
+void APlayerCharacter::Shoot(EProjectileDirection direction, bool holdNotTap)
+{
+	//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("SHOULD SHOOT."));
+
+	if (!CanShootInDirection(direction, holdNotTap))
+	{
+		return;
+	}
+
+	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("SHOULD REALLY SHOOT."));
+
+	UWorld* World = GetWorld();
+	if (World)
+	{
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.Owner = this;
+		SpawnParams.Instigator = GetInstigator();
+
+		FVector shootPos = GetActorLocation();
+		FRotator defaultRotation = FRotator();
+
+
+		switch (direction)
+		{
+		case EProjectileDirection::Left:
+			break;
+		case EProjectileDirection::Right:
+			break;
+		case EProjectileDirection::Up:
+			break;
+		case EProjectileDirection::Forward:
+			break;
+		}
+
+		// Spawn the projectile at the muzzle.
+		AProjectile* Projectile = World->SpawnActor<AProjectile>(ProjectileClass, shootPos, defaultRotation, SpawnParams);
+		if (Projectile)
+		{
+			Projectile->SetFiringDirection(direction);
+			Projectile->SetupFromConfig();
+			Projectile->Fire(direction);
+		}
+		else
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("DID NOT SHOOT."));
+		}
+	}
+}
+
+bool APlayerCharacter::CanShootInDirection(EProjectileDirection direction, bool holdNotTap)
+{
+	bool bypassDelay = !holdNotTap;
+
+	if (!bypassDelay)
+	{
+		if (DelayPreventsShootInDirection(direction))
+		{
+			return false;
+		}
+	}
+
+	if (holdNotTap)
+	{
+		if (ExceededProjCountForDirection(direction))
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
+bool APlayerCharacter::DelayPreventsShootInDirection(EProjectileDirection direction)
+{
+	switch (direction)
+	{
+	case EProjectileDirection::Forward:
+		return TimeSinceShoot_Forward < ShootHoldInputDelay;
+		break;
+	case EProjectileDirection::Up:
+		return TimeSinceShoot_Up < ShootHoldInputDelay;
+		break;
+	case EProjectileDirection::Left:
+		return TimeSinceShoot_Left < ShootHoldInputDelay;
+		break;
+	case EProjectileDirection::Right:
+		return TimeSinceShoot_Right < ShootHoldInputDelay;
+		break;
+	}
+
+	return false;
+}
+
+bool APlayerCharacter::ExceededProjCountForDirection(EProjectileDirection direction)
+{
+	UWorld* World = GetWorld();
+	if (!World)
+	{
+		return true;
+	}
+
+	TArray<AActor*> FoundActors;
+	UGameplayStatics::GetAllActorsOfClass(World, APlayerProjectile::StaticClass(), FoundActors);
+
+	int activeProjectiles_Left = 0;
+	int activeProjectiles_Right = 0;
+	int activeProjectiles_Up = 0;
+	int activeProjectiles_Forward = 0;
+
+	for (AActor* Actor : FoundActors)
+	{
+		AProjectile* proj = Cast<AProjectile>(Actor);
+		if (proj)
+		{
+			switch (proj->GetFiringDirection())
+			{
+			case EProjectileDirection::Left:
+				activeProjectiles_Left++;
+				break;
+			case EProjectileDirection::Right:
+				activeProjectiles_Right++;
+				break;
+			case EProjectileDirection::Up:
+				activeProjectiles_Up++;
+				break;
+			case EProjectileDirection::Forward:
+				activeProjectiles_Forward++;
+				break;
+			}
+		}
+	}
+
+	switch (direction)
+	{
+	case EProjectileDirection::Left:
+		return activeProjectiles_Left >= HoldShoot_MaxProjectiles;
+		break;
+	case EProjectileDirection::Right:
+		return activeProjectiles_Right >= HoldShoot_MaxProjectiles;
+		break;
+	case EProjectileDirection::Up:
+		return activeProjectiles_Up >= HoldShoot_MaxProjectiles;
+		break;
+	case EProjectileDirection::Forward:
+		return activeProjectiles_Forward >= HoldShoot_MaxProjectiles;
+		break;
+	}
+
+	return false;
+}
+
+void APlayerCharacter::UpdateShootValues(float DeltaTime)
+{
+	if (TimeSinceShoot_Left < ShootHoldInputDelay)
+	{
+		TimeSinceShoot_Left += DeltaTime;
+	}
+	if (TimeSinceShoot_Right < ShootHoldInputDelay)
+	{
+		TimeSinceShoot_Right += DeltaTime;
+	}
+	if (TimeSinceShoot_Up < ShootHoldInputDelay)
+	{
+		TimeSinceShoot_Up += DeltaTime;
+	}
+	if (TimeSinceShoot_Forward < ShootHoldInputDelay)
+	{
+		TimeSinceShoot_Forward += DeltaTime;
+	}
+}
+
+void APlayerCharacter::UpdateShootFromInput()
+{
+	if (ShootLeftInput_Pressed)
+	{
+		Shoot(EProjectileDirection::Left, false);
+		return;
+	}
+	if (ShootRightInput_Pressed)
+	{
+		Shoot(EProjectileDirection::Right, false);
+		return;
+	}
+	if (ShootUpInput_Pressed)
+	{
+		Shoot(EProjectileDirection::Up, false);
+		return;
+	}
+	if (ShootForwardInput_Pressed)
+	{
+		Shoot(EProjectileDirection::Forward, false);
+		return;
+	}
+
+	if (ShootLeftInput_Active)
+	{
+		Shoot(EProjectileDirection::Left, true);
+		return;
+	}
+	if (ShootRightInput_Active)
+	{
+		Shoot(EProjectileDirection::Right, true);
+		return;
+	}
+	if (ShootUpInput_Active)
+	{
+		Shoot(EProjectileDirection::Up, true);
+		return;
+	}
+	if (ShootForwardInput_Active)
+	{
+		Shoot(EProjectileDirection::Forward, true);
+		return;
+	}
 }

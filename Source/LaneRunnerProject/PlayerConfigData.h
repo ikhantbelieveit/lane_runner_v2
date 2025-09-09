@@ -1,7 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
-
 #include "PaperSpriteComponent.h"
 #include "PaperSprite.h"
 #include "CoreMinimal.h"
@@ -9,6 +8,8 @@
 #include "InputMappingContext.h"
 #include "InputAction.h"
 #include "PlayerConfigData.generated.h"
+
+class AProjectile;
 
 USTRUCT(BlueprintType)
 struct FPlayerInputAssets
@@ -122,6 +123,9 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	int HoldShoot_MaxProjectiles = 1;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class AProjectile> ProjectileClass;
 };
 
 

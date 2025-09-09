@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
-
+#include "EProjectileDirection.h"
 #include "PlayerConfigData.h"
 #include "EPlayerJumpState.h"
 #include "PaperSpriteComponent.h"
@@ -130,6 +130,31 @@ public:
 	virtual void Input_Jump(const FInputActionValue& Value);
 	virtual void Input_JumpCancel(const FInputActionValue& Value);
 
+	virtual void Input_ShootLeft(const FInputActionValue& Value);
+	virtual void Input_ShootRight(const FInputActionValue& Value);
+	virtual void Input_ShootUp(const FInputActionValue& Value);
+	virtual void Input_ShootForward(const FInputActionValue& Value);
+
+	virtual void Input_ShootLeftStart(const FInputActionValue& Value);
+	virtual void Input_ShootRightStart(const FInputActionValue& Value);
+	virtual void Input_ShootUpStart(const FInputActionValue& Value);
+	virtual void Input_ShootForwardStart(const FInputActionValue& Value);
+
+	void Shoot(EProjectileDirection direction, bool holdNotTap);
+	bool CanShootInDirection(EProjectileDirection direction, bool holdNotTap);
+	bool DelayPreventsShootInDirection(EProjectileDirection direction);
+	bool ExceededProjCountForDirection(EProjectileDirection direction);
+
+	float TimeSinceShoot_Left;
+	float TimeSinceShoot_Right;
+	float TimeSinceShoot_Up;
+	float TimeSinceShoot_Forward;
+
+	int HoldShotsRemaining_Left;
+	int HoldShotsRemaining_Right;
+	int HoldShotsRemaining_Up;
+	int HoldShotsRemaining_Forward;
+
 	void ClearInputValues();
 
 	//character update methods
@@ -139,6 +164,8 @@ public:
 	void UpdateJumpFromInput();
 	void UpdateJumpState(float DeltaTime);
 	void UpdateCameraPos();
+	void UpdateShootValues(float DeltaTime);
+	void UpdateShootFromInput();
 
 	//lane
 	bool MoveLane_Left();
@@ -164,4 +191,6 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Config")
 	UPlayerConfigData* ConfigData;
+
+	TSubclassOf<class AProjectile> ProjectileClass;
 };
