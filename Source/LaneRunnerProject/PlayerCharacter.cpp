@@ -572,7 +572,7 @@ void APlayerCharacter::Shoot(EProjectileDirection direction, bool holdNotTap)
 		return;
 	}
 
-	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("SHOULD REALLY SHOOT."));
+	//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("SHOULD REALLY SHOOT."));
 
 	UWorld* World = GetWorld();
 	if (World)
@@ -623,7 +623,7 @@ void APlayerCharacter::Shoot(EProjectileDirection direction, bool holdNotTap)
 		}
 		else
 		{
-			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("DID NOT SHOOT."));
+			//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("DID NOT SHOOT."));
 		}
 	}
 }
