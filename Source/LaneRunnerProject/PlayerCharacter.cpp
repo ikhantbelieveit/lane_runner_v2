@@ -604,6 +604,22 @@ void APlayerCharacter::Shoot(EProjectileDirection direction, bool holdNotTap)
 			Projectile->SetFiringDirection(direction);
 			Projectile->SetupFromConfig();
 			Projectile->Fire(direction);
+
+			switch (direction)
+			{
+			case EProjectileDirection::Left:
+				TimeSinceShoot_Left = 0;
+				break;
+			case EProjectileDirection::Right:
+				TimeSinceShoot_Right = 0;
+				break;
+			case EProjectileDirection::Up:
+				TimeSinceShoot_Up = 0;
+				break;
+			case EProjectileDirection::Forward:
+				TimeSinceShoot_Forward = 0;
+				break;
+			}
 		}
 		else
 		{
