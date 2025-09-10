@@ -112,6 +112,9 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	FVector ScrollTriggerBoxScale = FVector(1.0f);
+
+	UPROPERTY(EditAnywhere)
+	int StartHealth = 3;
 };
 
 USTRUCT(BlueprintType)

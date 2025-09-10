@@ -187,6 +187,9 @@ public:
 	float TimeSinceJumpStateChange;
 	bool JumpedThisFrame;
 
+	int StartHealth;
+	int CurrentHealth;
+
 protected:
 	UInputAction* Input_JumpAction;
 

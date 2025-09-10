@@ -1,10 +1,12 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "PlayerCharacter.h"
+#include "Components/CapsuleComponent.h"
 #include "ScrollWithPlayerComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Projectile.h"
 #include "PlayerProjectile.h"
+#include "LevelSystem.h"
 
 
 // Sets default values
@@ -90,20 +92,29 @@ void APlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	UpdateLaneScroll();
-	UpdateSpeedFromInput();
+	ALevelSystem* foundLevelSystem = Cast<ALevelSystem>(UGameplayStatics::GetActorOfClass(GetWorld(), ALevelSystem::StaticClass()));
+	if (foundLevelSystem)
+	{
+		switch (foundLevelSystem->GetGameState())
+		{
+		case EGameState::Active:
+			UpdateLaneScroll();
+			UpdateSpeedFromInput();
 
-	UpdateLaneFromInput();
+			UpdateLaneFromInput();
 
-	UpdateJumpState(DeltaTime);
-	UpdateJumpFromInput();
+			UpdateJumpState(DeltaTime);
+			UpdateJumpFromInput();
 
-	UpdateShootValues(DeltaTime);
-	UpdateShootFromInput();
+			UpdateShootValues(DeltaTime);
+			UpdateShootFromInput();
 
-	UpdateCameraPos();
+			UpdateCameraPos();
 
-	ClearInputValues();
+			ClearInputValues();
+			break;
+		}
+	}
 }
 
 // Called to bind functionality to input
@@ -173,19 +184,37 @@ void APlayerCharacter::BeginPlay_SetupFromConfig()
 
 		ProjectileClass = ConfigData->ShootConfig.ProjectileClass;
 
-		ScrollTriggerBox->SetRelativeScale3D(ConfigData->MiscConfig.ScrollTriggerBoxScale);
+		ScrollTriggerBox->SetRelativeScale3D(FVector(0.1f, 30.0f, 30.0f));
 		if (ScrollTriggerBox)
 		{
 			FString boxSize = ScrollTriggerBox->GetRelativeScale3D().ToString();
 			//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, boxSize);
 		}
 
-		ScrollTriggerBox->ComponentTags.Add(FName("PlayerArea"));
-		//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("set up config data."));
+		FName playerAreaTag = FName("PlayerArea");
+
+		if (!ScrollTriggerBox->ComponentTags.Contains(playerAreaTag))
+		{
+			ScrollTriggerBox->ComponentTags.Add(playerAreaTag);
+		}
+
+
+		FName playerCollTag = FName("PlayerColl");
+		UCapsuleComponent* CapsuleComp = GetCapsuleComponent();
+		if (CapsuleComp)
+		{
+			if (!CapsuleComp->ComponentTags.Contains(playerCollTag))
+			{
+				CapsuleComp->ComponentTags.Add(playerCollTag);
+			}
+		}
+
+		StartHealth = ConfigData->MiscConfig.StartHealth;
+
 	}
 	else
 	{
-		//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("set up config data EPIC FAIL."));
+
 	}
 }
 
