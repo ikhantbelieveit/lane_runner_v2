@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "Components/BoxComponent.h"
 #include "PlayerDetectComponent.generated.h"
 
 
@@ -43,4 +44,8 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool TriggerScrollWithPlayer;
+
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Overlap")
+	UBoxComponent* BoxComponent;
 };

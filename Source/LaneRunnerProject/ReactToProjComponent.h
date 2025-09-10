@@ -28,6 +28,8 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Overlap")
 	UPrimitiveComponent* CollisionComponent;
 
+	
+
 	UFUNCTION()
 	void HandleBeginOverlap(
 		UPrimitiveComponent* OverlappedComp,
@@ -52,4 +54,8 @@ public:
 	FName ProjTag;
 
 	virtual void HitByProjectile(AActor* projActor);
+
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Overlap")
+	UBoxComponent* BoxComponent;
 };

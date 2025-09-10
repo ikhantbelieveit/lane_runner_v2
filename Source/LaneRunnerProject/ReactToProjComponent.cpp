@@ -34,6 +34,15 @@ void UReactToProjComponent::BeginPlay()
 	{
 
 	}
+
+	if (!BoxComponent)
+	{
+		BoxComponent = GetOwner()->FindComponentByClass<UBoxComponent>();
+	}
+	if (BoxComponent)
+	{
+		BoxComponent->OnComponentBeginOverlap.AddDynamic(this, &UReactToProjComponent::HandleBeginOverlap);
+	}
 }
 
 
@@ -59,12 +68,9 @@ void UReactToProjComponent::HandleBeginOverlap(
 		return;
 	}
 
-	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("BIG TICK ENERGY."));
-
 	// Check for tag
 	if (OtherActor->ActorHasTag(ProjTag))
 	{
-		
 		HitByProjectile(OtherActor);
 	}
 }

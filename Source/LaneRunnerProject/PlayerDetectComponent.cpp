@@ -31,6 +31,16 @@ void UPlayerDetectComponent::BeginPlay()
 		CollisionComponent->OnComponentBeginOverlap.AddDynamic(this, &UPlayerDetectComponent::HandleBeginOverlap);
 
 	}
+
+	if (!BoxComponent)
+	{
+		BoxComponent = GetOwner()->FindComponentByClass<UBoxComponent>();
+	}
+	if (BoxComponent)
+	{
+		BoxComponent->OnComponentBeginOverlap.AddDynamic(this, &UPlayerDetectComponent::HandleBeginOverlap);
+
+	}
 }
 
 
@@ -56,7 +66,8 @@ void UPlayerDetectComponent::HandleBeginOverlap(
 		return;
 	}
 
-	if (OtherComp->ComponentHasTag(PlayerAreaTag))
+	FName PlayerName = "PlayerArea";
+	if (OtherComp->ComponentHasTag(PlayerName))
 	{
 		//do stuff
 		if (TriggerScrollWithPlayer)
