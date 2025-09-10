@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "ScrollWithPlayerComponent.h"
 #include "PlayerDetectComponent.h"
+#include "ScrollWithPlayerComponent.h"
 
 // Sets default values for this component's properties
 UPlayerDetectComponent::UPlayerDetectComponent()
@@ -56,12 +56,8 @@ void UPlayerDetectComponent::HandleBeginOverlap(
 		return;
 	}
 
-	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("GO GO GO"));
-
 	if (OtherComp->ComponentHasTag(PlayerAreaTag))
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("GOTTEM"));
-
 		//do stuff
 		if (TriggerScrollWithPlayer)
 		{
@@ -69,11 +65,9 @@ void UPlayerDetectComponent::HandleBeginOverlap(
 
 			if (scrollWithPlayer)
 			{
-				GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("WE DA BEST"));
 				scrollWithPlayer->Enabled = true;
 			}
 			
-			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("LETS GO GOLFING"));
 		}
 	}
 }

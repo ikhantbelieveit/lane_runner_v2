@@ -1,7 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
-
+#include "PaperSpriteComponent.h"
+#include "PaperSprite.h"
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
 #include "Engine/StaticMesh.h"
@@ -19,6 +20,8 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Visual")
     UStaticMesh* ProjectileMesh;
 
+    
+
 public:
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Projectile")
     float Speed = 1000.0f;
@@ -31,4 +34,7 @@ public:
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Projectile")
     float MeshScale = 0.2f;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Visual", meta = (AllowPrivateAccess = "true"))
+    UPaperSprite* ProjSprite;
 };

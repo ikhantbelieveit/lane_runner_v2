@@ -17,6 +17,11 @@ AProjectile::AProjectile()
     ProjectileMovement->bShouldBounce = false;
 
     ScrollWithPlayerComponent = CreateDefaultSubobject<UScrollWithPlayerComponent>(TEXT("ScrollWithPlayerComponent"));
+
+    //PaperSprite Visuals
+    SpriteComponent = CreateDefaultSubobject<UPaperSpriteComponent>(TEXT("Sprite"));
+    SpriteComponent->SetupAttachment(GetRootComponent());
+    SpriteComponent->SetRelativeLocation(FVector(0.0f, 0.0f, 0.0f));
 }
 
 void AProjectile::BeginPlay()
@@ -38,6 +43,8 @@ void AProjectile::SetupFromConfig()
 
     UProjectileMovementComponent* projMoveComp = (UProjectileMovementComponent*)GetComponentByClass(UProjectileMovementComponent::StaticClass());
     UStaticMeshComponent* meshComp = (UStaticMeshComponent*)GetComponentByClass(UStaticMeshComponent::StaticClass());
+    UPaperSpriteComponent* spriteComp = (UPaperSpriteComponent*)GetComponentByClass(UPaperSpriteComponent::StaticClass());
+
 
 
     if (ConfigData)
@@ -60,6 +67,20 @@ void AProjectile::SetupFromConfig()
             {
                 ScrollWithPlayerComponent->Enabled = false;
             }
+
+            spriteComp->SetRelativeRotation(FRotator(0.0f, 0.0f, 90.0f));
+            break;
+        case EProjectileDirection::Up:
+            spriteComp->SetRelativeRotation(FRotator(0.0f, 0.0f, 90.0f));
+
+            projMoveComp->InitialSpeed = ConfigData->Speed;
+            projMoveComp->MaxSpeed = ConfigData->Speed;
+
+            if (meshComp)
+            {
+                meshComp->SetStaticMesh(ConfigData->ProjectileMesh);
+                meshComp->SetRelativeScale3D(FVector(ConfigData->MeshScale));
+            }
             break;
         default:
             projMoveComp->InitialSpeed = ConfigData->Speed;
@@ -73,6 +94,14 @@ void AProjectile::SetupFromConfig()
             break;
         }
         
+        if (meshComp)
+        {
+            meshComp->SetVisibility(false);
+        }
+        if (spriteComp)
+        {
+            spriteComp->SetSprite(ConfigData->ProjSprite);
+        }
     }
 }
 

@@ -1,9 +1,11 @@
 // Fill out your copyright notice in the Description page of Project Settings.
+
+#include "PlayerCharacter.h"
 #include "ScrollWithPlayerComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Projectile.h"
 #include "PlayerProjectile.h"
-#include "PlayerCharacter.h"
+
 
 // Sets default values
 APlayerCharacter::APlayerCharacter()

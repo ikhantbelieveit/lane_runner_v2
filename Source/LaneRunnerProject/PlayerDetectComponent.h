@@ -39,7 +39,7 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName PlayerAreaTag;
+	FName PlayerAreaTag;	//TODO: make deprecated
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool TriggerScrollWithPlayer;

@@ -47,4 +47,9 @@ private:
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
     UProjectileConfigData* ConfigData;
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Visuals", meta = (AllowPrivateAccess = "true"))
+    UPaperSpriteComponent* SpriteComponent;
+
+    UPaperSprite* ProjSprite;
 };

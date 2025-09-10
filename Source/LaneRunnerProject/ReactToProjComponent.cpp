@@ -59,7 +59,7 @@ void UReactToProjComponent::HandleBeginOverlap(
 		return;
 	}
 
-	
+	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("BIG TICK ENERGY."));
 
 	// Check for tag
 	if (OtherActor->ActorHasTag(ProjTag))
