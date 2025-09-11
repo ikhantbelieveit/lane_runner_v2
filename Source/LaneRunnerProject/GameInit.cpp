@@ -37,6 +37,8 @@ void AGameInit::BeginPlay()
 			}
 		}
 	}
+
+	HasInitFinished = true;
 }
 
 // Called every frame
@@ -44,5 +46,21 @@ void AGameInit::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (HasInitFinished)
+	{
+		BroadcastInitFinished();
+	}
 }
 
+void AGameInit::BroadcastInitFinished()
+{
+	if (HasBroadcastInitFinished)
+	{
+		return;
+	}
+
+	OnAllSystemsSpawned.Broadcast();
+
+	HasBroadcastInitFinished = true;
+
+}

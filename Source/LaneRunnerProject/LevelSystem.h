@@ -10,6 +10,8 @@
 /**
  * 
  */
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FLevelSystemEvent);
 UCLASS()
 class LANERUNNERPROJECT_API ALevelSystem : public ABaseGameSystem
 {
@@ -21,6 +23,8 @@ class LANERUNNERPROJECT_API ALevelSystem : public ABaseGameSystem
 protected:
 	EGameState CurrentGameState;
 
+	//TArray<UDestructibleObjectComponent*> Destructibles;
+
 public:
 	void SetGameState(EGameState newState);
 	EGameState GetGameState();
@@ -28,4 +32,7 @@ public:
 	void OnPlayerTouchHazard();
 
 	void ResetFromLose();
+
+	UPROPERTY(BlueprintAssignable, Category = "Events")
+	FLevelSystemEvent CleanupBeforeReset;
 };

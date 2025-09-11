@@ -2,6 +2,7 @@
 
 
 #include "ReactToProjComponent.h"
+#include "DestructibleObjectComponent.h"
 
 // Sets default values for this component's properties
 UReactToProjComponent::UReactToProjComponent()
@@ -79,6 +80,15 @@ void UReactToProjComponent::HitByProjectile(AActor* projActor)
 {
 	OnProjHit.Broadcast();
 
-	GetOwner()->Destroy();
+	if (TakeDamageOnHit)
+	{
+		UDestructibleObjectComponent* destructible = (UDestructibleObjectComponent*)GetOwner()->GetComponentByClass(UDestructibleObjectComponent::StaticClass());
+		if (destructible)
+		{
+			destructible->OnHit();
+		}
+	}
+
+	//GetOwner()->Destroy();
 	projActor->Destroy();
 }

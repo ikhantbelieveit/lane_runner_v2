@@ -8,6 +8,8 @@
 #include "GameFramework/Actor.h"
 #include "GameInit.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FGameInitEvent);
+
 UCLASS()
 class LANERUNNERPROJECT_API AGameInit : public AActor
 {
@@ -23,8 +25,16 @@ protected:
 
 	TArray<ABaseGameSystem*> SpawnedGameSystems;
 
+	bool HasInitFinished;
+	bool HasBroadcastInitFinished;
+
+	void BroadcastInitFinished();
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+	UPROPERTY(BlueprintAssignable, Category = "Events")
+	FGameInitEvent OnAllSystemsSpawned;
 
 };

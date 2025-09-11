@@ -9,7 +9,6 @@ void ALevelSystem::BeginPlay()
 {
 	Super::BeginPlay();
 
-
 }
 
 void ALevelSystem::SetGameState(EGameState newState)
@@ -30,13 +29,6 @@ EGameState ALevelSystem::GetGameState()
 void ALevelSystem::OnPlayerTouchHazard()
 {
 	SetGameState(EGameState::Lose);
-
-	//APlayerCharacter* player = Cast<APlayerCharacter>(UGameplayStatics::GetActorOfClass(GetWorld(), APlayerCharacter::StaticClass()));
-	//if (player)
-	//{
-	//	//foundLevelSystem->OnPlayerTouchHazard();
-	//	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("PLAYER HIT - DO STUFF IN LEVEL SYSTEM"));
-	//}
 }
 
 void ALevelSystem::ResetFromLose()
@@ -46,6 +38,8 @@ void ALevelSystem::ResetFromLose()
 	//reset score
 	//move player back to start
 	//set player health
+	CleanupBeforeReset.Broadcast();
+
 	APlayerCharacter* player = Cast<APlayerCharacter>(UGameplayStatics::GetActorOfClass(GetWorld(), APlayerCharacter::StaticClass()));
 	if (player)
 	{

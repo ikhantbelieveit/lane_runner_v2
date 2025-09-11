@@ -58,4 +58,7 @@ public:
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Overlap")
 	UBoxComponent* BoxComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool TakeDamageOnHit = true;
 };
