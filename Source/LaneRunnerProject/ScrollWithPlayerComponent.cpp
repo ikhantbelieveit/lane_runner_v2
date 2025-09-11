@@ -2,6 +2,7 @@
 
 
 #include "ScrollWithPlayerComponent.h"
+#include "GameInit.h"
 
 // Sets default values for this component's properties
 UScrollWithPlayerComponent::UScrollWithPlayerComponent()
@@ -30,14 +31,16 @@ void UScrollWithPlayerComponent::BeginPlay()
 		if (nullptr != PlayerRef)
 		{
 			HasPlayerRef = true;
-			//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("PLAYER GOT"));
-		}
-		else
-		{
-			//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("PLAYER NOT"));
 		}
 	}
+
+	AGameInit* gameInit = Cast<AGameInit>(UGameplayStatics::GetActorOfClass(GetWorld(), AGameInit::StaticClass()));
+	if (gameInit)
+	{
+		gameInit->OnAllSystemsSpawned.AddDynamic(this, &UScrollWithPlayerComponent::RegisterGameSystemDelegates);
+	}
 	
+	StartPos = GetOwner()->GetActorLocation();
 }
 
 
@@ -60,3 +63,17 @@ void UScrollWithPlayerComponent::TickComponent(float DeltaTime, ELevelTick TickT
 	}
 }
 
+void UScrollWithPlayerComponent::RegisterGameSystemDelegates()
+{
+	ALevelSystem* levelSystem = Cast<ALevelSystem>(UGameplayStatics::GetActorOfClass(GetWorld(), ALevelSystem::StaticClass()));
+	if (levelSystem)
+	{
+		levelSystem->CleanupBeforeReset.AddDynamic(this, &UScrollWithPlayerComponent::OnLevelReset);
+	}
+}
+
+void UScrollWithPlayerComponent::OnLevelReset()
+{
+	Enabled = StartEnabled;
+	GetOwner()->SetActorLocation(StartPos);
+}

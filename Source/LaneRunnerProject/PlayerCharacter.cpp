@@ -559,9 +559,9 @@ void APlayerCharacter::OnLevelResetFromLose()
 
 	//Move back to start
 	SetActorLocation(SpawnPos);
+	UpdateCameraPos();
 	
 	ClearInputValues();	//maybe not needed? figured its handy
-	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("its respawn time"));
 }
 
 bool APlayerCharacter::MoveLane_Left()

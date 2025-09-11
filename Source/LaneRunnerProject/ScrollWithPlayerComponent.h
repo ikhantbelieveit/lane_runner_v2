@@ -33,4 +33,14 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Config")
 	bool StartEnabled = true;
+
+	UFUNCTION()
+	void RegisterGameSystemDelegates();
+
+	UFUNCTION()
+	void OnLevelReset();
+
+	FVector StartPos;
+
+
 };
