@@ -707,7 +707,7 @@ void APlayerCharacter::UpdateJumpState(float DeltaTime)
 void APlayerCharacter::UpdateCameraPos()
 {
 	//clamp camera Z pos
-	FVector CameraClampZPos = FVector(CameraComponent->GetComponentLocation().X, CameraComponent->GetComponentLocation().Y, CameraHeight);
+	FVector CameraClampZPos = FVector(CameraComponent->GetComponentLocation().X, 0.0f, CameraHeight);
 	CameraComponent->SetWorldLocation(CameraClampZPos);
 }
 
