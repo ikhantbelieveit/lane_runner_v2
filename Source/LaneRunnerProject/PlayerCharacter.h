@@ -44,6 +44,11 @@ protected:
 	UInputAction* Input_ShootUpAction;
 	UInputAction* Input_ShootForwardAction;
 
+	UInputAction* Input_LeftAction_Joystick;
+	UInputAction* Input_RightAction_Joystick;
+	UInputAction* Input_SpeedUpAction_Joystick;
+	UInputAction* Input_SlowDownAction_Joystick;
+
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Visuals", meta = (AllowPrivateAccess = "true"))
 	UPaperSpriteComponent* SpriteComponent;
@@ -116,16 +121,25 @@ public:
 	void Input_SetupFromConfig();
 
 	//input methods
-	void Input_LeftStart();
-	void Input_RightStart();
+	void Input_LeftStart(const FInputActionValue& Value);
+	void Input_RightStart(const FInputActionValue& Value);
+
+	void Input_LeftStart_Joystick(const FInputActionValue& Value);
+	void Input_RightStart_Joystick(const FInputActionValue& Value);
 
 	virtual void Input_SpeedUpStart(const FInputActionValue& Value);
 	virtual void Input_SpeedUp(const FInputActionValue& Value);
 	virtual void Input_SpeedUpCancel(const FInputActionValue& Value);
+	virtual void Input_SpeedUpStart_Joystick(const FInputActionValue& Value);
+	virtual void Input_SpeedUp_Joystick(const FInputActionValue& Value);
+	virtual void Input_SpeedUpCancel_Joystick(const FInputActionValue& Value);
 
 	virtual void Input_SlowDownStart(const FInputActionValue& Value);
 	virtual void Input_SlowDown(const FInputActionValue& Value);
 	virtual void Input_SlowDownCancel(const FInputActionValue& Value);
+	virtual void Input_SlowDownStart_Joystick(const FInputActionValue& Value);
+	virtual void Input_SlowDown_Joystick(const FInputActionValue& Value);
+	virtual void Input_SlowDownCancel_Joystick(const FInputActionValue& Value);
 
 	virtual void Input_JumpStart(const FInputActionValue& Value);
 	virtual void Input_Jump(const FInputActionValue& Value);

@@ -129,14 +129,22 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 		// Bind actions
 		EnhancedInputComponent->BindAction(Input_LeftAction, ETriggerEvent::Started, this, &APlayerCharacter::Input_LeftStart);
 		EnhancedInputComponent->BindAction(Input_RightAction, ETriggerEvent::Started, this, &APlayerCharacter::Input_RightStart);
+		EnhancedInputComponent->BindAction(Input_LeftAction_Joystick, ETriggerEvent::Started, this, &APlayerCharacter::Input_LeftStart_Joystick);
+		EnhancedInputComponent->BindAction(Input_RightAction_Joystick, ETriggerEvent::Started, this, &APlayerCharacter::Input_RightStart_Joystick);
 
 		EnhancedInputComponent->BindAction(Input_SpeedUpAction, ETriggerEvent::Started, this, &APlayerCharacter::Input_SpeedUpStart);
 		EnhancedInputComponent->BindAction(Input_SpeedUpAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Input_SpeedUp);
 		EnhancedInputComponent->BindAction(Input_SpeedUpAction, ETriggerEvent::Completed, this, &APlayerCharacter::Input_SpeedUpCancel);
+		EnhancedInputComponent->BindAction(Input_SpeedUpAction_Joystick, ETriggerEvent::Started, this, &APlayerCharacter::Input_SpeedUpStart_Joystick);
+		EnhancedInputComponent->BindAction(Input_SpeedUpAction_Joystick, ETriggerEvent::Triggered, this, &APlayerCharacter::Input_SpeedUp_Joystick);
+		EnhancedInputComponent->BindAction(Input_SpeedUpAction_Joystick, ETriggerEvent::Completed, this, &APlayerCharacter::Input_SpeedUpCancel_Joystick);
 
 		EnhancedInputComponent->BindAction(Input_SlowDownAction, ETriggerEvent::Started, this, &APlayerCharacter::Input_SlowDownStart);
 		EnhancedInputComponent->BindAction(Input_SlowDownAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Input_SlowDown);
 		EnhancedInputComponent->BindAction(Input_SlowDownAction, ETriggerEvent::Completed, this, &APlayerCharacter::Input_SlowDownCancel);
+		EnhancedInputComponent->BindAction(Input_SlowDownAction_Joystick, ETriggerEvent::Started, this, &APlayerCharacter::Input_SlowDownStart_Joystick);
+		EnhancedInputComponent->BindAction(Input_SlowDownAction_Joystick, ETriggerEvent::Triggered, this, &APlayerCharacter::Input_SlowDown_Joystick);
+		EnhancedInputComponent->BindAction(Input_SlowDownAction_Joystick, ETriggerEvent::Completed, this, &APlayerCharacter::Input_SlowDownCancel_Joystick);
 
 		EnhancedInputComponent->BindAction(Input_JumpAction, ETriggerEvent::Started, this, &APlayerCharacter::Input_JumpStart);
 		EnhancedInputComponent->BindAction(Input_JumpAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Input_Jump);
@@ -224,8 +232,12 @@ void APlayerCharacter::Input_SetupFromConfig()
 	{
 		Input_LeftAction = ConfigData->InputConfig.Input_LeftAction;
 		Input_RightAction = ConfigData->InputConfig.Input_RightAction;
+		Input_LeftAction_Joystick = ConfigData->InputConfig.Input_LeftAction_Joystick;
+		Input_RightAction_Joystick = ConfigData->InputConfig.Input_RightAction_Joystick;
 		Input_SpeedUpAction = ConfigData->InputConfig.Input_SpeedUpAction;
 		Input_SlowDownAction = ConfigData->InputConfig.Input_SlowDownAction;
+		Input_SpeedUpAction_Joystick = ConfigData->InputConfig.Input_SpeedUpAction_Joystick;
+		Input_SlowDownAction_Joystick = ConfigData->InputConfig.Input_SlowDownAction_Joystick;
 		Input_ShootRightAction = ConfigData->InputConfig.Input_ShootRightAction;
 		Input_ShootLeftAction = ConfigData->InputConfig.Input_ShootLeftAction;
 		Input_ShootUpAction = ConfigData->InputConfig.Input_ShootUpAction;
@@ -241,18 +253,32 @@ void APlayerCharacter::Input_SetupFromConfig()
 
 }
 
-void APlayerCharacter::Input_LeftStart()
+void APlayerCharacter::Input_LeftStart(const FInputActionValue& Value)
 {
 	LeftInput_Pressed = true;
-
-	//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("LEFT"));
 }
 
-void APlayerCharacter::Input_RightStart()
+void APlayerCharacter::Input_LeftStart_Joystick(const FInputActionValue& Value)
+{
+	float axis = Value.Get<float>();
+	if (axis < 0)
+	{
+		LeftInput_Pressed = true;
+	}
+}
+
+void APlayerCharacter::Input_RightStart(const FInputActionValue& Value)
 {
 	RightInput_Pressed = true;
+}
 
-	//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("RIGHT"));
+void APlayerCharacter::Input_RightStart_Joystick(const FInputActionValue& Value)
+{
+	float axis = Value.Get<float>();
+	if (axis > 0)
+	{
+		RightInput_Pressed = true;
+	}
 }
 
 void APlayerCharacter::Input_SpeedUp(const FInputActionValue& Value)
@@ -270,6 +296,34 @@ void APlayerCharacter::Input_SpeedUpCancel(const FInputActionValue& Value)
 	SpeedInput_Released = true;
 }
 
+void APlayerCharacter::Input_SpeedUp_Joystick(const FInputActionValue& Value)
+{
+	float axis = Value.Get<float>();
+	if (axis > 0)
+	{
+		SpeedInput_Active = true;
+	}
+}
+
+void APlayerCharacter::Input_SpeedUpStart_Joystick(const FInputActionValue& Value)
+{
+	float axis = Value.Get<float>();
+	
+	if (axis > 0)
+	{
+		SpeedInput_Pressed = true;
+	}
+}
+
+void APlayerCharacter::Input_SpeedUpCancel_Joystick(const FInputActionValue& Value)
+{
+	float axis = Value.Get<float>();
+	if (axis > 0)
+	{
+		SpeedInput_Released = true;
+	}
+}
+
 void APlayerCharacter::Input_SlowDownStart(const FInputActionValue& Value)
 {
 	SlowInput_Pressed = true;
@@ -283,6 +337,34 @@ void APlayerCharacter::Input_SlowDown(const FInputActionValue& Value)
 void APlayerCharacter::Input_SlowDownCancel(const FInputActionValue& Value)
 {
 	SlowInput_Released = true;
+}
+
+void APlayerCharacter::Input_SlowDownStart_Joystick(const FInputActionValue& Value)
+{
+	float axis = Value.Get<float>();
+	
+	if (axis < 0)
+	{
+		SlowInput_Pressed = true;
+	}
+}
+
+void APlayerCharacter::Input_SlowDown_Joystick(const FInputActionValue& Value)
+{
+	float axis = Value.Get<float>();
+	if (axis < 0)
+	{
+		SlowInput_Active = true;
+	}
+}
+
+void APlayerCharacter::Input_SlowDownCancel_Joystick(const FInputActionValue& Value)
+{
+	float axis = Value.Get<float>();
+	if (axis < 0)
+	{
+		SlowInput_Released = true;
+	}
 }
 
 void APlayerCharacter::Input_JumpStart(const FInputActionValue& Value)
