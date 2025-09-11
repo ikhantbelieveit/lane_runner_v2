@@ -26,4 +26,6 @@ public:
 	EGameState GetGameState();
 
 	void OnPlayerTouchHazard();
+
+	void ResetFromLose();
 };

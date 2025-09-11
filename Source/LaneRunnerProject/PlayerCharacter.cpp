@@ -85,6 +85,8 @@ void APlayerCharacter::BeginPlay()
 
 	//set lane to middle
 	SetLane(2);
+
+	SpawnPos = GetActorLocation();
 }
 
 // Called every frame
@@ -111,6 +113,13 @@ void APlayerCharacter::Tick(float DeltaTime)
 
 			UpdateCameraPos();
 
+			ClearInputValues();
+			break;
+		case EGameState::Lose:
+			if (JumpInput_Pressed)
+			{
+				foundLevelSystem->ResetFromLose();
+			}
 			ClearInputValues();
 			break;
 		}
@@ -541,6 +550,18 @@ void APlayerCharacter::SetJumpState(EPlayerJumpState newState)
 void APlayerCharacter::CancelVerticalSpeed()
 {
 	GetRootComponent()->ComponentVelocity = FVector(GetRootComponent()->ComponentVelocity.X, GetRootComponent()->ComponentVelocity.Y, 0);
+}
+
+void APlayerCharacter::OnLevelResetFromLose()
+{
+	//set lane to middle
+	SetLane(2);
+
+	//Move back to start
+	SetActorLocation(SpawnPos);
+	
+	ClearInputValues();	//maybe not needed? figured its handy
+	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("its respawn time"));
 }
 
 bool APlayerCharacter::MoveLane_Left()

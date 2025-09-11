@@ -38,3 +38,18 @@ void ALevelSystem::OnPlayerTouchHazard()
 	//	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("PLAYER HIT - DO STUFF IN LEVEL SYSTEM"));
 	//}
 }
+
+void ALevelSystem::ResetFromLose()
+{
+	//clear all projectiles
+	//bring back destroyed objects & collected items
+	//reset score
+	//move player back to start
+	//set player health
+	APlayerCharacter* player = Cast<APlayerCharacter>(UGameplayStatics::GetActorOfClass(GetWorld(), APlayerCharacter::StaticClass()));
+	if (player)
+	{
+		player->OnLevelResetFromLose();
+	}
+	SetGameState(EGameState::Active);
+}

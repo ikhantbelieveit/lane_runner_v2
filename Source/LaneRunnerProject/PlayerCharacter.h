@@ -50,6 +50,7 @@ protected:
 	UInputAction* Input_SlowDownAction_Joystick;
 
 
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Visuals", meta = (AllowPrivateAccess = "true"))
 	UPaperSpriteComponent* SpriteComponent;
 
@@ -86,6 +87,7 @@ protected:
 
 	EPlayerJumpState CurrentJumpState;
 
+	FVector SpawnPos;
 	
 
 public:	
@@ -203,6 +205,8 @@ public:
 
 	int StartHealth;
 	int CurrentHealth;
+
+	void OnLevelResetFromLose();
 
 protected:
 	UInputAction* Input_JumpAction;
