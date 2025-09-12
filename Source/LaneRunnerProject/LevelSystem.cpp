@@ -40,6 +40,7 @@ void ALevelSystem::ResetFromLose()
 	//move player back to start
 	//set player health
 	CleanupBeforeReset.Broadcast();
+	SetScore(0);
 
 	APlayerCharacter* player = Cast<APlayerCharacter>(UGameplayStatics::GetActorOfClass(GetWorld(), APlayerCharacter::StaticClass()));
 	if (player)
@@ -57,4 +58,21 @@ void ALevelSystem::KillPlayer()
 void ALevelSystem::OnPitfall()
 {
 	KillPlayer();
+}
+
+void ALevelSystem::SetScore(int newScore)
+{
+	CurrentScore = newScore;
+	FString message = "set score to " + FString::FromInt(CurrentScore);
+	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, message);
+}
+
+void ALevelSystem::AddToScore(int addValue)
+{
+	SetScore(CurrentScore + addValue);
+}
+
+int ALevelSystem::GetScore()
+{
+	return CurrentScore;
 }

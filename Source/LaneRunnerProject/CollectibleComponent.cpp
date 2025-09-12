@@ -7,6 +7,7 @@
 #include "GameInit.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/StaticMeshComponent.h"
+#include "LevelSystem.h"
 
 // Sets default values for this component's properties
 UCollectibleComponent::UCollectibleComponent()
@@ -62,6 +63,12 @@ void UCollectibleComponent::Collect()
 	if (GetIsCollected())
 	{
 		return;
+	}
+
+	ALevelSystem* foundSystem = Cast<ALevelSystem>(UGameplayStatics::GetActorOfClass(GetWorld(), ALevelSystem::StaticClass()));
+	if (foundSystem)
+	{
+		foundSystem->AddToScore(10);
 	}
 
 	UStaticMeshComponent* mesh = (UStaticMeshComponent*)GetOwner()->GetComponentByClass(UStaticMeshComponent::StaticClass());

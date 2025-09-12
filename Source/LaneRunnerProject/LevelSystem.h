@@ -23,7 +23,7 @@ class LANERUNNERPROJECT_API ALevelSystem : public ABaseGameSystem
 protected:
 	EGameState CurrentGameState;
 
-	//TArray<UDestructibleObjectComponent*> Destructibles;
+	int CurrentScore;
 
 public:
 	void SetGameState(EGameState newState);
@@ -38,4 +38,8 @@ public:
 
 	void KillPlayer();
 	void OnPitfall();
+
+	void SetScore(int newScore);
+	void AddToScore(int addValue);
+	int GetScore();
 };
