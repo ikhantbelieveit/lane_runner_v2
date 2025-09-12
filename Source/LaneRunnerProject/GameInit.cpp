@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "LevelSystem.h"
+#include "ProjectileSystem.h"
 #include "GameInit.h"
 
 // Sets default values
@@ -20,7 +21,8 @@ void AGameInit::BeginPlay()
 	if (World)
 	{
 		TArray<TSubclassOf<ABaseGameSystem>> systemsToSpawn = {
-		ALevelSystem::StaticClass()
+		ALevelSystem::StaticClass(),
+		AProjectileSystem::StaticClass()
 		};
 
 		for (TSubclassOf<ABaseGameSystem> systemToSpawn : systemsToSpawn)

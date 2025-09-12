@@ -7,6 +7,7 @@
 #include "Projectile.h"
 #include "PlayerProjectile.h"
 #include "LevelSystem.h"
+#include "ProjectileSystem.h"
 
 
 // Sets default values
@@ -719,46 +720,21 @@ void APlayerCharacter::UpdateCameraPos()
 
 void APlayerCharacter::Shoot(EProjectileDirection direction, bool holdNotTap)
 {
-	//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("SHOULD SHOOT."));
-
 	if (!CanShootInDirection(direction, holdNotTap))
 	{
 		return;
 	}
 
-	//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("SHOULD REALLY SHOOT."));
-
-	UWorld* World = GetWorld();
-	if (World)
+	AProjectileSystem* foundSystem = Cast<AProjectileSystem>(UGameplayStatics::GetActorOfClass(GetWorld(), AProjectileSystem::StaticClass()));
+	if (foundSystem)
 	{
-		FActorSpawnParameters SpawnParams;
-		SpawnParams.Owner = this;
-		SpawnParams.Instigator = GetInstigator();
+		FProjectileRequestData requestData = FProjectileRequestData();
+		requestData.Direction = direction;
+		requestData.ProjectileClass = ProjectileClass;
+		requestData.ShootPos = GetActorLocation();
 
-		FVector shootPos = GetActorLocation();
-		FRotator defaultRotation = FRotator();
-
-
-		switch (direction)
+		if (foundSystem->ShootPlayerProjectile(requestData))
 		{
-		case EProjectileDirection::Left:
-			break;
-		case EProjectileDirection::Right:
-			break;
-		case EProjectileDirection::Up:
-			break;
-		case EProjectileDirection::Forward:
-			break;
-		}
-
-		// Spawn the projectile at the muzzle.
-		AProjectile* Projectile = World->SpawnActor<AProjectile>(ProjectileClass, shootPos, defaultRotation, SpawnParams);
-		if (Projectile)
-		{
-			Projectile->SetFiringDirection(direction);
-			Projectile->SetupFromConfig();
-			Projectile->Fire(direction);
-
 			switch (direction)
 			{
 			case EProjectileDirection::Left:
@@ -774,10 +750,6 @@ void APlayerCharacter::Shoot(EProjectileDirection direction, bool holdNotTap)
 				TimeSinceShoot_Forward = 0;
 				break;
 			}
-		}
-		else
-		{
-			//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("DID NOT SHOOT."));
 		}
 	}
 }
