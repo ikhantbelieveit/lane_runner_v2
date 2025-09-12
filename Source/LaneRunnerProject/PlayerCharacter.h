@@ -183,6 +183,7 @@ public:
 	void UpdateCameraPos();
 	void UpdateShootValues(float DeltaTime);
 	void UpdateShootFromInput();
+	void UpdateCheckForPit();
 
 	//lane
 	bool MoveLane_Left();

@@ -35,4 +35,7 @@ public:
 
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FLevelSystemEvent CleanupBeforeReset;
+
+	void KillPlayer();
+	void OnPitfall();
 };

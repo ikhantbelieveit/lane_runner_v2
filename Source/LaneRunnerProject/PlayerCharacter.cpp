@@ -100,6 +100,7 @@ void APlayerCharacter::Tick(float DeltaTime)
 		switch (foundLevelSystem->GetGameState())
 		{
 		case EGameState::Active:
+
 			UpdateLaneScroll();
 			UpdateSpeedFromInput();
 
@@ -621,6 +622,8 @@ bool APlayerCharacter::SetLane(int laneIndex)
 			CameraComponent->GetComponentLocation().Z));
 	}
 
+	UpdateCheckForPit();
+
 	return true;
 }
 
@@ -943,5 +946,46 @@ void APlayerCharacter::UpdateShootFromInput()
 	{
 		Shoot(EProjectileDirection::Forward, true);
 		return;
+	}
+}
+
+void APlayerCharacter::UpdateCheckForPit()
+{
+	// Get start and end locations for the line trace
+	FVector Start = GetActorLocation();
+	FVector End = Start - FVector(0.0f, 0.0f, 130.0f); // cast down
+
+	FHitResult HitResult;
+	FCollisionQueryParams TraceParams;
+	TraceParams.AddIgnoredActor(this); // ignore self
+
+	// Perform the line trace
+	bool bHit = GetWorld()->LineTraceSingleByChannel(
+		HitResult,
+		Start,
+		End,
+		ECC_Visibility,   // trace channel
+		TraceParams
+	);
+
+	if (bHit)
+	{
+		AActor* HitActor = HitResult.GetActor();
+		float Distance = (Start - HitResult.ImpactPoint).Size();
+
+		if (HitActor)
+		{
+			// Check if actor has a specific tag
+			if (HitActor->ActorHasTag(FName("Pitfall")))
+			{
+				GetCharacterMovement()->StopMovementImmediately();
+
+				ALevelSystem* foundLevelSystem = Cast<ALevelSystem>(UGameplayStatics::GetActorOfClass(GetWorld(), ALevelSystem::StaticClass()));
+				if (foundLevelSystem)
+				{
+					foundLevelSystem->OnPitfall();
+				}
+			}
+		}
 	}
 }

@@ -28,6 +28,7 @@ EGameState ALevelSystem::GetGameState()
 
 void ALevelSystem::OnPlayerTouchHazard()
 {
+	//TODO: deplete health instead of instant lose
 	SetGameState(EGameState::Lose);
 }
 
@@ -46,4 +47,14 @@ void ALevelSystem::ResetFromLose()
 		player->OnLevelResetFromLose();
 	}
 	SetGameState(EGameState::Active);
+}
+
+void ALevelSystem::KillPlayer()
+{
+	SetGameState(EGameState::Lose);
+}
+
+void ALevelSystem::OnPitfall()
+{
+	KillPlayer();
 }
