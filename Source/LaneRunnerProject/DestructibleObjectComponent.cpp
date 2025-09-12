@@ -72,6 +72,15 @@ void UDestructibleObjectComponent::DestroyFromComp()
 		return;
 	}
 
+	if (GivePointsOnDestroy)
+	{
+		ALevelSystem* levelSystem = Cast<ALevelSystem>(UGameplayStatics::GetActorOfClass(GetWorld(), ALevelSystem::StaticClass()));
+		if (levelSystem)
+		{
+			levelSystem->AddToScore(PointsGivenOnDestroy);
+		}
+	}
+
 	UStaticMeshComponent* mesh = (UStaticMeshComponent*)GetOwner()->GetComponentByClass(UStaticMeshComponent::StaticClass());
 	if (mesh)
 	{
@@ -126,10 +135,10 @@ void UDestructibleObjectComponent::ResetDestroy()
 
 void UDestructibleObjectComponent::RegisterGameSystemDelegates()
 {
-	ALevelSystem* gameInit = Cast<ALevelSystem>(UGameplayStatics::GetActorOfClass(GetWorld(), ALevelSystem::StaticClass()));
-	if (gameInit)
+	ALevelSystem* levelSystem = Cast<ALevelSystem>(UGameplayStatics::GetActorOfClass(GetWorld(), ALevelSystem::StaticClass()));
+	if (levelSystem)
 	{
-		gameInit->CleanupBeforeReset.AddDynamic(this, &UDestructibleObjectComponent::OnLevelReset);
+		levelSystem->CleanupBeforeReset.AddDynamic(this, &UDestructibleObjectComponent::OnLevelReset);
 	}
 }
 

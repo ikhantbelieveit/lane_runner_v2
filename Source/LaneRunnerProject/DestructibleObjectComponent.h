@@ -49,4 +49,12 @@ public:
 
 	UFUNCTION()
 	void OnLevelReset();
+
+	// New integer property
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats")
+	int PointsGivenOnDestroy = 5;
+
+	// New boolean property
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flags")
+	bool GivePointsOnDestroy = true;
 };
