@@ -56,6 +56,7 @@ void UHazardCollisionComponent::HandleBeginOverlap(
 	FName PlayerName = "PlayerColl";
 	if (OtherComp->ComponentHasTag(PlayerName))
 	{
+		
 		ALevelSystem* foundLevelSystem = Cast<ALevelSystem>(UGameplayStatics::GetActorOfClass(GetWorld(), ALevelSystem::StaticClass()));
 		if (foundLevelSystem)
 		{
