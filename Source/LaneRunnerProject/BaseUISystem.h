@@ -6,6 +6,7 @@
 #include "BaseGameSystem.h"
 #include "BaseUIScreen.h"
 #include "UISystemConfigData.h"
+#include "EUIState.h"
 #include "BaseUISystem.generated.h"
 
 /**
@@ -33,8 +34,14 @@ public:
 
 	virtual void SetupFromConfig(USystemConfigData* configData) override;
 
+	virtual EUIState GetUIState();
+
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Config")
 	UUISystemConfigData* ConfigData;
+
+public:
+	UFUNCTION()
+	void OnAllSystemsSpawned();
 	
 };

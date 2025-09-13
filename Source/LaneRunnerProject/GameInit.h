@@ -44,8 +44,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Testing")
 	TSubclassOf<UBaseUIScreen> TestUIClass;
 
-	void ShowTestUI();
-
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Config")
 	UGameInitConfigData* ConfigData;
 };

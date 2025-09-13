@@ -4,6 +4,7 @@
 #include "ProjectileSystem.h"
 #include "UIStateSystem.h"
 #include "TestLevelUISystem.h"
+#include "EUIState.h"
 #include "GameInit.h"
 
 // Sets default values
@@ -22,9 +23,6 @@ void AGameInit::BeginPlay()
 	if (CreateSystemsFromConfigData())
 	{
 		HasInitFinished = true;
-
-
-		ShowTestUI();
 	}
 	else
 	{
@@ -44,25 +42,22 @@ void AGameInit::Tick(float DeltaTime)
 		{
 			BroadcastInitFinished();
 
-			ALevelSystem* foundSystem = Cast<ALevelSystem>(UGameplayStatics::GetActorOfClass(GetWorld(), ALevelSystem::StaticClass()));
-			if (foundSystem)
+			AUIStateSystem* uiSystem = Cast<AUIStateSystem>(UGameplayStatics::GetActorOfClass(GetWorld(), AUIStateSystem::StaticClass()));
+			if (uiSystem)
 			{
 				//show test ui
-				foundSystem->SetScore(0);
+				uiSystem->EnterScreen(EUIState::TestLevel);
+			}
+
+			ALevelSystem* levelSystem = Cast<ALevelSystem>(UGameplayStatics::GetActorOfClass(GetWorld(), ALevelSystem::StaticClass()));
+			if (levelSystem)
+			{
+				//show test ui
+				levelSystem->SetScore(0);
 			}
 
 			HasBroadcastInitFinished = true;
 		}
-	}
-}
-
-void AGameInit::ShowTestUI()
-{
-	AUIStateSystem* foundSystem = Cast<AUIStateSystem>(UGameplayStatics::GetActorOfClass(GetWorld(), AUIStateSystem::StaticClass()));
-	if (foundSystem)
-	{
-		//show test ui
-		foundSystem->EnterScreen();
 	}
 }
 

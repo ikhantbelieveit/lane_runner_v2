@@ -4,13 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "BaseUISystem.h"
-#include "TestLevelUISystem.generated.h"
+#include "DeathScreenUISystem.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class LANERUNNERPROJECT_API ATestLevelUISystem : public ABaseUISystem
+class LANERUNNERPROJECT_API ADeathScreenUISystem : public ABaseUISystem
 {
 	GENERATED_BODY()
 

@@ -15,6 +15,7 @@ enum class EGameSystem : uint8
 	ProjectileSystem    UMETA(DisplayName = "ProjectileSystem"),
 	TestLevelUISystem    UMETA(DisplayName = "TestLevelUISystem"),
 	UIStateSystem    UMETA(DisplayName = "UIStateSystem"),
+	DeathScreenUISystem    UMETA(DisplayName = "DeathScreenUISystem"),
 };
 
 UCLASS()

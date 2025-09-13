@@ -5,25 +5,33 @@
 #include "CoreMinimal.h"
 #include "BaseGameSystem.h"
 #include "BaseUIScreen.h"
+#include "BaseUISystem.h"
+#include "EUIState.h"
 #include "UIStateSystem.generated.h"
 
-/**
- * 
- */
+
+
 UCLASS()
 class LANERUNNERPROJECT_API AUIStateSystem : public ABaseGameSystem
 {
 	GENERATED_BODY()
 
 public:
-	void EnterScreen();	//pass in enum or string ID
+	void EnterScreen(EUIState newScreen);	//pass in enum or string ID
 
 	void HideScreen();
 
 	void HideAllScreens();
 
+	void RegisterSystem(EUIState State, ABaseUISystem* System);
+
 private:
 	TArray<UBaseUIScreen*> ActiveScreens;
 
-	//void ApplyInputMode(UBaseUIScreen* Screen);
+	EUIState CurrentUIState;
+	EUIState PrevUIState;
+
+	ABaseUISystem* GetSystemRefForState(EUIState state);
+
+	TMap<EUIState, ABaseUISystem*> UISystem_LUT;
 };

@@ -3,6 +3,8 @@
 
 #include "BaseUISystem.h"
 #include "Kismet/GameplayStatics.h"
+#include "UIStateSystem.h"
+#include "EUIState.h"
 #include "GameInit.h"
 
 void ABaseUISystem::InitialiseWidget()
@@ -26,6 +28,12 @@ void ABaseUISystem::InitialiseWidget()
 void ABaseUISystem::BeginPlay()
 {
     Super::BeginPlay();
+
+    AGameInit* gameInit = Cast<AGameInit>(UGameplayStatics::GetActorOfClass(GetWorld(), AGameInit::StaticClass()));
+    if (gameInit)
+    {
+        gameInit->OnAllSystemsSpawned.AddDynamic(this, &ABaseUISystem::OnAllSystemsSpawned);
+    }
 
 }
 
@@ -101,10 +109,22 @@ void ABaseUISystem::SetupFromConfig(USystemConfigData* configData)
     {
         UIWidget = uiConfigData->AssetConfig.WidgetAsset;
         InitialiseWidget();
-        GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("set up from config"));
     }
-    else
+}
+
+EUIState ABaseUISystem::GetUIState()
+{
+    return EUIState::None;
+}
+
+void ABaseUISystem::OnAllSystemsSpawned()
+{
+    if (UIWidget)
     {
-        GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("set up from config FAIL"));
+        AUIStateSystem* uiSystem = Cast<AUIStateSystem>(UGameplayStatics::GetActorOfClass(GetWorld(), AUIStateSystem::StaticClass()));
+        if (uiSystem)
+        {
+            uiSystem->RegisterSystem(GetUIState(), this);
+        }
     }
 }

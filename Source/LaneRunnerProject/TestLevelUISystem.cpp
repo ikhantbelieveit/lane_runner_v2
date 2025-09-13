@@ -3,3 +3,7 @@
 
 #include "TestLevelUISystem.h"
 
+EUIState ATestLevelUISystem::GetUIState()
+{
+	return EUIState::TestLevel;
+}

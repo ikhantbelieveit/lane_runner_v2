@@ -21,7 +21,6 @@ void ALevelSystem::SetGameState(EGameState newState)
 	}
 
 	AUIStateSystem* foundSystem = Cast<AUIStateSystem>(UGameplayStatics::GetActorOfClass(GetWorld(), AUIStateSystem::StaticClass()));
-	AGameInit* foundInit = Cast<AGameInit>(UGameplayStatics::GetActorOfClass(GetWorld(), AGameInit::StaticClass()));
 
 	switch (newState)
 	{
@@ -29,15 +28,14 @@ void ALevelSystem::SetGameState(EGameState newState)
 		
 		if (foundSystem)
 		{
-			//show test ui
-			foundSystem->HideScreen();
+			foundSystem->EnterScreen(EUIState::DeathScreen);
 		}
 		break;
 	case EGameState::Active:
 		
-		if (foundInit)
+		if (foundSystem)
 		{
-			foundInit->ShowTestUI();
+			foundSystem->EnterScreen(EUIState::TestLevel);
 		}
 		break;
 	}
