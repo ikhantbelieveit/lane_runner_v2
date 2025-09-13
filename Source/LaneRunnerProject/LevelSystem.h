@@ -41,5 +41,11 @@ public:
 
 	void SetScore(int newScore);
 	void AddToScore(int addValue);
+	
+
+	UPROPERTY(BlueprintAssignable, Category = "Events")
+	FLevelSystemEvent OnScoreSet;
+
+	UFUNCTION(BlueprintCallable)
 	int GetScore();
 };

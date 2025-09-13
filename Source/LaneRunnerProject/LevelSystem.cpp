@@ -2,7 +2,9 @@
 
 
 #include "LevelSystem.h"
+#include "UIStateSystem.h"
 #include "PlayerCharacter.h"
+#include "GameInit.h"
 #include "Kismet/GameplayStatics.h"
 
 void ALevelSystem::BeginPlay()
@@ -16,6 +18,28 @@ void ALevelSystem::SetGameState(EGameState newState)
 	if(CurrentGameState == newState)
 	{
 		return;
+	}
+
+	AUIStateSystem* foundSystem = Cast<AUIStateSystem>(UGameplayStatics::GetActorOfClass(GetWorld(), AUIStateSystem::StaticClass()));
+	AGameInit* foundInit = Cast<AGameInit>(UGameplayStatics::GetActorOfClass(GetWorld(), AGameInit::StaticClass()));
+
+	switch (newState)
+	{
+	case EGameState::Lose:
+		
+		if (foundSystem)
+		{
+			//show test ui
+			foundSystem->HideScreen();
+		}
+		break;
+	case EGameState::Active:
+		
+		if (foundInit)
+		{
+			foundInit->ShowTestUI();
+		}
+		break;
 	}
 
 	CurrentGameState = newState;
@@ -63,8 +87,8 @@ void ALevelSystem::OnPitfall()
 void ALevelSystem::SetScore(int newScore)
 {
 	CurrentScore = newScore;
-	FString message = "set score to " + FString::FromInt(CurrentScore);
-	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, message);
+
+	OnScoreSet.Broadcast();
 }
 
 void ALevelSystem::AddToScore(int addValue)

@@ -6,6 +6,7 @@
 #include "LevelSystem.h"
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "UIStateSystem.h"
 #include "GameInit.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FGameInitEvent);
@@ -37,4 +38,8 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FGameInitEvent OnAllSystemsSpawned;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Testing")
+	TSubclassOf<UBaseUIScreen> TestUIClass;
+
+	void ShowTestUI();
 };

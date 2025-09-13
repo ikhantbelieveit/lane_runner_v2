@@ -2,6 +2,8 @@
 
 #include "LevelSystem.h"
 #include "ProjectileSystem.h"
+#include "UIStateSystem.h"
+#include "TestLevelUISystem.h"
 #include "GameInit.h"
 
 // Sets default values
@@ -22,7 +24,9 @@ void AGameInit::BeginPlay()
 	{
 		TArray<TSubclassOf<ABaseGameSystem>> systemsToSpawn = {
 		ALevelSystem::StaticClass(),
-		AProjectileSystem::StaticClass()
+		AProjectileSystem::StaticClass(),
+		AUIStateSystem::StaticClass(),
+		ATestLevelUISystem::StaticClass(),
 		};
 
 		for (TSubclassOf<ABaseGameSystem> systemToSpawn : systemsToSpawn)
@@ -41,6 +45,9 @@ void AGameInit::BeginPlay()
 	}
 
 	HasInitFinished = true;
+
+	
+	ShowTestUI();
 }
 
 // Called every frame
@@ -50,7 +57,29 @@ void AGameInit::Tick(float DeltaTime)
 
 	if (HasInitFinished)
 	{
-		BroadcastInitFinished();
+		if (!HasBroadcastInitFinished)
+		{
+			BroadcastInitFinished();
+
+			ALevelSystem* foundSystem = Cast<ALevelSystem>(UGameplayStatics::GetActorOfClass(GetWorld(), ALevelSystem::StaticClass()));
+			if (foundSystem)
+			{
+				//show test ui
+				foundSystem->SetScore(0);
+			}
+
+			HasBroadcastInitFinished = true;
+		}
+	}
+}
+
+void AGameInit::ShowTestUI()
+{
+	AUIStateSystem* foundSystem = Cast<AUIStateSystem>(UGameplayStatics::GetActorOfClass(GetWorld(), AUIStateSystem::StaticClass()));
+	if (foundSystem)
+	{
+		//show test ui
+		foundSystem->EnterScreen();
 	}
 }
 
