@@ -48,4 +48,6 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	int GetScore();
+
+
 };

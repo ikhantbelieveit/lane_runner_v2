@@ -27,13 +27,6 @@ void ABaseUISystem::BeginPlay()
 {
     Super::BeginPlay();
 
-    AGameInit* gameInit = Cast<AGameInit>(UGameplayStatics::GetActorOfClass(GetWorld(), AGameInit::StaticClass()));
-    if (gameInit)
-    {
-        UIWidget = gameInit->TestUIClass;    //TODO: assign UI Widget BP in config data
-    }
-
-    InitialiseWidget();
 }
 
 void ABaseUISystem::ShowScreen()
@@ -50,7 +43,6 @@ void ABaseUISystem::ShowScreen()
         return;
     }
 
-    //UBaseUIScreen* Screen = CreateWidget<UBaseUIScreen>(PC, UIWidget);
     if (WidgetInstance)
     {
         WidgetInstance->SetVisibility(ESlateVisibility::Visible);
@@ -100,5 +92,19 @@ void ABaseUISystem::ApplyInputMode()
         PC->SetInputMode(FInputModeGameAndUI());
         PC->bShowMouseCursor = true;
         break;
+    }
+}
+
+void ABaseUISystem::SetupFromConfig(USystemConfigData* configData)
+{
+    if (UUISystemConfigData* uiConfigData = Cast<UUISystemConfigData>(configData))
+    {
+        UIWidget = uiConfigData->AssetConfig.WidgetAsset;
+        InitialiseWidget();
+        GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("set up from config"));
+    }
+    else
+    {
+        GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("set up from config FAIL"));
     }
 }

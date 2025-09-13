@@ -4,7 +4,18 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "SystemConfigData.h"
 #include "BaseGameSystem.generated.h"
+
+UENUM(BlueprintType)
+enum class EGameSystem : uint8
+{
+	None       UMETA(DisplayName = "None"),
+	LevelSystem    UMETA(DisplayName = "LevelSystem"),
+	ProjectileSystem    UMETA(DisplayName = "ProjectileSystem"),
+	TestLevelUISystem    UMETA(DisplayName = "TestLevelUISystem"),
+	UIStateSystem    UMETA(DisplayName = "UIStateSystem"),
+};
 
 UCLASS()
 class LANERUNNERPROJECT_API ABaseGameSystem : public AActor
@@ -26,4 +37,6 @@ public:
 	virtual void InitialiseSystem();
 
 	virtual void ResetSystem();
+
+	virtual void SetupFromConfig(USystemConfigData* configData);
 };

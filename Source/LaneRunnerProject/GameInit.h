@@ -7,6 +7,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "UIStateSystem.h"
+#include "GameInitConfigData.h"
 #include "GameInit.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FGameInitEvent);
@@ -31,6 +32,8 @@ protected:
 
 	void BroadcastInitFinished();
 
+	bool CreateSystemsFromConfigData();
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -42,4 +45,7 @@ public:
 	TSubclassOf<UBaseUIScreen> TestUIClass;
 
 	void ShowTestUI();
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Config")
+	UGameInitConfigData* ConfigData;
 };

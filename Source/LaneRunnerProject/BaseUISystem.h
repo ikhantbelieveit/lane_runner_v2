@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "BaseGameSystem.h"
 #include "BaseUIScreen.h"
+#include "UISystemConfigData.h"
 #include "BaseUISystem.generated.h"
 
 /**
@@ -29,5 +30,11 @@ public:
 	TSubclassOf<UBaseUIScreen> UIWidget;
 
 	UBaseUIScreen* WidgetInstance;
+
+	virtual void SetupFromConfig(USystemConfigData* configData) override;
+
+protected:
+	UPROPERTY(EditDefaultsOnly, Category = "Config")
+	UUISystemConfigData* ConfigData;
 	
 };

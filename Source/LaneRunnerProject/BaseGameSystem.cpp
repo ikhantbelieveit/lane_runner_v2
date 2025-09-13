@@ -34,3 +34,8 @@ void ABaseGameSystem::ResetSystem()
 {
 
 }
+
+void ABaseGameSystem::SetupFromConfig(USystemConfigData* configData)
+{
+
+}
