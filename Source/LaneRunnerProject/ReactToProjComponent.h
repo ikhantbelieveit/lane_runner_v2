@@ -61,4 +61,7 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool TakeDamageOnHit = true;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool BlockProj = true;
 };

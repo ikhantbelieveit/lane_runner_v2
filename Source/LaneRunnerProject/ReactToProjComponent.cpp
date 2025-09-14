@@ -89,6 +89,8 @@ void UReactToProjComponent::HitByProjectile(AActor* projActor)
 		}
 	}
 
-	//GetOwner()->Destroy();
-	projActor->Destroy();
+	if (BlockProj)
+	{
+		projActor->Destroy();
+	}
 }
