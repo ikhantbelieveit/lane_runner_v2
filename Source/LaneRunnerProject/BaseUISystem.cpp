@@ -70,6 +70,12 @@ void ABaseUISystem::ShowScreen()
         WidgetInstance->SetVisibility(ESlateVisibility::Visible);
         ApplyInputMode();
         WidgetInstance->OnScreenShown();
+
+        if (WidgetInstance->ScreenInputMode != EScreenInputMode::None &&
+            WidgetInstance->DefaultSelection)
+        {
+            WidgetInstance->DefaultSelection->SetKeyboardFocus();
+        }
     }
 }
 

@@ -16,7 +16,6 @@ void UDeathScreenUIWidget::Initialise()
 
 void UDeathScreenUIWidget::OnRespawnButtonPressed()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("SHOULD RESPAWN"));
 	ALevelSystem* foundLevelSystem = Cast<ALevelSystem>(UGameplayStatics::GetActorOfClass(GetWorld(), ALevelSystem::StaticClass()));
 	if (foundLevelSystem)
 	{

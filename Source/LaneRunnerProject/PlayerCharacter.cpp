@@ -120,10 +120,6 @@ void APlayerCharacter::Tick(float DeltaTime)
 		case EGameState::Lose:
 			UpdateCameraPos();
 
-			if (JumpInput_Pressed)
-			{
-				foundLevelSystem->ResetFromLose();
-			}
 			ClearInputValues();
 			break;
 		}

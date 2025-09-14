@@ -21,6 +21,10 @@ public:
 
 	void RegisterSystem(EUIState State, ABaseUISystem* System);
 
+	void PrintFocusedWidget();
+
+	virtual void Tick(float DeltaTime) override;
+
 private:
 	TArray<UBaseUIScreen*> ActiveScreens;
 
