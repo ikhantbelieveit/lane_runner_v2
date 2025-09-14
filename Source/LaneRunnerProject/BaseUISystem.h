@@ -22,6 +22,8 @@ public:
 
 	virtual void BeginPlay() override;
 
+	virtual void Tick(float DeltaTime) override;
+
 	virtual void ShowScreen();
 
 	virtual void HideScreen();
@@ -43,5 +45,7 @@ protected:
 public:
 	UFUNCTION()
 	void OnAllSystemsSpawned();
+
+	bool IsActiveUI;
 	
 };

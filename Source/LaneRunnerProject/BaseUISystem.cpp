@@ -5,6 +5,10 @@
 #include "Kismet/GameplayStatics.h"
 #include "UIStateSystem.h"
 #include "EUIState.h"
+#include "BaseUIScreen.h"
+#include "Blueprint/WidgetBlueprintLibrary.h"
+#include "Components/Widget.h"
+#include "Blueprint/UserWidget.h"
 #include "GameInit.h"
 
 void ABaseUISystem::InitialiseWidget()
@@ -22,6 +26,7 @@ void ABaseUISystem::InitialiseWidget()
         Screen->SetVisibility(ESlateVisibility::Hidden); // Hide initially
         //ScreenInstances.Add(ScreenClass, Screen);
         WidgetInstance = Screen;
+        WidgetInstance->Initialise();
     }
 }
 
@@ -35,6 +40,14 @@ void ABaseUISystem::BeginPlay()
         gameInit->OnAllSystemsSpawned.AddDynamic(this, &ABaseUISystem::OnAllSystemsSpawned);
     }
 
+}
+
+void ABaseUISystem::Tick(float DeltaTime)
+{
+    if (IsActiveUI)
+    {
+
+    }
 }
 
 void ABaseUISystem::ShowScreen()
@@ -53,6 +66,7 @@ void ABaseUISystem::ShowScreen()
 
     if (WidgetInstance)
     {
+        IsActiveUI = true;
         WidgetInstance->SetVisibility(ESlateVisibility::Visible);
         ApplyInputMode();
         WidgetInstance->OnScreenShown();
@@ -63,6 +77,7 @@ void ABaseUISystem::HideScreen()
 {
     if (WidgetInstance)
     {
+        IsActiveUI = false;
         WidgetInstance->SetVisibility(ESlateVisibility::Hidden);
         WidgetInstance->OnScreenHidden();
         

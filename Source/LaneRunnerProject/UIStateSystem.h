@@ -19,10 +19,6 @@ class LANERUNNERPROJECT_API AUIStateSystem : public ABaseGameSystem
 public:
 	void EnterScreen(EUIState newScreen);	//pass in enum or string ID
 
-	void HideScreen();
-
-	void HideAllScreens();
-
 	void RegisterSystem(EUIState State, ABaseUISystem* System);
 
 private:
@@ -31,7 +27,7 @@ private:
 	EUIState CurrentUIState;
 	EUIState PrevUIState;
 
-	ABaseUISystem* GetSystemRefForState(EUIState state);
+	const ABaseUISystem* GetSystemRefForState(EUIState state) const;
 
 	TMap<EUIState, ABaseUISystem*> UISystem_LUT;
 };

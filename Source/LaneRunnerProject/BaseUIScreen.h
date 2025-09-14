@@ -22,11 +22,13 @@ class LANERUNNERPROJECT_API UBaseUIScreen : public UUserWidget
 	GENERATED_BODY()
 
 public:
-
-	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
-	EScreenInputMode ScreenInputMode = EScreenInputMode::None;
+	virtual void Initialise() {}
 
 	virtual void OnScreenShown() {}
 	virtual void OnScreenHidden() {}
-	
+
+	TObjectPtr<UWidget> DefaultSelection;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	EScreenInputMode ScreenInputMode = EScreenInputMode::None;
 };

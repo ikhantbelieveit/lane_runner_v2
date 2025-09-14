@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "BaseUISystem.h"
+#include "Components/Button.h" 
 #include "DeathScreenUISystem.generated.h"
 
 /**
@@ -16,5 +17,5 @@ class LANERUNNERPROJECT_API ADeathScreenUISystem : public ABaseUISystem
 
 public:
 	virtual EUIState GetUIState() override;
-	
+
 };

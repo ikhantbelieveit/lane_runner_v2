@@ -36,69 +36,16 @@ void AUIStateSystem::EnterScreen(EUIState newScreen)
     CurrentUIState = newScreen;
 }
 
-void AUIStateSystem::HideScreen()
-{
-    ABaseUISystem* system = GetSystemRefForState(EUIState::TestLevel);
-
-    if (system)
-    {
-        system->HideScreen();
-    }
-}
-
-void AUIStateSystem::HideAllScreens()
-{
-    /*for (UBaseUIScreen* Screen : ActiveScreens)
-    {
-        if (Screen)
-        {
-            Screen->OnScreenHidden();
-            Screen->RemoveFromParent();
-        }
-    }
-    ActiveScreens.Empty();
-
-    UWorld* World = GEngine->GetWorldFromContextObjectChecked(this);
-    APlayerController* PC = UGameplayStatics::GetPlayerController(World, 0);
-    if (PC)
-    {
-        PC->SetInputMode(FInputModeGameOnly());
-        PC->bShowMouseCursor = false;
-    }*/
-}
-
 void AUIStateSystem::RegisterSystem(EUIState state, ABaseUISystem* system)
 {
     UISystem_LUT.Add(state, system);
 }
 
-ABaseUISystem* AUIStateSystem::GetSystemRefForState(EUIState state)
+const ABaseUISystem* AUIStateSystem::GetSystemRefForState(EUIState state) const
 {
-    switch (state)
+    if (const ABaseUISystem* const* FoundSystem = UISystem_LUT.Find(state))
     {
-    case EUIState::DeathScreen:
-    {
-        ADeathScreenUISystem* uiSystem = Cast<ADeathScreenUISystem>(UGameplayStatics::GetActorOfClass(GetWorld(), ADeathScreenUISystem::StaticClass()));
-        if (uiSystem)
-        {
-            uiSystem->ShowScreen();
-        }
+        return *FoundSystem;
     }
-        
-        break;
-    case EUIState::TestLevel:
-    {
-        ATestLevelUISystem* uiSystem = Cast<ATestLevelUISystem>(UGameplayStatics::GetActorOfClass(GetWorld(), ATestLevelUISystem::StaticClass()));
-        if (uiSystem)
-        {
-            uiSystem->ShowScreen();
-        }
-    }
-        
-        break;
-    default:
-        return nullptr;
-    }
-
     return nullptr;
 }

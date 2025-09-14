@@ -2,6 +2,8 @@
 
 
 #include "DeathScreenUISystem.h"
+#include "DeathScreenUIWidget.h"
+
 
 EUIState ADeathScreenUISystem::GetUIState()
 {
