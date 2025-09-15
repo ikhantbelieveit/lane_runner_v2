@@ -55,4 +55,6 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FGameStateEvent OnGameStateChanged;
 
+	UFUNCTION(BlueprintCallable)
+	void EnterLevel();
 };

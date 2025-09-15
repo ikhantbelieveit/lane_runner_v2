@@ -19,6 +19,8 @@
 #include "EGameState.h"
 #include "PlayerCharacter.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FPlayerEvent);
+
 UCLASS()
 class LANERUNNERPROJECT_API APlayerCharacter : public ACharacter
 {
@@ -208,7 +210,7 @@ public:
 	int StartHealth;
 	int CurrentHealth;
 
-	void OnLevelResetFromLose();
+	void ResetPlayer();
 
 protected:
 	UInputAction* Input_JumpAction;
@@ -227,6 +229,16 @@ public:
 
 	UFUNCTION()
 	void OnGameStateChanged(EGameState newState, EGameState prevState);
+
+	void OnHitHazard();
+	void SetHealthToMax();
+
+	UFUNCTION(BlueprintCallable)
+	int GetCurrentHealth();
+	void SetCurrentHealth(int newHealth);
+
+	UPROPERTY(BlueprintAssignable)
+	FPlayerEvent OnHealthSet;
 
 protected:
 	void StopHorizontalMovement();

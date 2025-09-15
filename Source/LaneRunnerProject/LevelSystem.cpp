@@ -53,8 +53,15 @@ EGameState ALevelSystem::GetGameState()
 
 void ALevelSystem::OnPlayerTouchHazard()
 {
-	//TODO: deplete health instead of instant lose
-	SetGameState(EGameState::Lose);
+	APlayerCharacter* player = Cast<APlayerCharacter>(UGameplayStatics::GetActorOfClass(GetWorld(), APlayerCharacter::StaticClass()));
+	if (player)
+	{
+		player->OnHitHazard();
+		if (player->GetCurrentHealth() <= 0)
+		{
+			SetGameState(EGameState::Lose);
+		}
+	}
 }
 
 void ALevelSystem::ResetFromLose()
@@ -90,4 +97,25 @@ void ALevelSystem::AddToScore(int addValue)
 int ALevelSystem::GetScore()
 {
 	return CurrentScore;
+}
+
+void ALevelSystem::EnterLevel()
+{
+	AUIStateSystem* uiSystem = Cast<AUIStateSystem>(UGameplayStatics::GetActorOfClass(GetWorld(), AUIStateSystem::StaticClass()));
+	if (uiSystem)
+	{
+		//show test ui
+		uiSystem->EnterScreen(EUIState::TestLevel);
+	}
+
+	APlayerCharacter* player = Cast<APlayerCharacter>(UGameplayStatics::GetActorOfClass(GetWorld(), APlayerCharacter::StaticClass()));
+	if (player)
+	{
+		player->ResetPlayer();
+
+	}
+
+	SetScore(0);
+
+	SetGameState(EGameState::Active);
 }

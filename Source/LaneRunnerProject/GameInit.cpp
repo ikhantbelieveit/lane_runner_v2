@@ -42,18 +42,11 @@ void AGameInit::Tick(float DeltaTime)
 		{
 			BroadcastInitFinished();
 
-			AUIStateSystem* uiSystem = Cast<AUIStateSystem>(UGameplayStatics::GetActorOfClass(GetWorld(), AUIStateSystem::StaticClass()));
-			if (uiSystem)
-			{
-				//show test ui
-				uiSystem->EnterScreen(EUIState::TestLevel);
-			}
-
 			ALevelSystem* levelSystem = Cast<ALevelSystem>(UGameplayStatics::GetActorOfClass(GetWorld(), ALevelSystem::StaticClass()));
 			if (levelSystem)
 			{
 				//show test ui
-				levelSystem->SetScore(0);
+				levelSystem->EnterLevel();
 			}
 
 			HasBroadcastInitFinished = true;

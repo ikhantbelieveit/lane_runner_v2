@@ -559,7 +559,7 @@ void APlayerCharacter::CancelVerticalSpeed()
 	GetRootComponent()->ComponentVelocity = FVector(GetRootComponent()->ComponentVelocity.X, GetRootComponent()->ComponentVelocity.Y, 0);
 }
 
-void APlayerCharacter::OnLevelResetFromLose()
+void APlayerCharacter::ResetPlayer()
 {
 	//set lane to middle
 	SetLane(2);
@@ -567,6 +567,8 @@ void APlayerCharacter::OnLevelResetFromLose()
 	//Move back to start
 	SetActorLocation(SpawnPos);
 	UpdateCameraPos();
+
+	SetHealthToMax();
 	
 	ClearInputValues();	//maybe not needed? figured its handy
 }
@@ -585,7 +587,7 @@ void APlayerCharacter::OnGameStateChanged(EGameState newState, EGameState prevSt
 	switch (newState)
 	{
 	case EGameState::Active:
-		OnLevelResetFromLose();
+		ResetPlayer();
 		break;
 	case EGameState::Dormant:
 		break;
@@ -595,6 +597,31 @@ void APlayerCharacter::OnGameStateChanged(EGameState newState, EGameState prevSt
 	case EGameState::Win:
 		break;
 	}
+}
+
+void APlayerCharacter::OnHitHazard()
+{
+	if (CurrentHealth > 0)
+	{
+		SetCurrentHealth(CurrentHealth - 1);
+	}
+}
+
+void APlayerCharacter::SetHealthToMax()
+{
+	SetCurrentHealth(StartHealth);
+}
+
+void APlayerCharacter::SetCurrentHealth(int newHealth)
+{
+	CurrentHealth = newHealth;
+
+	OnHealthSet.Broadcast();
+}
+
+int APlayerCharacter::GetCurrentHealth()
+{
+	return CurrentHealth;
 }
 
 void APlayerCharacter::StopHorizontalMovement()
