@@ -7,6 +7,7 @@
 #include "Projectile.h"
 #include "PlayerProjectile.h"
 #include "LevelSystem.h"
+#include "GameInit.h"
 #include "ProjectileSystem.h"
 
 
@@ -88,6 +89,12 @@ void APlayerCharacter::BeginPlay()
 	SetLane(2);
 
 	SpawnPos = GetActorLocation();
+
+	AGameInit* gameInit = Cast<AGameInit>(UGameplayStatics::GetActorOfClass(GetWorld(), AGameInit::StaticClass()));
+	if (gameInit)
+	{
+		gameInit->OnAllSystemsSpawned.AddDynamic(this, &APlayerCharacter::RegisterGameSystemDelegates);
+	}
 }
 
 // Called every frame
@@ -563,6 +570,44 @@ void APlayerCharacter::OnLevelResetFromLose()
 	
 	ClearInputValues();	//maybe not needed? figured its handy
 }
+
+void APlayerCharacter::RegisterGameSystemDelegates()
+{
+	ALevelSystem* levelSystem = Cast<ALevelSystem>(UGameplayStatics::GetActorOfClass(GetWorld(), ALevelSystem::StaticClass()));
+	if (levelSystem)
+	{
+		levelSystem->OnGameStateChanged.AddDynamic(this, &APlayerCharacter::OnGameStateChanged);
+	}
+}
+
+void APlayerCharacter::OnGameStateChanged(EGameState newState, EGameState prevState)
+{
+	switch (newState)
+	{
+	case EGameState::Active:
+		OnLevelResetFromLose();
+		break;
+	case EGameState::Dormant:
+		break;
+	case EGameState::Lose:
+		StopHorizontalMovement();
+		break;
+	case EGameState::Win:
+		break;
+	}
+}
+
+void APlayerCharacter::StopHorizontalMovement()
+{
+	if (UCharacterMovementComponent* MoveComp = GetCharacterMovement())
+	{
+		FVector Vel = MoveComp->Velocity;
+		Vel.X = 0.f;  // Forward/backward
+		Vel.Y = 0.f;  // Right/left
+		MoveComp->Velocity = Vel;
+	}
+}
+
 
 bool APlayerCharacter::MoveLane_Left()
 {

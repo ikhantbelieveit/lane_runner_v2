@@ -40,7 +40,10 @@ void ALevelSystem::SetGameState(EGameState newState)
 		break;
 	}
 
+	PrevGameState = CurrentGameState;
 	CurrentGameState = newState;
+
+	OnGameStateChanged.Broadcast(CurrentGameState, PrevGameState);
 }
 
 EGameState ALevelSystem::GetGameState()
@@ -56,19 +59,9 @@ void ALevelSystem::OnPlayerTouchHazard()
 
 void ALevelSystem::ResetFromLose()
 {
-	//clear all projectiles
-	//bring back destroyed objects & collected items
-	//reset score
-	//move player back to start
-	//set player health
 	CleanupBeforeReset.Broadcast();
 	SetScore(0);
 
-	APlayerCharacter* player = Cast<APlayerCharacter>(UGameplayStatics::GetActorOfClass(GetWorld(), APlayerCharacter::StaticClass()));
-	if (player)
-	{
-		player->OnLevelResetFromLose();
-	}
 	SetGameState(EGameState::Active);
 }
 

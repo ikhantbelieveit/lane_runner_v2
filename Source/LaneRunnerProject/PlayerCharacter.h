@@ -16,6 +16,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "EGameState.h"
 #include "PlayerCharacter.generated.h"
 
 UCLASS()
@@ -219,4 +220,15 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Scroll", meta = (AllowPrivateAccess = "true"))
 	UBoxComponent* ScrollTriggerBox;
+
+public:
+	UFUNCTION()
+	void RegisterGameSystemDelegates();
+
+	UFUNCTION()
+	void OnGameStateChanged(EGameState newState, EGameState prevState);
+
+protected:
+	void StopHorizontalMovement();
+
 };

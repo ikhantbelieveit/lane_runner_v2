@@ -12,6 +12,8 @@
  */
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FLevelSystemEvent);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FGameStateEvent, EGameState, newState, EGameState, prevState);
+
 UCLASS()
 class LANERUNNERPROJECT_API ALevelSystem : public ABaseGameSystem
 {
@@ -22,6 +24,7 @@ class LANERUNNERPROJECT_API ALevelSystem : public ABaseGameSystem
 
 protected:
 	EGameState CurrentGameState;
+	EGameState PrevGameState;
 
 	int CurrentScore;
 
@@ -49,5 +52,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	int GetScore();
 
+	UPROPERTY(BlueprintAssignable, Category = "Events")
+	FGameStateEvent OnGameStateChanged;
 
 };
