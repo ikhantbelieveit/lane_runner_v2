@@ -23,4 +23,10 @@ public:
 
 	UFUNCTION()
 	void OnRespawnButtonPressed();
+
+	UPROPERTY(meta = (BindWidget))
+	UButton* QuitButton;
+
+	UFUNCTION()
+	void OnQuitButtonPressed();
 };

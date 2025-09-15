@@ -46,7 +46,15 @@ void ABaseUISystem::Tick(float DeltaTime)
 {
     if (IsActiveUI)
     {
+        TSharedPtr<SWidget> FocusedWidget = FSlateApplication::Get().GetUserFocusedWidget(0);
 
+        if (!FocusedWidget.IsValid() || FocusedWidget->GetTypeAsString() == TEXT("SViewport"))
+        {
+            if (WidgetInstance->DefaultSelection && WidgetInstance->DefaultSelection->TakeWidget()->SupportsKeyboardFocus())
+            {
+                WidgetInstance->DefaultSelection->SetKeyboardFocus();
+            }
+        }
     }
 }
 

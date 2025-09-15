@@ -4,6 +4,7 @@
 #include "DeathScreenUIWidget.h"
 #include "LevelSystem.h"
 #include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetSystemLibrary.h"
 
 void UDeathScreenUIWidget::Initialise()
 {
@@ -11,6 +12,11 @@ void UDeathScreenUIWidget::Initialise()
 	{
 		DefaultSelection = RespawnButton;
 		RespawnButton->OnClicked.AddDynamic(this, &UDeathScreenUIWidget::OnRespawnButtonPressed);
+	}
+
+	if (QuitButton)
+	{
+		QuitButton->OnClicked.AddDynamic(this, &UDeathScreenUIWidget::OnQuitButtonPressed);
 	}
 }
 
@@ -21,4 +27,10 @@ void UDeathScreenUIWidget::OnRespawnButtonPressed()
 	{
 		foundLevelSystem->ResetFromLose();
 	}
+}
+
+void UDeathScreenUIWidget::OnQuitButtonPressed()
+{
+	APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0);
+	UKismetSystemLibrary::QuitGame(this, PC, EQuitPreference::Quit, true);
 }
