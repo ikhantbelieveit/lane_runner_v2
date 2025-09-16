@@ -51,11 +51,16 @@ EGameState ALevelSystem::GetGameState()
 	return CurrentGameState;
 }
 
-void ALevelSystem::OnPlayerTouchHazard(bool oneHitKill)
+void ALevelSystem::OnPlayerTouchHazard(bool oneHitKill, bool overrideInvincibility)
 {
 	APlayerCharacter* player = Cast<APlayerCharacter>(UGameplayStatics::GetActorOfClass(GetWorld(), APlayerCharacter::StaticClass()));
 	if (player)
 	{
+		if (player->GetMercyInvincibleActive() && !overrideInvincibility)
+		{
+			return;
+		}
+
 		player->OnHitHazard(oneHitKill);
 		if (player->GetCurrentHealth() <= 0)
 		{

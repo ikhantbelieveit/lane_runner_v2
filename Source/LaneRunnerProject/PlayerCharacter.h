@@ -199,6 +199,7 @@ public:
 	void UpdateShootValues(float DeltaTime);
 	void UpdateShootFromInput();
 	void UpdateCheckForPit();
+	void UpdateMercyInvincibility(float DeltaTime);
 
 	//lane
 	bool MoveLane_Left();
@@ -252,7 +253,17 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FPlayerEvent OnHealthSet;
 
+public:
+	bool GetMercyInvincibleActive();
+
 protected:
 	void StopHorizontalMovement();
+
+	float MercyInvincibileTimeMax = 1.5f;
+	bool MercyInvincibileActive;
+	float MercyInvincibileTimeLeft;
+
+	void StartMercyInvincibility();
+	void CancelMercyInvincibility();
 
 };

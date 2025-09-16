@@ -32,7 +32,7 @@ public:
 	void SetGameState(EGameState newState);
 	EGameState GetGameState();
 
-	void OnPlayerTouchHazard(bool oneHitKill);
+	void OnPlayerTouchHazard(bool oneHitKill, bool overrideInvincibility);
 
 	void ResetFromLose();
 

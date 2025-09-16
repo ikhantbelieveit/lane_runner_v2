@@ -40,4 +40,7 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	bool OneHitKill;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	bool OverrideInvincibility;
 };

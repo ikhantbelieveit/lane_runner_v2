@@ -60,7 +60,7 @@ void UHazardCollisionComponent::HandleBeginOverlap(
 		ALevelSystem* foundLevelSystem = Cast<ALevelSystem>(UGameplayStatics::GetActorOfClass(GetWorld(), ALevelSystem::StaticClass()));
 		if (foundLevelSystem)
 		{
-			foundLevelSystem->OnPlayerTouchHazard(OneHitKill);
+			foundLevelSystem->OnPlayerTouchHazard(OneHitKill, OverrideInvincibility);
 		}
 	}
 }

@@ -121,6 +121,8 @@ void APlayerCharacter::Tick(float DeltaTime)
 			UpdateShootFromInput();
 
 			UpdateCameraPos();
+
+			UpdateMercyInvincibility(DeltaTime);
 			break;
 		case EGameState::Lose:
 			UpdateCameraPos();
@@ -618,6 +620,8 @@ void APlayerCharacter::ResetPlayer()
 	UpdateCameraPos();
 
 	SetHealthToMax();
+
+	CancelMercyInvincibility();
 	
 	ClearInputValues();	//maybe not needed? figured its handy
 }
@@ -636,9 +640,13 @@ void APlayerCharacter::OnGameStateChanged(EGameState newState, EGameState prevSt
 	switch (newState)
 	{
 	case EGameState::Active:
-		if (prevState == EGameState::Lose)
+		switch (prevState)
 		{
+		case EGameState::Lose:
 			ResetPlayer();
+			break;
+		case EGameState::AwaitContinue:
+			StartMercyInvincibility();
 		}
 		break;
 	case EGameState::Dormant:
@@ -685,6 +693,11 @@ int APlayerCharacter::GetCurrentHealth()
 	return CurrentHealth;
 }
 
+bool APlayerCharacter::GetMercyInvincibleActive()
+{
+	return MercyInvincibileActive;
+}
+
 void APlayerCharacter::StopHorizontalMovement()
 {
 	if (UCharacterMovementComponent* MoveComp = GetCharacterMovement())
@@ -693,6 +706,52 @@ void APlayerCharacter::StopHorizontalMovement()
 		Vel.X = 0.f;  // Forward/backward
 		Vel.Y = 0.f;  // Right/left
 		MoveComp->Velocity = Vel;
+	}
+}
+
+void APlayerCharacter::StartMercyInvincibility()
+{
+	if (MercyInvincibileActive)
+	{
+		return;
+	}
+
+	MercyInvincibileTimeLeft = MercyInvincibileTimeMax;
+
+	MercyInvincibileActive = true;
+
+	if (SpriteComponent && PlayerSprite)
+	{
+		SpriteComponent->SetSprite(PlayerSprite);
+
+		FLinearColor colour = FLinearColor();
+
+		colour.R = 1.0f;
+		colour.G = 1.0f;
+		colour.B = 1.0f;
+		colour.A = 0.5f;
+
+		SpriteComponent->SetSpriteColor(colour);
+	}
+}
+
+void APlayerCharacter::CancelMercyInvincibility()
+{
+	MercyInvincibileTimeLeft = 0.0f;
+	MercyInvincibileActive = false;
+
+	if (SpriteComponent && PlayerSprite)
+	{
+		SpriteComponent->SetSprite(PlayerSprite);
+
+		FLinearColor colour = FLinearColor();
+
+		colour.R = 1.0f;
+		colour.G = 1.0f;
+		colour.B = 1.0f;
+		colour.A = 1.0f;
+
+		SpriteComponent->SetSpriteColor(colour);
 	}
 }
 
@@ -1096,6 +1155,18 @@ void APlayerCharacter::UpdateCheckForPit()
 					foundLevelSystem->OnPitfall();
 				}
 			}
+		}
+	}
+}
+
+void APlayerCharacter::UpdateMercyInvincibility(float DeltaTime)
+{
+	if (MercyInvincibileActive)
+	{
+		MercyInvincibileTimeLeft -= DeltaTime;
+		if (MercyInvincibileTimeLeft <= 0)
+		{
+			CancelMercyInvincibility();
 		}
 	}
 }
