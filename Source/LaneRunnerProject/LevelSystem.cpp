@@ -51,12 +51,12 @@ EGameState ALevelSystem::GetGameState()
 	return CurrentGameState;
 }
 
-void ALevelSystem::OnPlayerTouchHazard()
+void ALevelSystem::OnPlayerTouchHazard(bool oneHitKill)
 {
 	APlayerCharacter* player = Cast<APlayerCharacter>(UGameplayStatics::GetActorOfClass(GetWorld(), APlayerCharacter::StaticClass()));
 	if (player)
 	{
-		player->OnHitHazard();
+		player->OnHitHazard(oneHitKill);
 		if (player->GetCurrentHealth() <= 0)
 		{
 			SetGameState(EGameState::Lose);

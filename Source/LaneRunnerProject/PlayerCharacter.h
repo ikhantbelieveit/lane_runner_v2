@@ -242,7 +242,7 @@ public:
 	UFUNCTION()
 	void OnGameStateChanged(EGameState newState, EGameState prevState);
 
-	void OnHitHazard();
+	void OnHitHazard(bool oneHitKill);
 	void SetHealthToMax();
 
 	UFUNCTION(BlueprintCallable)

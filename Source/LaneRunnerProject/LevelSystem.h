@@ -32,7 +32,7 @@ public:
 	void SetGameState(EGameState newState);
 	EGameState GetGameState();
 
-	void OnPlayerTouchHazard();
+	void OnPlayerTouchHazard(bool oneHitKill);
 
 	void ResetFromLose();
 

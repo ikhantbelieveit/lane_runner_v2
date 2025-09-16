@@ -38,5 +38,6 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-		
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	bool OneHitKill;
 };

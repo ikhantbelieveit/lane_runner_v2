@@ -121,13 +121,12 @@ void APlayerCharacter::Tick(float DeltaTime)
 			UpdateShootFromInput();
 
 			UpdateCameraPos();
-
-			//ClearInputValues();
 			break;
 		case EGameState::Lose:
 			UpdateCameraPos();
-
-			//ClearInputValues();
+			break;
+		case EGameState::AwaitContinue:
+			UpdateCameraPos();
 			break;
 		}
 	}
@@ -649,14 +648,23 @@ void APlayerCharacter::OnGameStateChanged(EGameState newState, EGameState prevSt
 		break;
 	case EGameState::Win:
 		break;
+	case EGameState::AwaitContinue:
+		StopHorizontalMovement();
 	}
 }
 
-void APlayerCharacter::OnHitHazard()
+void APlayerCharacter::OnHitHazard(bool oneHitKill)
 {
 	if (CurrentHealth > 0)
 	{
-		SetCurrentHealth(CurrentHealth - 1);
+		if (oneHitKill)
+		{
+			SetCurrentHealth(0);
+		}
+		else
+		{
+			SetCurrentHealth(CurrentHealth - 1);
+		}
 	}
 }
 
