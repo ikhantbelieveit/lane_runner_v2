@@ -122,15 +122,17 @@ void APlayerCharacter::Tick(float DeltaTime)
 
 			UpdateCameraPos();
 
-			ClearInputValues();
+			//ClearInputValues();
 			break;
 		case EGameState::Lose:
 			UpdateCameraPos();
 
-			ClearInputValues();
+			//ClearInputValues();
 			break;
 		}
 	}
+
+	ClearInputValues();
 }
 
 // Called to bind functionality to input
@@ -177,6 +179,11 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 		EnhancedInputComponent->BindAction(Input_ShootForwardAction, ETriggerEvent::Started, this, &APlayerCharacter::Input_ShootForwardStart);
 		EnhancedInputComponent->BindAction(Input_ShootForwardAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Input_ShootForward);
+
+		EnhancedInputComponent->BindAction(Input_Continue, ETriggerEvent::Started, this, &APlayerCharacter::Input_ContinueStart);
+		EnhancedInputComponent->BindAction(Input_Continue, ETriggerEvent::Completed, this, &APlayerCharacter::Input_ContinueCancel);
+
+		EnhancedInputComponent->BindAction(Input_DebugReset, ETriggerEvent::Started, this, &APlayerCharacter::Input_DebugResetStart);
 	}
 
 }
@@ -259,6 +266,9 @@ void APlayerCharacter::Input_SetupFromConfig()
 		Input_ShootUpAction = ConfigData->InputConfig.Input_ShootUpAction;
 		Input_ShootForwardAction = ConfigData->InputConfig.Input_ShootForwardAction;
 		Input_JumpAction = ConfigData->InputConfig.Input_JumpAction;
+
+		Input_Continue = ConfigData->InputConfig.Input_Continue;
+		Input_DebugReset = ConfigData->InputConfig.Input_DebugReset;
 
 		//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("set up input data."));
 	}
@@ -385,12 +395,26 @@ void APlayerCharacter::Input_SlowDownCancel_Joystick(const FInputActionValue& Va
 
 void APlayerCharacter::Input_JumpStart(const FInputActionValue& Value)
 {
-	JumpInput_Pressed = true;
+	ALevelSystem* foundLevelSystem = Cast<ALevelSystem>(UGameplayStatics::GetActorOfClass(GetWorld(), ALevelSystem::StaticClass()));
+	if (foundLevelSystem)
+	{
+		if (foundLevelSystem->GetGameState() == EGameState::Active)
+		{
+			JumpInput_Pressed = true;
+		}
+	}
 }
 
 void APlayerCharacter::Input_Jump(const FInputActionValue& Value)
 {
-	JumpInput_Active = true;
+	ALevelSystem* foundLevelSystem = Cast<ALevelSystem>(UGameplayStatics::GetActorOfClass(GetWorld(), ALevelSystem::StaticClass()));
+	if (foundLevelSystem)
+	{
+		if (foundLevelSystem->GetGameState() == EGameState::Active)
+		{
+			JumpInput_Active = true;
+		}
+	}
 }
 
 void APlayerCharacter::Input_JumpCancel(const FInputActionValue& Value)
@@ -438,6 +462,30 @@ void APlayerCharacter::Input_ShootForwardStart(const FInputActionValue& Value)
 	ShootForwardInput_Pressed = true;
 }
 
+void APlayerCharacter::Input_ContinueStart(const FInputActionValue& Value)
+{
+	ALevelSystem* foundLevelSystem = Cast<ALevelSystem>(UGameplayStatics::GetActorOfClass(GetWorld(), ALevelSystem::StaticClass()));
+	if (foundLevelSystem)
+	{
+		if (foundLevelSystem->GetGameState() == EGameState::AwaitContinue)
+		{
+			ContinueInput_Pressed = true;
+			BlockForwardShoot = true;
+			foundLevelSystem->TriggerContinue();
+		}
+	}
+}
+
+void APlayerCharacter::Input_ContinueCancel(const FInputActionValue& Value)
+{
+	BlockForwardShoot = false;
+}
+
+void APlayerCharacter::Input_DebugResetStart(const FInputActionValue& Value)
+{
+	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("SHOULD DEBUG RESET"));
+}
+
 void APlayerCharacter::ClearInputValues()
 {
 	LeftInput_Pressed = false;
@@ -464,6 +512,8 @@ void APlayerCharacter::ClearInputValues()
 	ShootRightInput_Pressed = false;
 	ShootUpInput_Pressed = false;
 	ShootForwardInput_Pressed = false;
+
+	ContinueInput_Pressed = false;
 }
 
 void APlayerCharacter::UpdateLaneScroll()
@@ -587,7 +637,10 @@ void APlayerCharacter::OnGameStateChanged(EGameState newState, EGameState prevSt
 	switch (newState)
 	{
 	case EGameState::Active:
-		ResetPlayer();
+		if (prevState == EGameState::Lose)
+		{
+			ResetPlayer();
+		}
 		break;
 	case EGameState::Dormant:
 		break;
@@ -722,20 +775,23 @@ float APlayerCharacter::GetCurrentRunSpeed()
 
 void APlayerCharacter::UpdateJumpFromInput()
 {
-	if (JumpInput_Pressed)
+	if (!ContinueInput_Pressed)
 	{
-		if (CurrentJumpState == EPlayerJumpState::Grounded)
+		if (JumpInput_Pressed)
 		{
-			bPressedJump = true;
-			SetJumpState(EPlayerJumpState::Rise);
-			JumpedThisFrame = true;
+			if (CurrentJumpState == EPlayerJumpState::Grounded)
+			{
+				bPressedJump = true;
+				SetJumpState(EPlayerJumpState::Rise);
+				JumpedThisFrame = true;
+			}
 		}
-	}
 
-	if (JumpInput_Released)
-	{
-		bPressedJump = false;
-		SetJumpState(EPlayerJumpState::Fall);
+		if (JumpInput_Released)
+		{
+			bPressedJump = false;
+			SetJumpState(EPlayerJumpState::Fall);
+		}
 	}
 }
 
@@ -963,8 +1019,11 @@ void APlayerCharacter::UpdateShootFromInput()
 	}
 	if (ShootForwardInput_Pressed)
 	{
-		Shoot(EProjectileDirection::Forward, false);
-		return;
+		if (!BlockForwardShoot)
+		{
+			Shoot(EProjectileDirection::Forward, false);
+			return;
+		}
 	}
 
 	if (ShootLeftInput_Active)
@@ -984,8 +1043,11 @@ void APlayerCharacter::UpdateShootFromInput()
 	}
 	if (ShootForwardInput_Active)
 	{
-		Shoot(EProjectileDirection::Forward, true);
-		return;
+		if (!BlockForwardShoot)
+		{
+			Shoot(EProjectileDirection::Forward, true);
+			return;
+		}
 	}
 }
 

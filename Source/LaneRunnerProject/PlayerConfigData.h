@@ -61,6 +61,12 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	UInputAction* Input_SlowDownAction_Joystick;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	UInputAction* Input_Continue;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	UInputAction* Input_DebugReset;
 };
 
 USTRUCT(BlueprintType)

@@ -57,4 +57,7 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void EnterLevel();
+
+	UFUNCTION(BlueprintCallable)
+	void TriggerContinue();
 };

@@ -52,6 +52,9 @@ protected:
 	UInputAction* Input_SpeedUpAction_Joystick;
 	UInputAction* Input_SlowDownAction_Joystick;
 
+	UInputAction* Input_Continue;
+	UInputAction* Input_DebugReset;
+
 
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Visuals", meta = (AllowPrivateAccess = "true"))
@@ -83,6 +86,10 @@ protected:
 	bool ShootRightInput_Pressed;
 	bool ShootUpInput_Pressed;
 	bool ShootForwardInput_Pressed;
+
+	bool ContinueInput_Pressed;
+
+	bool BlockForwardShoot;
 
 	EPlayerSpeedState CurrentSpeedState;
 
@@ -159,6 +166,11 @@ public:
 	virtual void Input_ShootRightStart(const FInputActionValue& Value);
 	virtual void Input_ShootUpStart(const FInputActionValue& Value);
 	virtual void Input_ShootForwardStart(const FInputActionValue& Value);
+
+	virtual void Input_ContinueStart(const FInputActionValue& Value);
+	virtual void Input_ContinueCancel(const FInputActionValue& Value);
+
+	virtual void Input_DebugResetStart(const FInputActionValue& Value);
 
 	void Shoot(EProjectileDirection direction, bool holdNotTap);
 	bool CanShootInDirection(EProjectileDirection direction, bool holdNotTap);

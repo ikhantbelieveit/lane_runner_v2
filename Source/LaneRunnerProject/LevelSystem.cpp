@@ -61,6 +61,10 @@ void ALevelSystem::OnPlayerTouchHazard()
 		{
 			SetGameState(EGameState::Lose);
 		}
+		else
+		{
+			SetGameState(EGameState::AwaitContinue);
+		}
 	}
 }
 
@@ -118,4 +122,12 @@ void ALevelSystem::EnterLevel()
 	SetScore(0);
 
 	SetGameState(EGameState::Active);
+}
+
+void ALevelSystem::TriggerContinue()
+{
+	if (GetGameState() == EGameState::AwaitContinue)
+	{
+		SetGameState(EGameState::Active);
+	}
 }
