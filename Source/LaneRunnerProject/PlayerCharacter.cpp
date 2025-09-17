@@ -40,6 +40,12 @@ APlayerCharacter::APlayerCharacter()
 	ScrollTriggerBox->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 
 	SpriteToggle = CreateDefaultSubobject<USpriteToggleComponent>(TEXT("SpriteToggle"));
+
+	
+	DropShadowDecal = CreateDefaultSubobject<UDecalComponent>(TEXT("DropShadowDecal"));
+	DropShadowDecal->SetupAttachment(GetRootComponent());
+
+	
 }
 
 // Called when the game starts or when spawned
@@ -96,6 +102,8 @@ void APlayerCharacter::BeginPlay()
 	SetLane(2);
 
 	SpawnPos = GetActorLocation();
+
+	
 
 	AGameInit* gameInit = Cast<AGameInit>(UGameplayStatics::GetActorOfClass(GetWorld(), AGameInit::StaticClass()));
 	if (gameInit)
@@ -265,6 +273,17 @@ void APlayerCharacter::BeginPlay_SetupFromConfig()
 		}
 
 		StartHealth = ConfigData->MiscConfig.StartHealth;
+
+		if (DropShadowDecal)
+		{
+			DropShadowDecal->SetDecalMaterial(ConfigData->VisualsConfig.DropShadowMaterial); // Assign your shadow material
+		}
+
+		if (SpriteComponent_Ghost)
+		{
+			SpriteComponent_Ghost->SetMaterial(0, ConfigData->VisualsConfig.SpriteGhostMaterial);
+		}
+		
 
 	}
 	else
@@ -695,6 +714,7 @@ void APlayerCharacter::OnHitHazard(bool oneHitKill)
 		else
 		{
 			SetCurrentHealth(CurrentHealth - 1);
+			StartMercyInvincibility();
 		}
 	}
 }

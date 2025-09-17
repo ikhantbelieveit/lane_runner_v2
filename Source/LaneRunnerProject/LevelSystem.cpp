@@ -66,10 +66,6 @@ void ALevelSystem::OnPlayerTouchHazard(bool oneHitKill, bool overrideInvincibili
 		{
 			SetGameState(EGameState::Lose);
 		}
-		else
-		{
-			SetGameState(EGameState::AwaitContinue);
-		}
 	}
 }
 

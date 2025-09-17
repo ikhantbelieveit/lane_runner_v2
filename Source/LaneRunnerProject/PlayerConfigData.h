@@ -78,6 +78,12 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Visuals", meta = (AllowPrivateAccess = "true"))
 	UPaperSprite* PlayerSprite;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Shadow")
+	UMaterialInterface* DropShadowMaterial;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Shadow")
+	UMaterialInterface* SpriteGhostMaterial;
 };
 
 USTRUCT(BlueprintType)
