@@ -20,27 +20,26 @@ APlayerCharacter::APlayerCharacter()
 
 	// Camera
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("PlayerCamera"));
-
 	CameraComponent->SetupAttachment(GetRootComponent());
-
 	CameraComponent->SetRelativeLocation(FVector(-420.0f, 0.0f, 175.0f)); // eye height
 	CameraComponent->SetRelativeRotation(FRotator(-10.0f, 0.0f, 0.0f)); // slight downward tilt
 	
-
-
 	//PaperSprite Visuals
 	SpriteComponent = CreateDefaultSubobject<UPaperSpriteComponent>(TEXT("Sprite"));
 	SpriteComponent->SetupAttachment(GetRootComponent());
 	SpriteComponent->SetRelativeLocation(FVector(0.0f, 0.0f, 0.0f));
-	
+
+	SpriteComponent_Ghost = CreateDefaultSubobject<UPaperSpriteComponent>(TEXT("SpriteGhost"));
+	SpriteComponent_Ghost->SetupAttachment(GetRootComponent());
+	SpriteComponent_Ghost->SetRelativeLocation(FVector(0.0f, 0.0f, 0.0f));
 
 	//Scroll Trigger Box
 	ScrollTriggerBox = CreateDefaultSubobject<UBoxComponent>(TEXT("ScrollTriggerBox"));
 	ScrollTriggerBox->SetupAttachment(GetRootComponent());
 	ScrollTriggerBox->SetRelativeLocation(FVector(0.0f, 0.0f, 0.0f));
 	ScrollTriggerBox->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-	
-	
+
+	SpriteToggle = CreateDefaultSubobject<USpriteToggleComponent>(TEXT("SpriteToggle"));
 }
 
 // Called when the game starts or when spawned
@@ -67,19 +66,27 @@ void APlayerCharacter::BeginPlay()
 		}
 	}
 
-
 	// assign sprite image
 	if (SpriteComponent && PlayerSprite)
 	{
 		SpriteComponent->SetSprite(PlayerSprite);
 	}
 
+	if (SpriteComponent_Ghost && PlayerSprite)
+	{
+		SpriteComponent_Ghost->SetSprite(PlayerSprite);
+		SpriteComponent_Ghost->SetSpriteColor(FLinearColor(1.0f, 1.0f, 1.0f, 0.75f));
+	}
+
 	// assign sprite transform
 	FRotator DesiredRotation = FRotator(0.0f, 90.0f, 0.0f);
 	SpriteComponent->SetWorldRotation(DesiredRotation);
-
 	SpriteComponent->SetRelativeScale3D(FVector(3.0f, 3.0f, 3.0f));
 
+	SpriteComponent_Ghost->SetWorldRotation(DesiredRotation);
+	SpriteComponent_Ghost->SetRelativeScale3D(FVector(3.0f, 3.0f, 3.0f));
+
+	SpriteToggle->SetSpriteEnabled(FString("Sprite Base"));
 
 	//assign camera FOV
 	CameraComponent->SetFieldOfView(CameraFOV);
@@ -197,6 +204,22 @@ void APlayerCharacter::BeginPlay_SetupFromConfig()
 
 		PlayerSprite = ConfigData->VisualsConfig.PlayerSprite;
 
+		if (SpriteComponent)
+		{
+			if (!SpriteComponent->ComponentHasTag(FName("Sprite Base")))
+			{
+				SpriteComponent->ComponentTags.Add(FName("Sprite Base"));
+			}
+		}
+		
+		if (SpriteComponent_Ghost)
+		{
+			if (!SpriteComponent_Ghost->ComponentHasTag(FName("Sprite Ghost")))
+			{
+				SpriteComponent_Ghost->ComponentTags.Add(FName("Sprite Ghost"));
+			}
+		}
+		
 		DefaultRunSpeed = ConfigData->MovementConfig.DefaultRunSpeed;
 		FastRunSpeed = ConfigData->MovementConfig.FastRunSpeed;
 		SlowRunSpeed = ConfigData->MovementConfig.SlowRunSpeed;
@@ -695,7 +718,7 @@ int APlayerCharacter::GetCurrentHealth()
 
 bool APlayerCharacter::GetMercyInvincibleActive()
 {
-	return MercyInvincibileActive;
+	return MercyInvincibleActive;
 }
 
 void APlayerCharacter::StopHorizontalMovement()
@@ -711,48 +734,24 @@ void APlayerCharacter::StopHorizontalMovement()
 
 void APlayerCharacter::StartMercyInvincibility()
 {
-	if (MercyInvincibileActive)
+	if (MercyInvincibleActive)
 	{
 		return;
 	}
 
-	MercyInvincibileTimeLeft = MercyInvincibileTimeMax;
+	MercyInvincibleTimeLeft = MercyInvincibleTimeMax;
 
-	MercyInvincibileActive = true;
+	MercyInvincibleActive = true;
 
-	if (SpriteComponent && PlayerSprite)
-	{
-		SpriteComponent->SetSprite(PlayerSprite);
-
-		FLinearColor colour = FLinearColor();
-
-		colour.R = 1.0f;
-		colour.G = 1.0f;
-		colour.B = 1.0f;
-		colour.A = 0.5f;
-
-		SpriteComponent->SetSpriteColor(colour);
-	}
+	SpriteToggle->SetSpriteEnabled(FString("Sprite Ghost"));
 }
 
 void APlayerCharacter::CancelMercyInvincibility()
 {
-	MercyInvincibileTimeLeft = 0.0f;
-	MercyInvincibileActive = false;
+	MercyInvincibleTimeLeft = 0.0f;
+	MercyInvincibleActive = false;
 
-	if (SpriteComponent && PlayerSprite)
-	{
-		SpriteComponent->SetSprite(PlayerSprite);
-
-		FLinearColor colour = FLinearColor();
-
-		colour.R = 1.0f;
-		colour.G = 1.0f;
-		colour.B = 1.0f;
-		colour.A = 1.0f;
-
-		SpriteComponent->SetSpriteColor(colour);
-	}
+	SpriteToggle->SetSpriteEnabled(FString("Sprite Base"));
 }
 
 
@@ -1161,10 +1160,10 @@ void APlayerCharacter::UpdateCheckForPit()
 
 void APlayerCharacter::UpdateMercyInvincibility(float DeltaTime)
 {
-	if (MercyInvincibileActive)
+	if (MercyInvincibleActive)
 	{
-		MercyInvincibileTimeLeft -= DeltaTime;
-		if (MercyInvincibileTimeLeft <= 0)
+		MercyInvincibleTimeLeft -= DeltaTime;
+		if (MercyInvincibleTimeLeft <= 0)
 		{
 			CancelMercyInvincibility();
 		}

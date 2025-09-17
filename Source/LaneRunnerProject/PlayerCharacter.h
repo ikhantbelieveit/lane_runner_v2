@@ -17,9 +17,10 @@
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "EGameState.h"
+#include "SpriteToggleComponent.h"
 #include "PlayerCharacter.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FPlayerEvent);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FPlayerCharacterEvent);
 
 UCLASS()
 class LANERUNNERPROJECT_API APlayerCharacter : public ACharacter
@@ -251,7 +252,7 @@ public:
 	void SetCurrentHealth(int newHealth);
 
 	UPROPERTY(BlueprintAssignable)
-	FPlayerEvent OnHealthSet;
+	FPlayerCharacterEvent OnHealthSet;
 
 public:
 	bool GetMercyInvincibleActive();
@@ -259,11 +260,17 @@ public:
 protected:
 	void StopHorizontalMovement();
 
-	float MercyInvincibileTimeMax = 1.5f;
-	bool MercyInvincibileActive;
-	float MercyInvincibileTimeLeft;
+	float MercyInvincibleTimeMax = 1.5f;
+	bool MercyInvincibleActive;
+	float MercyInvincibleTimeLeft;
 
 	void StartMercyInvincibility();
 	void CancelMercyInvincibility();
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	USpriteToggleComponent* SpriteToggle;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Visuals", meta = (AllowPrivateAccess = "true"))
+	UPaperSpriteComponent* SpriteComponent_Ghost;
 
 };
