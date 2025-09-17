@@ -60,4 +60,6 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void TriggerContinue();
+
+	void SaveLevelStats();
 };

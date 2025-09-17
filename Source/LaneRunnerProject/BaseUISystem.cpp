@@ -74,6 +74,8 @@ void ABaseUISystem::ShowScreen()
 
     if (WidgetInstance)
     {
+        WidgetInstance->SetupBeforeShow();
+
         IsActiveUI = true;
         WidgetInstance->SetVisibility(ESlateVisibility::Visible);
         ApplyInputMode();
@@ -91,6 +93,8 @@ void ABaseUISystem::HideScreen()
 {
     if (WidgetInstance)
     {
+        WidgetInstance->SetupBeforeHide();
+
         IsActiveUI = false;
         WidgetInstance->SetVisibility(ESlateVisibility::Hidden);
         WidgetInstance->OnScreenHidden();

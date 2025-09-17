@@ -3,6 +3,7 @@
 
 #include "DeathScreenUIWidget.h"
 #include "LevelSystem.h"
+#include "GameSaveSystem.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
 
@@ -33,4 +34,63 @@ void UDeathScreenUIWidget::OnQuitButtonPressed()
 {
 	APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0);
 	UKismetSystemLibrary::QuitGame(this, PC, EQuitPreference::Quit, true);
+}
+
+void UDeathScreenUIWidget::SetupBeforeShow()
+{
+	Super::SetupBeforeShow();
+
+	int currentScore = 0;
+	int highScore = 0;
+	bool newHighScore = false;
+
+	ALevelSystem* foundLevelSystem = Cast<ALevelSystem>(UGameplayStatics::GetActorOfClass(GetWorld(), ALevelSystem::StaticClass()));
+	if (foundLevelSystem)
+	{
+		currentScore = foundLevelSystem->GetScore();
+	}
+
+	AGameSaveSystem* foundGameSaveSystem = Cast<AGameSaveSystem>(UGameplayStatics::GetActorOfClass(GetWorld(), AGameSaveSystem::StaticClass()));
+	if (foundGameSaveSystem)
+	{
+		if (foundGameSaveSystem->HasExistingSave())
+		{
+			highScore = foundGameSaveSystem->CurrentSave->StatsData.HighScore;
+		}
+	}
+
+	newHighScore = currentScore > highScore;
+
+	if (newHighScore)
+	{
+		highScore = currentScore;
+	}
+
+	SetScoreText(currentScore);
+	SetHighScoreText(highScore);
+	SetMessageActive(newHighScore);
+}
+
+void UDeathScreenUIWidget::SetScoreText(int newScore)
+{
+	FText text = FText::FromString(FString::FromInt(newScore));
+	ScoreText->SetText(text);
+}
+
+void UDeathScreenUIWidget::SetHighScoreText(int newHighScore)
+{
+	FText scoreText = FText::FromString(FString::FromInt(newHighScore));
+	HighScoreText->SetText(scoreText);
+}
+
+void UDeathScreenUIWidget::SetMessageActive(bool active)
+{
+	if (active)
+	{
+		NewHighScoreMessageText->SetVisibility(ESlateVisibility::Visible);
+	}
+	else
+	{
+		NewHighScoreMessageText->SetVisibility(ESlateVisibility::Hidden);
+	}
 }

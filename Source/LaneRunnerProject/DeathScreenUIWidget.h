@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "BaseUIScreen.h"
 #include "Components/Button.h" 
+#include "Components/TextBlock.h"
 #include "DeathScreenUIWidget.generated.h"
 
 /**
@@ -29,4 +30,21 @@ public:
 
 	UFUNCTION()
 	void OnQuitButtonPressed();
+
+	virtual void SetupBeforeShow() override;
+
+	UPROPERTY(meta = (BindWidget))
+	UTextBlock* ScoreText;
+
+	UPROPERTY(meta = (BindWidget))
+	UTextBlock* HighScoreText;
+
+	UPROPERTY(meta = (BindWidget))
+	UTextBlock* NewHighScoreMessageText;
+
+	void SetScoreText(int newScore);
+
+	void SetHighScoreText(int newHighScore);
+
+	void SetMessageActive(bool active);
 };

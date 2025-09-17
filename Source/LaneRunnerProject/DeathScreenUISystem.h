@@ -17,5 +17,4 @@ class LANERUNNERPROJECT_API ADeathScreenUISystem : public ABaseUISystem
 
 public:
 	virtual EUIState GetUIState() override;
-
 };

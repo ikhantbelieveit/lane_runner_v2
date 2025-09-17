@@ -89,6 +89,8 @@ bool AGameInit::CreateSystemsFromConfigData()
 					ABaseGameSystem* newSystem = World->SpawnActor<ABaseGameSystem>(systemToSpawn);
 					if (newSystem)
 					{
+						newSystem->InitialiseSystem();
+
 						if (configDataAsset)
 						{
 							newSystem->SetupFromConfig(configDataAsset);

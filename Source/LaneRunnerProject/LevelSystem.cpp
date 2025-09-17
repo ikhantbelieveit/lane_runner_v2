@@ -6,6 +6,7 @@
 #include "PlayerCharacter.h"
 #include "GameInit.h"
 #include "Kismet/GameplayStatics.h"
+#include "GameSaveSystem.h"
 
 void ALevelSystem::BeginPlay()
 {
@@ -25,11 +26,13 @@ void ALevelSystem::SetGameState(EGameState newState)
 	switch (newState)
 	{
 	case EGameState::Lose:
-		
 		if (foundSystem)
 		{
 			foundSystem->EnterScreen(EUIState::DeathScreen);
 		}
+
+		SaveLevelStats();
+
 		break;
 	case EGameState::Active:
 		
@@ -131,4 +134,35 @@ void ALevelSystem::TriggerContinue()
 	{
 		SetGameState(EGameState::Active);
 	}
+}
+
+void ALevelSystem::SaveLevelStats()
+{
+	int highScore = 0;
+
+	AGameSaveSystem* foundGameSaveSystem = Cast<AGameSaveSystem>(UGameplayStatics::GetActorOfClass(GetWorld(), AGameSaveSystem::StaticClass()));
+	if (foundGameSaveSystem)
+	{
+		if (foundGameSaveSystem->HasExistingSave())
+		{
+			highScore = foundGameSaveSystem->CurrentSave->StatsData.HighScore;
+		}
+	}
+
+	if (GetScore() > highScore)
+	{
+		highScore = GetScore();
+	}
+
+	AGameSaveSystem* saveSystem = Cast<AGameSaveSystem>(UGameplayStatics::GetActorOfClass(GetWorld(), AGameSaveSystem::StaticClass()));
+	if (saveSystem)
+	{
+		UMySaveGame* saveObject = Cast<UMySaveGame>(
+			UGameplayStatics::CreateSaveGameObject(UMySaveGame::StaticClass()));
+
+		// Fill in some data
+		saveObject->StatsData.HighScore = highScore;
+		saveSystem->SaveGame(saveObject);
+		
+	};
 }

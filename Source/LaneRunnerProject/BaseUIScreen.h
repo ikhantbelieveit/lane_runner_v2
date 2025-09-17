@@ -27,6 +27,9 @@ public:
 	virtual void OnScreenShown() {}
 	virtual void OnScreenHidden() {}
 
+	virtual void SetupBeforeShow() {}
+	virtual void SetupBeforeHide() {}
+
 	TObjectPtr<UWidget> DefaultSelection;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

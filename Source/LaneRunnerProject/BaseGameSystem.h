@@ -16,6 +16,7 @@ enum class EGameSystem : uint8
 	TestLevelUISystem    UMETA(DisplayName = "TestLevelUISystem"),
 	UIStateSystem    UMETA(DisplayName = "UIStateSystem"),
 	DeathScreenUISystem    UMETA(DisplayName = "DeathScreenUISystem"),
+	GameSaveSystem    UMETA(DisplayName = "GameSaveSystem"),
 };
 
 UCLASS()
