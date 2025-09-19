@@ -26,27 +26,6 @@ void UGI_UIStateSystem::Initialize(FSubsystemCollectionBase& Collection)
             true
         );
     }
-
-    /*UMyGameInstance* GI = Cast<UMyGameInstance>(GetGameInstance());
-    if (GI)
-    {
-        for (const TPair<EUIState, TSubclassOf<UBaseUIScreen>> pair : GI->ConfigData->UIConfig.UIScreen_LUT)
-        {
-            
-            EUIState state = pair.Key;
-            TSubclassOf<UBaseUIScreen> screen = pair.Value;
-
-            InitialiseWidget(screen, state);
-        }
-    }*/
-
-    /*for (const TPair<EUIState, TSubclassOf<UBaseUIScreen>> pair : UIScreen_LUT)
-    {
-        EUIState state = pair.Key;
-        TSubclassOf<UBaseUIScreen> screen = pair.Value;
-
-        InitialiseWidget(screen, state);
-    }*/
 }
 
 void UGI_UIStateSystem::Deinitialize()
@@ -63,14 +42,12 @@ bool UGI_UIStateSystem::InitialiseWidget(TSubclassOf<UBaseUIScreen> widget, EUIS
     UWorld* World = GEngine->GetWorldFromContextObjectChecked(this);
     if (!World)
     {
-        GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("world dont exist"));
         return false;
     }
 
     APlayerController* PC = UGameplayStatics::GetPlayerController(World, 0);
     if (!PC)
     {
-        GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("player controller dont exist"));
         return false;
     }
     
@@ -85,7 +62,7 @@ bool UGI_UIStateSystem::InitialiseWidget(TSubclassOf<UBaseUIScreen> widget, EUIS
 
         RegisterWidget(state, Screen);
 
-        GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, widget->GetName());
+        //GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, widget->GetName());
 
         return true;
     }
@@ -108,38 +85,10 @@ void UGI_UIStateSystem::EnterScreen(EUIState newScreen)
         if (checkState != newScreen)
         {
             HideScreen(checkSystem);
-            //hide
-            //checkSystem->SetupBeforeHide();
-
-            //IsActiveUI = false;
-            //checkSystem->SetVisibility(ESlateVisibility::Hidden);
-            //checkSystem->OnScreenHidden();
-
-
-            //// Reapply mode for last active screen, or reset
-            //APlayerController* PC = UGameplayStatics::GetPlayerController(checkSystem->GetWorld(), 0);
-            //if (PC)
-            //{
-            //    PC->SetInputMode(FInputModeGameOnly());
-            //    PC->bShowMouseCursor = false;
-            //}
         }
         else
         {
             ShowScreen(checkSystem);
-            //show
-            //checkSystem->SetupBeforeShow();
-
-            ////IsActiveUI = true;
-            //checkSystem->SetVisibility(ESlateVisibility::Visible);
-            //ApplyInputMode(checkSystem);
-            //checkSystem->OnScreenShown();
-
-            //if (checkSystem->ScreenInputMode != EScreenInputMode::None &&
-            //    checkSystem->DefaultSelection)
-            //{
-            //    checkSystem->DefaultSelection->SetKeyboardFocus();
-            //}
         }
     }
 

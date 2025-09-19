@@ -24,14 +24,9 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	TArray<ABaseGameSystem*> SpawnedGameSystems;
-
-	bool HasInitFinished;
 	bool HasBroadcastInitFinished;
 
 	void BroadcastInitFinished();
-
-	bool CreateSystemsFromConfigData();
 
 public:	
 	// Called every frame

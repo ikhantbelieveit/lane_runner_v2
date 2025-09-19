@@ -20,14 +20,6 @@ void AGameInit::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	if (CreateSystemsFromConfigData())
-	{
-		HasInitFinished = true;
-	}
-	else
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("ERROR: failed system spawn on begin play."));
-	}
 	
 }
 
@@ -36,26 +28,23 @@ void AGameInit::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (HasInitFinished)
+	if (!HasBroadcastInitFinished)
 	{
-		if (!HasBroadcastInitFinished)
+		auto* uiStateSystem = GetGameInstance()->GetSubsystem<UGI_UIStateSystem>();
+		if (uiStateSystem)
 		{
-			auto* uiStateSystem = GetGameInstance()->GetSubsystem<UGI_UIStateSystem>();
-			if (uiStateSystem)
+			if (uiStateSystem->HasInitialisedFromConfig)
 			{
-				if (uiStateSystem->HasInitialisedFromConfig)
+				BroadcastInitFinished();
+
+				auto* levelSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGI_LevelSystem>();
+				if (levelSystem)
 				{
-					BroadcastInitFinished();
-
-					auto* levelSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGI_LevelSystem>();
-					if (levelSystem)
-					{
-						//show test ui
-						levelSystem->EnterLevel();
-					}
-
-					HasBroadcastInitFinished = true;
+					//show test ui
+					levelSystem->EnterLevel();
 				}
+
+				HasBroadcastInitFinished = true;
 			}
 		}
 	}
@@ -72,49 +61,4 @@ void AGameInit::BroadcastInitFinished()
 
 	HasBroadcastInitFinished = true;
 
-}
-
-bool AGameInit::CreateSystemsFromConfigData()
-{
-	bool success = false;
-
-	if (ConfigData)
-	{
-		UWorld* World = GetWorld();
-		if (World)
-		{
-			for (const TPair <EGameSystem, FInitSystemData> pair : ConfigData->SystemConfigMap)
-			{
-				EGameSystem SystemType = pair.Key;
-				const FInitSystemData& InitData = pair.Value;
-
-				TSubclassOf<ABaseGameSystem> systemToSpawn = InitData.SystemClass;
-				USystemConfigData* configDataAsset = InitData.ConfigDataAsset;
-
-				if (systemToSpawn)
-				{
-					ABaseGameSystem* newSystem = World->SpawnActor<ABaseGameSystem>(systemToSpawn);
-					if (newSystem)
-					{
-						newSystem->InitialiseSystem();
-
-						if (configDataAsset)
-						{
-							newSystem->SetupFromConfig(configDataAsset);
-						}
-
-						SpawnedGameSystems.Add(newSystem);
-
-						FString name = newSystem->GetName();
-						GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, name);
-					}
-				}
-			}
-
-
-			success = true;
-		}
-	}
-
-	return success;
 }
