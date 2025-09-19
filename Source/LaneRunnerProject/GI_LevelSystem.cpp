@@ -2,7 +2,7 @@
 
 
 #include "GI_LevelSystem.h"
-#include "UIStateSystem.h"
+#include "GI_UIStateSystem.h"
 #include "PlayerCharacter.h"
 #include "Kismet/GameplayStatics.h"
 #include "GI_SaveSystem.h"
@@ -14,14 +14,14 @@ void UGI_LevelSystem::SetGameState(EGameState newState)
 		return;
 	}
 
-	AUIStateSystem* foundSystem = Cast<AUIStateSystem>(UGameplayStatics::GetActorOfClass(GetWorld(), AUIStateSystem::StaticClass()));
+	auto* uiStateSystem = GetGameInstance()->GetSubsystem<UGI_UIStateSystem>();
 
 	switch (newState)
 	{
 	case EGameState::Lose:
-		if (foundSystem)
+		if (uiStateSystem)
 		{
-			foundSystem->EnterScreen(EUIState::DeathScreen);
+			uiStateSystem->EnterScreen(EUIState::DeathScreen);
 		}
 
 		SaveLevelStats();
@@ -29,9 +29,9 @@ void UGI_LevelSystem::SetGameState(EGameState newState)
 		break;
 	case EGameState::Active:
 
-		if (foundSystem)
+		if (uiStateSystem)
 		{
-			foundSystem->EnterScreen(EUIState::TestLevel);
+			uiStateSystem->EnterScreen(EUIState::TestLevel);
 		}
 		break;
 	}
@@ -105,11 +105,10 @@ int UGI_LevelSystem::GetScore()
 
 void UGI_LevelSystem::EnterLevel()
 {
-	AUIStateSystem* uiSystem = Cast<AUIStateSystem>(UGameplayStatics::GetActorOfClass(GetWorld(), AUIStateSystem::StaticClass()));
-	if (uiSystem)
+	auto* uiStateSystem = GetGameInstance()->GetSubsystem<UGI_UIStateSystem>();
+	if (uiStateSystem)
 	{
-		//show test ui
-		uiSystem->EnterScreen(EUIState::TestLevel);
+		uiStateSystem->EnterScreen(EUIState::TestLevel);
 	}
 
 	APlayerCharacter* player = Cast<APlayerCharacter>(UGameplayStatics::GetActorOfClass(GetWorld(), APlayerCharacter::StaticClass()));

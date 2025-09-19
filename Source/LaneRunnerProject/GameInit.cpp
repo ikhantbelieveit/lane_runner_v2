@@ -2,7 +2,7 @@
 
 #include "GI_LevelSystem.h"
 #include "ProjectileSystem.h"
-#include "UIStateSystem.h"
+#include "GI_UIStateSystem.h"
 #include "TestLevelUISystem.h"
 #include "EUIState.h"
 #include "GameInit.h"
@@ -40,16 +40,23 @@ void AGameInit::Tick(float DeltaTime)
 	{
 		if (!HasBroadcastInitFinished)
 		{
-			BroadcastInitFinished();
-
-			auto* levelSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGI_LevelSystem>();
-			if (levelSystem)
+			auto* uiStateSystem = GetGameInstance()->GetSubsystem<UGI_UIStateSystem>();
+			if (uiStateSystem)
 			{
-				//show test ui
-				levelSystem->EnterLevel();
-			}
+				if (uiStateSystem->HasInitialisedFromConfig)
+				{
+					BroadcastInitFinished();
 
-			HasBroadcastInitFinished = true;
+					auto* levelSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGI_LevelSystem>();
+					if (levelSystem)
+					{
+						//show test ui
+						levelSystem->EnterLevel();
+					}
+
+					HasBroadcastInitFinished = true;
+				}
+			}
 		}
 	}
 }

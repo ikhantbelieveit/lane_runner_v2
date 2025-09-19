@@ -6,7 +6,6 @@
 void UMyGameInstance::Init()
 {
     Super::Init();
-    GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Magenta, TEXT("using my game instance"));
 }
 
 void UMyGameInstance::Shutdown()

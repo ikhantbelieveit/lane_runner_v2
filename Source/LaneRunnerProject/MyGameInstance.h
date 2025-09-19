@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/GameInstance.h"
+#include "GI_ConfigData.h"
 #include "MyGameInstance.generated.h"
 
 /**
@@ -17,4 +18,10 @@ class LANERUNNERPROJECT_API UMyGameInstance : public UGameInstance
 public:
 	virtual void Init() override;
 	virtual void Shutdown() override;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	int TestProperty;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UGI_ConfigData* ConfigData;
 };
