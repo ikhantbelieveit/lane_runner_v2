@@ -8,7 +8,7 @@
 #include "PlayerProjectile.h"
 #include "GI_LevelSystem.h"
 #include "GameInit.h"
-#include "ProjectileSystem.h"
+#include "GI_ProjectileSystem.h"
 
 
 // Sets default values
@@ -924,15 +924,15 @@ void APlayerCharacter::Shoot(EProjectileDirection direction, bool holdNotTap)
 		return;
 	}
 
-	AProjectileSystem* foundSystem = Cast<AProjectileSystem>(UGameplayStatics::GetActorOfClass(GetWorld(), AProjectileSystem::StaticClass()));
-	if (foundSystem)
+	auto* projectileSystem = GetGameInstance()->GetSubsystem<UGI_ProjectileSystem>();
+	if (projectileSystem)
 	{
 		FProjectileRequestData requestData = FProjectileRequestData();
 		requestData.Direction = direction;
 		requestData.ProjectileClass = ProjectileClass;
 		requestData.ShootPos = GetActorLocation();
 
-		if (foundSystem->ShootPlayerProjectile(requestData))
+		if (projectileSystem->ShootPlayerProjectile(requestData))
 		{
 			switch (direction)
 			{
