@@ -3,7 +3,7 @@
 
 #include "DeathScreenUIWidget.h"
 #include "GI_LevelSystem.h"
-#include "GameSaveSystem.h"
+#include "GI_SaveSystem.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
 
@@ -50,12 +50,12 @@ void UDeathScreenUIWidget::SetupBeforeShow()
 		currentScore = levelSystem->GetScore();
 	}
 
-	AGameSaveSystem* foundGameSaveSystem = Cast<AGameSaveSystem>(UGameplayStatics::GetActorOfClass(GetWorld(), AGameSaveSystem::StaticClass()));
-	if (foundGameSaveSystem)
+	auto* saveSystem = GetGameInstance()->GetSubsystem<UGI_SaveSystem>();
+	if (saveSystem)
 	{
-		if (foundGameSaveSystem->HasExistingSave())
+		if (saveSystem->HasExistingSave())
 		{
-			highScore = foundGameSaveSystem->CurrentSave->StatsData.HighScore;
+			highScore = saveSystem->CurrentSave->StatsData.HighScore;
 		}
 	}
 

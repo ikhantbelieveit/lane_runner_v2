@@ -5,7 +5,7 @@
 #include "UIStateSystem.h"
 #include "PlayerCharacter.h"
 #include "Kismet/GameplayStatics.h"
-#include "GameSaveSystem.h"
+#include "GI_SaveSystem.h"
 
 void UGI_LevelSystem::SetGameState(EGameState newState)
 {
@@ -136,12 +136,12 @@ void UGI_LevelSystem::SaveLevelStats()
 {
 	int highScore = 0;
 
-	AGameSaveSystem* foundGameSaveSystem = Cast<AGameSaveSystem>(UGameplayStatics::GetActorOfClass(GetWorld(), AGameSaveSystem::StaticClass()));
-	if (foundGameSaveSystem)
+	auto* saveSystem = GetGameInstance()->GetSubsystem<UGI_SaveSystem>();
+	if (saveSystem)
 	{
-		if (foundGameSaveSystem->HasExistingSave())
+		if (saveSystem->HasExistingSave())
 		{
-			highScore = foundGameSaveSystem->CurrentSave->StatsData.HighScore;
+			highScore = saveSystem->CurrentSave->StatsData.HighScore;
 		}
 	}
 
@@ -149,8 +149,6 @@ void UGI_LevelSystem::SaveLevelStats()
 	{
 		highScore = GetScore();
 	}
-
-	AGameSaveSystem* saveSystem = Cast<AGameSaveSystem>(UGameplayStatics::GetActorOfClass(GetWorld(), AGameSaveSystem::StaticClass()));
 	if (saveSystem)
 	{
 		UMySaveGame* saveObject = Cast<UMySaveGame>(
