@@ -7,6 +7,7 @@
 #include "GameInit.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/StaticMeshComponent.h"
+#include "GI_LevelSystem.h"
 
 
 // Sets default values for this component's properties
@@ -33,11 +34,10 @@ void UDestructibleObjectComponent::BeginPlay()
 		DefaultCollMode = box->GetCollisionEnabled();
 	}
 
-
-	AGameInit* gameInit = Cast<AGameInit>(UGameplayStatics::GetActorOfClass(GetWorld(), AGameInit::StaticClass()));
-	if (gameInit)
+	auto* levelSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGI_LevelSystem>();
+	if (levelSystem)
 	{
-		gameInit->OnAllSystemsSpawned.AddDynamic(this, &UDestructibleObjectComponent::RegisterGameSystemDelegates);
+		levelSystem->CleanupBeforeReset.AddDynamic(this, &UDestructibleObjectComponent::OnLevelReset);
 	}
 }
 
@@ -74,7 +74,7 @@ void UDestructibleObjectComponent::DestroyFromComp()
 
 	if (GivePointsOnDestroy)
 	{
-		ALevelSystem* levelSystem = Cast<ALevelSystem>(UGameplayStatics::GetActorOfClass(GetWorld(), ALevelSystem::StaticClass()));
+		auto* levelSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGI_LevelSystem>();
 		if (levelSystem)
 		{
 			levelSystem->AddToScore(PointsGivenOnDestroy);
@@ -131,15 +131,6 @@ void UDestructibleObjectComponent::ResetDestroy()
 	}
 
 	Destroyed = false;
-}
-
-void UDestructibleObjectComponent::RegisterGameSystemDelegates()
-{
-	ALevelSystem* levelSystem = Cast<ALevelSystem>(UGameplayStatics::GetActorOfClass(GetWorld(), ALevelSystem::StaticClass()));
-	if (levelSystem)
-	{
-		levelSystem->CleanupBeforeReset.AddDynamic(this, &UDestructibleObjectComponent::OnLevelReset);
-	}
 }
 
 void UDestructibleObjectComponent::OnLevelReset()

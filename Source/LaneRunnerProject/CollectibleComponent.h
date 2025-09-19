@@ -36,9 +36,6 @@ public:
 	ECollisionEnabled::Type DefaultCollMode;
 
 	UFUNCTION()
-	void RegisterGameSystemDelegates();
-
-	UFUNCTION()
 	void OnLevelReset();
 
 	UFUNCTION()

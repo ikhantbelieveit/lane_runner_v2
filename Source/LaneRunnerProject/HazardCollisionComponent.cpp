@@ -1,6 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 #include "Kismet/GameplayStatics.h"
-#include "LevelSystem.h"
+#include "GI_LevelSystem.h"
 #include "HazardCollisionComponent.h"
 
 // Sets default values for this component's properties
@@ -57,10 +57,10 @@ void UHazardCollisionComponent::HandleBeginOverlap(
 	if (OtherComp->ComponentHasTag(PlayerName))
 	{
 		
-		ALevelSystem* foundLevelSystem = Cast<ALevelSystem>(UGameplayStatics::GetActorOfClass(GetWorld(), ALevelSystem::StaticClass()));
-		if (foundLevelSystem)
+		auto* levelSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGI_LevelSystem>();
+		if (levelSystem)
 		{
-			foundLevelSystem->OnPlayerTouchHazard(OneHitKill, OverrideInvincibility);
+			levelSystem->OnPlayerTouchHazard(OneHitKill, OverrideInvincibility);
 		}
 	}
 }

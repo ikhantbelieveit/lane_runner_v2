@@ -35,9 +35,6 @@ public:
 	bool StartEnabled = true;
 
 	UFUNCTION()
-	void RegisterGameSystemDelegates();
-
-	UFUNCTION()
 	void OnLevelReset();
 
 	FVector StartPos;

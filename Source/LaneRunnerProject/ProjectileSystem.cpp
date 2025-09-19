@@ -3,17 +3,17 @@
 
 #include "ProjectileSystem.h"
 #include "EngineUtils.h"
-#include "LevelSystem.h"
+#include "GI_LevelSystem.h"
 #include "GameInit.h"
 
 void AProjectileSystem::BeginPlay()
 {
 	Super::BeginPlay();
 
-	AGameInit* gameInit = Cast<AGameInit>(UGameplayStatics::GetActorOfClass(GetWorld(), AGameInit::StaticClass()));
-	if (gameInit)
+	auto* levelSystem = GetGameInstance()->GetSubsystem<UGI_LevelSystem>();
+	if (levelSystem)
 	{
-		gameInit->OnAllSystemsSpawned.AddDynamic(this, &AProjectileSystem::RegisterGameSystemDelegates);
+		levelSystem->CleanupBeforeReset.AddDynamic(this, &AProjectileSystem::OnLevelReset);
 	}
 }
 
@@ -54,15 +54,6 @@ void AProjectileSystem::ClearAllProjectiles()
 		{
 			Proj->Destroy();
 		}
-	}
-}
-
-void AProjectileSystem::RegisterGameSystemDelegates()
-{
-	ALevelSystem* gameInit = Cast<ALevelSystem>(UGameplayStatics::GetActorOfClass(GetWorld(), ALevelSystem::StaticClass()));
-	if (gameInit)
-	{
-		gameInit->CleanupBeforeReset.AddDynamic(this, &AProjectileSystem::OnLevelReset);
 	}
 }
 

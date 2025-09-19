@@ -3,6 +3,7 @@
 
 #include "ScrollWithPlayerComponent.h"
 #include "GameInit.h"
+#include "GI_LevelSystem.h"
 
 // Sets default values for this component's properties
 UScrollWithPlayerComponent::UScrollWithPlayerComponent()
@@ -34,12 +35,12 @@ void UScrollWithPlayerComponent::BeginPlay()
 		}
 	}
 
-	AGameInit* gameInit = Cast<AGameInit>(UGameplayStatics::GetActorOfClass(GetWorld(), AGameInit::StaticClass()));
-	if (gameInit)
+	auto* levelSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGI_LevelSystem>();
+	if (levelSystem)
 	{
-		gameInit->OnAllSystemsSpawned.AddDynamic(this, &UScrollWithPlayerComponent::RegisterGameSystemDelegates);
+		levelSystem->CleanupBeforeReset.AddDynamic(this, &UScrollWithPlayerComponent::OnLevelReset);
 	}
-	
+
 	StartPos = GetOwner()->GetActorLocation();
 }
 
@@ -60,15 +61,6 @@ void UScrollWithPlayerComponent::TickComponent(float DeltaTime, ELevelTick TickT
 			currentLoc.Z);
 
 		GetOwner()->SetActorLocation(newActorLoc);
-	}
-}
-
-void UScrollWithPlayerComponent::RegisterGameSystemDelegates()
-{
-	ALevelSystem* levelSystem = Cast<ALevelSystem>(UGameplayStatics::GetActorOfClass(GetWorld(), ALevelSystem::StaticClass()));
-	if (levelSystem)
-	{
-		levelSystem->CleanupBeforeReset.AddDynamic(this, &UScrollWithPlayerComponent::OnLevelReset);
 	}
 }
 

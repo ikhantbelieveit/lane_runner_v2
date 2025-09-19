@@ -2,7 +2,7 @@
 
 
 #include "DeathScreenUIWidget.h"
-#include "LevelSystem.h"
+#include "GI_LevelSystem.h"
 #include "GameSaveSystem.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
@@ -23,10 +23,10 @@ void UDeathScreenUIWidget::Initialise()
 
 void UDeathScreenUIWidget::OnRespawnButtonPressed()
 {
-	ALevelSystem* foundLevelSystem = Cast<ALevelSystem>(UGameplayStatics::GetActorOfClass(GetWorld(), ALevelSystem::StaticClass()));
-	if (foundLevelSystem)
+	auto* levelSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGI_LevelSystem>();
+	if (levelSystem)
 	{
-		foundLevelSystem->ResetFromLose();
+		levelSystem->ResetFromLose();
 	}
 }
 
@@ -44,10 +44,10 @@ void UDeathScreenUIWidget::SetupBeforeShow()
 	int highScore = 0;
 	bool newHighScore = false;
 
-	ALevelSystem* foundLevelSystem = Cast<ALevelSystem>(UGameplayStatics::GetActorOfClass(GetWorld(), ALevelSystem::StaticClass()));
-	if (foundLevelSystem)
+	auto* levelSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGI_LevelSystem>();
+	if (levelSystem)
 	{
-		currentScore = foundLevelSystem->GetScore();
+		currentScore = levelSystem->GetScore();
 	}
 
 	AGameSaveSystem* foundGameSaveSystem = Cast<AGameSaveSystem>(UGameplayStatics::GetActorOfClass(GetWorld(), AGameSaveSystem::StaticClass()));

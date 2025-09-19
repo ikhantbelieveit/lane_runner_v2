@@ -7,7 +7,7 @@
 #include "GameInit.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/StaticMeshComponent.h"
-#include "LevelSystem.h"
+#include "GI_LevelSystem.h"
 
 // Sets default values for this component's properties
 UCollectibleComponent::UCollectibleComponent()
@@ -33,15 +33,11 @@ void UCollectibleComponent::BeginPlay()
 		box->OnComponentBeginOverlap.AddDynamic(this, &UCollectibleComponent::HandleBeginOverlap);
 	}
 
-
-	AGameInit* gameInit = Cast<AGameInit>(UGameplayStatics::GetActorOfClass(GetWorld(), AGameInit::StaticClass()));
-	if (gameInit)
+	auto* levelSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGI_LevelSystem>();
+	if (levelSystem)
 	{
-		gameInit->OnAllSystemsSpawned.AddDynamic(this, &UCollectibleComponent::RegisterGameSystemDelegates);
+		levelSystem->CleanupBeforeReset.AddDynamic(this, &UCollectibleComponent::OnLevelReset);
 	}
-
-
-	
 }
 
 
@@ -65,10 +61,10 @@ void UCollectibleComponent::Collect()
 		return;
 	}
 
-	ALevelSystem* foundSystem = Cast<ALevelSystem>(UGameplayStatics::GetActorOfClass(GetWorld(), ALevelSystem::StaticClass()));
-	if (foundSystem)
+	auto* levelSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGI_LevelSystem>();
+	if (levelSystem)
 	{
-		foundSystem->AddToScore(10);
+		levelSystem->AddToScore(10);
 	}
 
 	UStaticMeshComponent* mesh = (UStaticMeshComponent*)GetOwner()->GetComponentByClass(UStaticMeshComponent::StaticClass());
@@ -91,15 +87,6 @@ void UCollectibleComponent::Collect()
 	}
 
 	Collected = true;
-}
-
-void UCollectibleComponent::RegisterGameSystemDelegates()
-{
-	ALevelSystem* gameInit = Cast<ALevelSystem>(UGameplayStatics::GetActorOfClass(GetWorld(), ALevelSystem::StaticClass()));
-	if (gameInit)
-	{
-		gameInit->CleanupBeforeReset.AddDynamic(this, &UCollectibleComponent::OnLevelReset);
-	}
 }
 
 void UCollectibleComponent::OnLevelReset()

@@ -37,8 +37,5 @@ public:
 	void ClearAllProjectiles();
 
 	UFUNCTION()
-	void RegisterGameSystemDelegates();
-
-	UFUNCTION()
 	void OnLevelReset();
 };

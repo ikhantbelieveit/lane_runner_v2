@@ -1,6 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "LevelSystem.h"
+#include "GI_LevelSystem.h"
 #include "ProjectileSystem.h"
 #include "UIStateSystem.h"
 #include "TestLevelUISystem.h"
@@ -42,7 +42,7 @@ void AGameInit::Tick(float DeltaTime)
 		{
 			BroadcastInitFinished();
 
-			ALevelSystem* levelSystem = Cast<ALevelSystem>(UGameplayStatics::GetActorOfClass(GetWorld(), ALevelSystem::StaticClass()));
+			auto* levelSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGI_LevelSystem>();
 			if (levelSystem)
 			{
 				//show test ui

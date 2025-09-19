@@ -240,9 +240,6 @@ protected:
 
 public:
 	UFUNCTION()
-	void RegisterGameSystemDelegates();
-
-	UFUNCTION()
 	void OnGameStateChanged(EGameState newState, EGameState prevState);
 
 	void OnHitHazard(bool oneHitKill);

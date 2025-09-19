@@ -6,7 +6,7 @@
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Projectile.h"
 #include "PlayerProjectile.h"
-#include "LevelSystem.h"
+#include "GI_LevelSystem.h"
 #include "GameInit.h"
 #include "ProjectileSystem.h"
 
@@ -103,12 +103,10 @@ void APlayerCharacter::BeginPlay()
 
 	SpawnPos = GetActorLocation();
 
-	
-
-	AGameInit* gameInit = Cast<AGameInit>(UGameplayStatics::GetActorOfClass(GetWorld(), AGameInit::StaticClass()));
-	if (gameInit)
+	auto* levelSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGI_LevelSystem>();
+	if (levelSystem)
 	{
-		gameInit->OnAllSystemsSpawned.AddDynamic(this, &APlayerCharacter::RegisterGameSystemDelegates);
+		levelSystem->OnGameStateChanged.AddDynamic(this, &APlayerCharacter::OnGameStateChanged);
 	}
 }
 
@@ -117,10 +115,10 @@ void APlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	ALevelSystem* foundLevelSystem = Cast<ALevelSystem>(UGameplayStatics::GetActorOfClass(GetWorld(), ALevelSystem::StaticClass()));
-	if (foundLevelSystem)
+	auto* levelSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGI_LevelSystem>();
+	if (levelSystem)
 	{
-		switch (foundLevelSystem->GetGameState())
+		switch (levelSystem->GetGameState())
 		{
 		case EGameState::Active:
 
@@ -438,10 +436,10 @@ void APlayerCharacter::Input_SlowDownCancel_Joystick(const FInputActionValue& Va
 
 void APlayerCharacter::Input_JumpStart(const FInputActionValue& Value)
 {
-	ALevelSystem* foundLevelSystem = Cast<ALevelSystem>(UGameplayStatics::GetActorOfClass(GetWorld(), ALevelSystem::StaticClass()));
-	if (foundLevelSystem)
+	auto* levelSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGI_LevelSystem>();
+	if (levelSystem)
 	{
-		if (foundLevelSystem->GetGameState() == EGameState::Active)
+		if (levelSystem->GetGameState() == EGameState::Active)
 		{
 			JumpInput_Pressed = true;
 		}
@@ -450,10 +448,10 @@ void APlayerCharacter::Input_JumpStart(const FInputActionValue& Value)
 
 void APlayerCharacter::Input_Jump(const FInputActionValue& Value)
 {
-	ALevelSystem* foundLevelSystem = Cast<ALevelSystem>(UGameplayStatics::GetActorOfClass(GetWorld(), ALevelSystem::StaticClass()));
-	if (foundLevelSystem)
+	auto* levelSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGI_LevelSystem>();
+	if (levelSystem)
 	{
-		if (foundLevelSystem->GetGameState() == EGameState::Active)
+		if (levelSystem->GetGameState() == EGameState::Active)
 		{
 			JumpInput_Active = true;
 		}
@@ -507,14 +505,14 @@ void APlayerCharacter::Input_ShootForwardStart(const FInputActionValue& Value)
 
 void APlayerCharacter::Input_ContinueStart(const FInputActionValue& Value)
 {
-	ALevelSystem* foundLevelSystem = Cast<ALevelSystem>(UGameplayStatics::GetActorOfClass(GetWorld(), ALevelSystem::StaticClass()));
-	if (foundLevelSystem)
+	auto* levelSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGI_LevelSystem>();
+	if (levelSystem)
 	{
-		if (foundLevelSystem->GetGameState() == EGameState::AwaitContinue)
+		if (levelSystem->GetGameState() == EGameState::AwaitContinue)
 		{
 			ContinueInput_Pressed = true;
 			BlockForwardShoot = true;
-			foundLevelSystem->TriggerContinue();
+			levelSystem->TriggerContinue();
 		}
 	}
 }
@@ -666,15 +664,6 @@ void APlayerCharacter::ResetPlayer()
 	CancelMercyInvincibility();
 	
 	ClearInputValues();	//maybe not needed? figured its handy
-}
-
-void APlayerCharacter::RegisterGameSystemDelegates()
-{
-	ALevelSystem* levelSystem = Cast<ALevelSystem>(UGameplayStatics::GetActorOfClass(GetWorld(), ALevelSystem::StaticClass()));
-	if (levelSystem)
-	{
-		levelSystem->OnGameStateChanged.AddDynamic(this, &APlayerCharacter::OnGameStateChanged);
-	}
 }
 
 void APlayerCharacter::OnGameStateChanged(EGameState newState, EGameState prevState)
@@ -1168,10 +1157,10 @@ void APlayerCharacter::UpdateCheckForPit()
 			{
 				GetCharacterMovement()->StopMovementImmediately();
 
-				ALevelSystem* foundLevelSystem = Cast<ALevelSystem>(UGameplayStatics::GetActorOfClass(GetWorld(), ALevelSystem::StaticClass()));
-				if (foundLevelSystem)
+				auto* levelSystem = GetGameInstance()->GetSubsystem<UGI_LevelSystem>();
+				if (levelSystem)
 				{
-					foundLevelSystem->OnPitfall();
+					levelSystem->OnPitfall();
 				}
 			}
 		}
