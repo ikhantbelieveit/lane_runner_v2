@@ -30,10 +30,14 @@ public:
 
 	bool HasInitialisedFromConfig;
 
-	TMap<EUIState, UBaseUIScreen*> ActiveWidgets_LUT;
+	TMap<EUIState, UBaseUIScreen*> Widgets_LUT;
 
 private:
-	TArray<UBaseUIScreen*> ActiveScreens;
+	UBaseUIScreen* ActiveWidget;
+
+	void ShowScreen(UBaseUIScreen* screen);
+	void HideScreen(UBaseUIScreen* screen);
+
 
 	EUIState CurrentUIState;
 	EUIState PrevUIState;

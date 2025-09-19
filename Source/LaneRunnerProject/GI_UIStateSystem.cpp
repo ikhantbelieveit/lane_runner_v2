@@ -27,7 +27,7 @@ void UGI_UIStateSystem::Initialize(FSubsystemCollectionBase& Collection)
         );
     }
 
-    UMyGameInstance* GI = Cast<UMyGameInstance>(GetGameInstance());
+    /*UMyGameInstance* GI = Cast<UMyGameInstance>(GetGameInstance());
     if (GI)
     {
         for (const TPair<EUIState, TSubclassOf<UBaseUIScreen>> pair : GI->ConfigData->UIConfig.UIScreen_LUT)
@@ -38,7 +38,7 @@ void UGI_UIStateSystem::Initialize(FSubsystemCollectionBase& Collection)
 
             InitialiseWidget(screen, state);
         }
-    }
+    }*/
 
     /*for (const TPair<EUIState, TSubclassOf<UBaseUIScreen>> pair : UIScreen_LUT)
     {
@@ -100,44 +100,46 @@ void UGI_UIStateSystem::EnterScreen(EUIState newScreen)
         return;
     }
 
-    for (const TPair<EUIState, UBaseUIScreen*> pair : ActiveWidgets_LUT)
+    for (const TPair<EUIState, UBaseUIScreen*> pair : Widgets_LUT)
     {
         EUIState checkState = pair.Key;
         UBaseUIScreen* checkSystem = pair.Value;
 
         if (checkState != newScreen)
         {
+            HideScreen(checkSystem);
             //hide
-            checkSystem->SetupBeforeHide();
+            //checkSystem->SetupBeforeHide();
 
             //IsActiveUI = false;
-            checkSystem->SetVisibility(ESlateVisibility::Hidden);
-            checkSystem->OnScreenHidden();
+            //checkSystem->SetVisibility(ESlateVisibility::Hidden);
+            //checkSystem->OnScreenHidden();
 
 
-            // Reapply mode for last active screen, or reset
-            APlayerController* PC = UGameplayStatics::GetPlayerController(checkSystem->GetWorld(), 0);
-            if (PC)
-            {
-                PC->SetInputMode(FInputModeGameOnly());
-                PC->bShowMouseCursor = false;
-            }
+            //// Reapply mode for last active screen, or reset
+            //APlayerController* PC = UGameplayStatics::GetPlayerController(checkSystem->GetWorld(), 0);
+            //if (PC)
+            //{
+            //    PC->SetInputMode(FInputModeGameOnly());
+            //    PC->bShowMouseCursor = false;
+            //}
         }
         else
         {
+            ShowScreen(checkSystem);
             //show
-            checkSystem->SetupBeforeShow();
+            //checkSystem->SetupBeforeShow();
 
-            //IsActiveUI = true;
-            checkSystem->SetVisibility(ESlateVisibility::Visible);
-            ApplyInputMode(checkSystem);
-            checkSystem->OnScreenShown();
+            ////IsActiveUI = true;
+            //checkSystem->SetVisibility(ESlateVisibility::Visible);
+            //ApplyInputMode(checkSystem);
+            //checkSystem->OnScreenShown();
 
-            if (checkSystem->ScreenInputMode != EScreenInputMode::None &&
-                checkSystem->DefaultSelection)
-            {
-                checkSystem->DefaultSelection->SetKeyboardFocus();
-            }
+            //if (checkSystem->ScreenInputMode != EScreenInputMode::None &&
+            //    checkSystem->DefaultSelection)
+            //{
+            //    checkSystem->DefaultSelection->SetKeyboardFocus();
+            //}
         }
     }
 
@@ -147,7 +149,7 @@ void UGI_UIStateSystem::EnterScreen(EUIState newScreen)
 
 void UGI_UIStateSystem::RegisterWidget(EUIState state, UBaseUIScreen* widget)
 {
-    ActiveWidgets_LUT.Add(state, widget);
+    Widgets_LUT.Add(state, widget);
 }
 
 void UGI_UIStateSystem::PrintFocusedWidget()
@@ -164,9 +166,45 @@ void UGI_UIStateSystem::PrintFocusedWidget()
 }
 
 
+void UGI_UIStateSystem::ShowScreen(UBaseUIScreen* screen)
+{
+    screen->SetupBeforeShow();
+
+    screen->SetVisibility(ESlateVisibility::Visible);
+    ApplyInputMode(screen);
+    screen->OnScreenShown();
+
+    if (screen->ScreenInputMode != EScreenInputMode::None &&
+        screen->DefaultSelection)
+    {
+        screen->DefaultSelection->SetKeyboardFocus();
+    }
+
+    ActiveWidget = screen;
+}
+
+void UGI_UIStateSystem::HideScreen(UBaseUIScreen* screen)
+{
+    screen->SetupBeforeHide();
+
+    screen->SetVisibility(ESlateVisibility::Hidden);
+    screen->OnScreenHidden();
+
+
+    // Reapply mode for last active screen, or reset
+    APlayerController* PC = UGameplayStatics::GetPlayerController(screen->GetWorld(), 0);
+    if (PC)
+    {
+        PC->SetInputMode(FInputModeGameOnly());
+        PC->bShowMouseCursor = false;
+    }
+
+    ActiveWidget = nullptr;
+}
+
 const UBaseUIScreen* UGI_UIStateSystem::GetScreenForState(EUIState state) const
 {
-    if (const UBaseUIScreen* const* FoundSystem = ActiveWidgets_LUT.Find(state))
+    if (const UBaseUIScreen* const* FoundSystem = Widgets_LUT.Find(state))
     {
         return *FoundSystem;
     }
@@ -207,6 +245,19 @@ void UGI_UIStateSystem::TickSubsystem(float DeltaTime)
         if (InitialiseFromConfig())
         {
             HasInitialisedFromConfig = true;
+        }
+    }
+
+    if (ActiveWidget)
+    {
+        TSharedPtr<SWidget> FocusedWidget = FSlateApplication::Get().GetUserFocusedWidget(0);
+
+        if (!FocusedWidget.IsValid() || FocusedWidget->GetTypeAsString() == TEXT("SViewport"))
+        {
+            if (ActiveWidget->DefaultSelection && ActiveWidget->DefaultSelection->TakeWidget()->SupportsKeyboardFocus())
+            {
+                ActiveWidget->DefaultSelection->SetKeyboardFocus();
+            }
         }
     }
 }
