@@ -136,6 +136,8 @@ void APlayerCharacter::Tick(float DeltaTime)
 			UpdateCameraPos();
 
 			UpdateMercyInvincibility(DeltaTime);
+
+			UpdateBoost(DeltaTime);
 			break;
 		case EGameState::Lose:
 			UpdateCameraPos();
@@ -596,18 +598,24 @@ void APlayerCharacter::UpdateSpeedFromInput()
 
 	SetSpeedState(newState);
 
-
-	switch (CurrentSpeedState)
+	if (IsBoosting)
 	{
-	case EPlayerSpeedState::Fast:
-		GetCharacterMovement()->MaxWalkSpeed = FastRunSpeed;
-		break;
-	case EPlayerSpeedState::Slow:
-		GetCharacterMovement()->MaxWalkSpeed = SlowRunSpeed;
-		break;
-	default:
-		GetCharacterMovement()->MaxWalkSpeed = DefaultRunSpeed;
-		break;
+		GetCharacterMovement()->MaxWalkSpeed = BoostOverrideSpeed;
+	}
+	else
+	{
+		switch (CurrentSpeedState)
+		{
+		case EPlayerSpeedState::Fast:
+			GetCharacterMovement()->MaxWalkSpeed = FastRunSpeed;
+			break;
+		case EPlayerSpeedState::Slow:
+			GetCharacterMovement()->MaxWalkSpeed = SlowRunSpeed;
+			break;
+		default:
+			GetCharacterMovement()->MaxWalkSpeed = DefaultRunSpeed;
+			break;
+		}
 	}
 }
 
@@ -664,6 +672,8 @@ void APlayerCharacter::ResetPlayer()
 	CancelMercyInvincibility();
 	
 	ClearInputValues();	//maybe not needed? figured its handy
+
+	CancelBoost();
 }
 
 void APlayerCharacter::OnGameStateChanged(EGameState newState, EGameState prevState)
@@ -763,6 +773,40 @@ void APlayerCharacter::CancelMercyInvincibility()
 	SpriteToggle->SetSpriteEnabled(FString("Sprite Base"));
 }
 
+void APlayerCharacter::StartBoost(float boostSpeed, float timeToBlockScroll)
+{
+	//MaxSpeedCache_Boost = GetCharacterMovement()->MaxWalkSpeed;
+	//GetCharacterMovement()->MaxWalkSpeed = boostSpeed;
+
+	BoostOverrideSpeed = boostSpeed;
+	BoostTimeRemaining = timeToBlockScroll;
+	IsBoosting = true;
+}
+
+void APlayerCharacter::CancelBoost()
+{
+	IsBoosting = false;
+	//GetCharacterMovement()->MaxWalkSpeed = MaxSpeedCache_Boost;
+}
+
+void APlayerCharacter::OnTouchBoostPad(float boostSpeed, float boostTime)
+{
+	auto* levelSystem = GetGameInstance()->GetSubsystem<UGI_LevelSystem>();
+	if (levelSystem)
+	{
+		if (levelSystem->GetGameState() == EGameState::Active)
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("BOOST PLAYER"));
+
+			FVector boostVector = FVector(boostSpeed, 0.0f, 0.0f);
+
+			StartBoost(boostSpeed, boostTime);
+			//LaunchCharacter(boostVector, true, false);
+			//StartTempBlockScroll(timeToBlockScroll);
+		}
+	}
+}
+
 
 bool APlayerCharacter::MoveLane_Left()
 {
@@ -837,6 +881,11 @@ bool APlayerCharacter::CanPlayerOccupyLane(int laneIndex)
 
 float APlayerCharacter::GetCurrentRunSpeed()
 {
+	if (IsBoosting)
+	{
+		return BoostOverrideSpeed;
+	}
+
 	switch (CurrentSpeedState)
 	{
 	case EPlayerSpeedState::Slow:
@@ -1175,6 +1224,18 @@ void APlayerCharacter::UpdateMercyInvincibility(float DeltaTime)
 		if (MercyInvincibleTimeLeft <= 0)
 		{
 			CancelMercyInvincibility();
+		}
+	}
+}
+
+void APlayerCharacter::UpdateBoost(float DeltaTime)
+{
+	if (IsBoosting)
+	{
+		BoostTimeRemaining -= DeltaTime;
+		if (BoostTimeRemaining <= 0)
+		{
+			CancelBoost();
 		}
 	}
 }

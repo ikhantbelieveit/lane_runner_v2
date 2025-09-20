@@ -7,6 +7,7 @@
 #include "GameFramework/Actor.h"
 #include "UIStateSystem.h"
 #include "GameInitConfigData.h"
+#include "BaseUIScreen.h"
 #include "GameInit.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FGameInitEvent);

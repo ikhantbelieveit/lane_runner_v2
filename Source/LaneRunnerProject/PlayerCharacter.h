@@ -202,6 +202,7 @@ public:
 	void UpdateShootFromInput();
 	void UpdateCheckForPit();
 	void UpdateMercyInvincibility(float DeltaTime);
+	void UpdateBoost(float DeltaTime);
 
 	//lane
 	bool MoveLane_Left();
@@ -273,5 +274,17 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Visuals")
 	UDecalComponent* DropShadowDecal;
+
+	bool IsBoosting = false;
+	float BoostOverrideSpeed;
+	float BoostTimeRemaining;
+
+	//float MaxSpeedCache_Boost;
+
+	void StartBoost(float boostSpeed, float timeToBoost);
+	void CancelBoost();
+
+public:
+	void OnTouchBoostPad(float boostSpeed, float boostTime);
 
 };
