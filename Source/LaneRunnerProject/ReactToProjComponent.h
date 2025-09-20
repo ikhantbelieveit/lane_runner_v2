@@ -64,4 +64,6 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool BlockProj = true;
+
+	
 };

@@ -44,6 +44,8 @@ void UReactToProjComponent::BeginPlay()
 	{
 		BoxComponent->OnComponentBeginOverlap.AddDynamic(this, &UReactToProjComponent::HandleBeginOverlap);
 	}
+
+	
 }
 
 
