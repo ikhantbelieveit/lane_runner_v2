@@ -44,9 +44,14 @@ void AGameInit::Tick(float DeltaTime)
 					levelSystem->EnterLevel();
 				}
 
-				HasBroadcastInitFinished = true;
+				
 			}
 		}
+
+		//init audio system here
+
+
+		HasBroadcastInitFinished = true;
 	}
 }
 

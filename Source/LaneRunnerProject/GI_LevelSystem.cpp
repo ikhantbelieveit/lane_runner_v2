@@ -5,6 +5,7 @@
 #include "GI_UIStateSystem.h"
 #include "PlayerCharacter.h"
 #include "Kismet/GameplayStatics.h"
+#include "GI_AudioSystem.h"
 #include "GI_SaveSystem.h"
 
 void UGI_LevelSystem::SetGameState(EGameState newState)
@@ -63,6 +64,12 @@ void UGI_LevelSystem::OnPlayerTouchHazard(bool oneHitKill, bool overrideInvincib
 			if (player->GetCurrentHealth() <= 0)
 			{
 				SetGameState(EGameState::Lose);
+			}
+
+			auto* audioSystem = GetGameInstance()->GetSubsystem<UGI_AudioSystem>();
+			if (audioSystem)
+			{
+				audioSystem->Play(EAudioKey::TakeDamage);
 			}
 		}
 	}

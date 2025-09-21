@@ -2,10 +2,12 @@
 
 
 #include "MyGameInstance.h"
+#include "GI_AudioSystem.h"
 
 void UMyGameInstance::Init()
 {
     Super::Init();
+
 }
 
 void UMyGameInstance::Shutdown()

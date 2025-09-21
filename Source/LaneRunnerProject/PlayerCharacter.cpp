@@ -775,9 +775,6 @@ void APlayerCharacter::CancelMercyInvincibility()
 
 void APlayerCharacter::StartBoost(float boostSpeed, float timeToBlockScroll)
 {
-	//MaxSpeedCache_Boost = GetCharacterMovement()->MaxWalkSpeed;
-	//GetCharacterMovement()->MaxWalkSpeed = boostSpeed;
-
 	BoostOverrideSpeed = boostSpeed;
 	BoostTimeRemaining = timeToBlockScroll;
 	IsBoosting = true;
@@ -786,7 +783,6 @@ void APlayerCharacter::StartBoost(float boostSpeed, float timeToBlockScroll)
 void APlayerCharacter::CancelBoost()
 {
 	IsBoosting = false;
-	//GetCharacterMovement()->MaxWalkSpeed = MaxSpeedCache_Boost;
 }
 
 void APlayerCharacter::OnTouchBoostPad(float boostSpeed, float boostTime)
@@ -796,13 +792,9 @@ void APlayerCharacter::OnTouchBoostPad(float boostSpeed, float boostTime)
 	{
 		if (levelSystem->GetGameState() == EGameState::Active)
 		{
-			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("BOOST PLAYER"));
-
 			FVector boostVector = FVector(boostSpeed, 0.0f, 0.0f);
 
 			StartBoost(boostSpeed, boostTime);
-			//LaunchCharacter(boostVector, true, false);
-			//StartTempBlockScroll(timeToBlockScroll);
 		}
 	}
 }

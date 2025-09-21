@@ -44,15 +44,11 @@ private:
 
 	const UBaseUIScreen* GetScreenForState(EUIState state) const;
 
-	
-
 	void ApplyInputMode(UBaseUIScreen* widget);
 
 	FTimerHandle TickHandle;
 
 	void TickSubsystem(float DeltaTime);
-
-	
 
 	bool InitialiseFromConfig();
 	

@@ -6,6 +6,7 @@
 #include "Engine/DataAsset.h"
 #include "EUIState.h"
 #include "BaseUIScreen.h"
+#include "GI_AudioSystem.h"
 #include "GI_ConfigData.generated.h"
 
 USTRUCT(BlueprintType)
@@ -27,5 +28,8 @@ class LANERUNNERPROJECT_API UGI_ConfigData : public UDataAsset
 public:
 	UPROPERTY(EditAnywhere)
 	FUIConfig UIConfig;
+
+	UPROPERTY(EditAnywhere)
+	UAudioConfigData* AudioConfig;
 	
 };
