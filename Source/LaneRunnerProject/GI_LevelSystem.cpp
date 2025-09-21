@@ -20,6 +20,7 @@ void UGI_LevelSystem::SetGameState(EGameState newState)
 	switch (newState)
 	{
 	case EGameState::Lose:
+
 		if (uiStateSystem)
 		{
 			uiStateSystem->EnterScreen(EUIState::DeathScreen);
@@ -122,7 +123,9 @@ void UGI_LevelSystem::EnterLevel()
 	if (player)
 	{
 		player->ResetPlayer();
-
+	}
+	else
+	{
 	}
 
 	SetScore(0);

@@ -674,6 +674,8 @@ void APlayerCharacter::ResetPlayer()
 	ClearInputValues();	//maybe not needed? figured its handy
 
 	CancelBoost();
+
+	JumpBlocked = false;
 }
 
 void APlayerCharacter::OnGameStateChanged(EGameState newState, EGameState prevState)
@@ -799,6 +801,16 @@ void APlayerCharacter::OnTouchBoostPad(float boostSpeed, float boostTime)
 	}
 }
 
+void APlayerCharacter::OnTouchBlockJump()
+{
+	JumpBlocked = true;
+}
+
+void APlayerCharacter::OnExitBlockJump()
+{
+	JumpBlocked = false;
+}
+
 
 bool APlayerCharacter::MoveLane_Left()
 {
@@ -895,7 +907,8 @@ void APlayerCharacter::UpdateJumpFromInput()
 	{
 		if (JumpInput_Pressed)
 		{
-			if (CurrentJumpState == EPlayerJumpState::Grounded)
+			if (CurrentJumpState == EPlayerJumpState::Grounded &&
+				!JumpBlocked)
 			{
 				bPressedJump = true;
 				SetJumpState(EPlayerJumpState::Rise);

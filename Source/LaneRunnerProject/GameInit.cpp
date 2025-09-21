@@ -5,6 +5,7 @@
 #include "GI_UIStateSystem.h"
 #include "TestLevelUISystem.h"
 #include "EUIState.h"
+#include "MyGameInstance.h"
 #include "GameInit.h"
 
 // Sets default values
@@ -30,28 +31,21 @@ void AGameInit::Tick(float DeltaTime)
 
 	if (!HasBroadcastInitFinished)
 	{
-		auto* uiStateSystem = GetGameInstance()->GetSubsystem<UGI_UIStateSystem>();
-		if (uiStateSystem)
+		UMyGameInstance* GI = Cast<UMyGameInstance>(GetGameInstance());
+		if (GI)
 		{
-			if (uiStateSystem->HasInitialisedFromConfig)
+			if (GI->AllSystemsReady())
 			{
 				BroadcastInitFinished();
 
 				auto* levelSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGI_LevelSystem>();
 				if (levelSystem)
 				{
-					//show test ui
 					levelSystem->EnterLevel();
+					HasBroadcastInitFinished = true;
 				}
-
-				
 			}
 		}
-
-		//init audio system here
-
-
-		HasBroadcastInitFinished = true;
 	}
 }
 

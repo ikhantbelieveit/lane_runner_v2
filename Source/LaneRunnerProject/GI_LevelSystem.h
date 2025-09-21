@@ -16,8 +16,8 @@ class LANERUNNERPROJECT_API UGI_LevelSystem : public UGameInstanceSubsystem
 	GENERATED_BODY()
 
 protected:
-	EGameState CurrentGameState;
-	EGameState PrevGameState;
+	EGameState CurrentGameState = EGameState::Dormant;
+	EGameState PrevGameState = EGameState::Dormant;
 
 	int CurrentScore;
 

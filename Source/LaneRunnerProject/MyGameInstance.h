@@ -24,4 +24,7 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	UGI_ConfigData* ConfigData;
+
+	UFUNCTION(BlueprintCallable)
+	bool AllSystemsReady();
 };

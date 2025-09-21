@@ -284,7 +284,10 @@ protected:
 	void StartBoost(float boostSpeed, float timeToBoost);
 	void CancelBoost();
 
+	bool JumpBlocked;
+
 public:
 	void OnTouchBoostPad(float boostSpeed, float boostTime);
-
+	void OnTouchBlockJump();
+	void OnExitBlockJump();
 };
