@@ -81,6 +81,12 @@ public:
     void StopMusic(float FadeOutTime = 1.0f);
 
     UFUNCTION(BlueprintCallable, Category = "Audio")
+    void PauseMusic();
+
+    UFUNCTION(BlueprintCallable, Category = "Audio")
+    void ResumeMusic();
+
+    UFUNCTION(BlueprintCallable, Category = "Audio")
     void SetChannelVolume(EAudioChannel Channel, float Volume);
 
     UFUNCTION(BlueprintCallable, Category = "Audio")

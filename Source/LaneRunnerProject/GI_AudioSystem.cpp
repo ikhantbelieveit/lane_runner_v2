@@ -115,6 +115,23 @@ void UGI_AudioSystem::StopMusic(float FadeOutTime)
     }
 }
 
+void UGI_AudioSystem::PauseMusic()
+{
+    if (MusicComponent && MusicComponent->IsPlaying())
+    {
+        MusicComponent->SetPaused(true);
+    }
+}
+
+void UGI_AudioSystem::ResumeMusic()
+{
+    if (MusicComponent && !MusicComponent->IsPlaying())
+    {
+        // Resume from pause point
+        MusicComponent->SetPaused(false);
+    }
+}
+
 void UGI_AudioSystem::SetChannelVolume(EAudioChannel Channel, float Volume)
 {
     if (USoundClass* TargetClass = ResolveClass(Channel))

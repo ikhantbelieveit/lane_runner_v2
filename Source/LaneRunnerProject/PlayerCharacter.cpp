@@ -9,6 +9,7 @@
 #include "GI_LevelSystem.h"
 #include "GameInit.h"
 #include "GI_ProjectileSystem.h"
+#include "GI_AudioSystem.h"
 
 
 // Sets default values
@@ -706,6 +707,17 @@ void APlayerCharacter::OnGameStateChanged(EGameState newState, EGameState prevSt
 
 void APlayerCharacter::OnHitHazard(bool oneHitKill)
 {
+	bool resultInKill = oneHitKill ? true : (CurrentHealth <= 1);
+	if (!resultInKill)
+	{
+		auto* audioSystem = GetGameInstance()->GetSubsystem<UGI_AudioSystem>();
+		if (audioSystem)
+		{
+			audioSystem->Play(EAudioKey::TakeDamage);
+		}
+	}
+
+
 	if (CurrentHealth > 0)
 	{
 		if (oneHitKill)
@@ -913,6 +925,12 @@ void APlayerCharacter::UpdateJumpFromInput()
 				bPressedJump = true;
 				SetJumpState(EPlayerJumpState::Rise);
 				JumpedThisFrame = true;
+
+				auto* audioSystem = GetGameInstance()->GetSubsystem<UGI_AudioSystem>();
+				if (audioSystem)
+				{
+					audioSystem->Play(EAudioKey::Jump);
+				}
 			}
 		}
 

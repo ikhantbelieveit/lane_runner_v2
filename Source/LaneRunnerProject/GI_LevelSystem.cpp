@@ -16,6 +16,7 @@ void UGI_LevelSystem::SetGameState(EGameState newState)
 	}
 
 	auto* uiStateSystem = GetGameInstance()->GetSubsystem<UGI_UIStateSystem>();
+	auto* audioSystem = GetGameInstance()->GetSubsystem<UGI_AudioSystem>();
 
 	switch (newState)
 	{
@@ -26,6 +27,11 @@ void UGI_LevelSystem::SetGameState(EGameState newState)
 			uiStateSystem->EnterScreen(EUIState::DeathScreen);
 		}
 
+		if (audioSystem)
+		{
+			audioSystem->StopMusic();
+		}
+
 		SaveLevelStats();
 
 		break;
@@ -34,6 +40,11 @@ void UGI_LevelSystem::SetGameState(EGameState newState)
 		if (uiStateSystem)
 		{
 			uiStateSystem->EnterScreen(EUIState::TestLevel);
+		}
+
+		if (audioSystem)
+		{
+			audioSystem->PlayMusic(EAudioKey::BackgroundMusic);
 		}
 		break;
 	}
@@ -65,12 +76,6 @@ void UGI_LevelSystem::OnPlayerTouchHazard(bool oneHitKill, bool overrideInvincib
 			if (player->GetCurrentHealth() <= 0)
 			{
 				SetGameState(EGameState::Lose);
-			}
-
-			auto* audioSystem = GetGameInstance()->GetSubsystem<UGI_AudioSystem>();
-			if (audioSystem)
-			{
-				audioSystem->Play(EAudioKey::TakeDamage);
 			}
 		}
 	}
@@ -132,12 +137,6 @@ void UGI_LevelSystem::EnterLevel()
 	if (player)
 	{
 		player->ResetPlayer();
-	}
-
-	auto* audioSystem = GetGameInstance()->GetSubsystem<UGI_AudioSystem>();
-	if (audioSystem)
-	{
-		audioSystem->Play(EAudioKey::BackgroundMusic);
 	}
 
 	SetScore(0);
