@@ -30,7 +30,8 @@ enum class EAudioKey : uint8
     Jump UMETA(DisplayName = "Jump"),
     Pitfall UMETA(DisplayName = "Pitfall"),
     TakeDamage UMETA(DisplayName = "Take Damage"),
-    GameOver UMETA(DisplayName = "Game Over")
+    GameOver UMETA(DisplayName = "Game Over"),
+    CoinGet UMETA(DisplayName = "Coin Get"),
 };
 
 USTRUCT(BlueprintType)

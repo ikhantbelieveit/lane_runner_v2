@@ -8,6 +8,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Components/StaticMeshComponent.h"
 #include "GI_LevelSystem.h"
+#include "GI_AudioSystem.h"
 
 // Sets default values for this component's properties
 UCollectibleComponent::UCollectibleComponent()
@@ -87,6 +88,12 @@ void UCollectibleComponent::Collect()
 	}
 
 	Collected = true;
+
+	auto* audioSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGI_AudioSystem>();
+	if (audioSystem)
+	{
+		audioSystem->Play(EAudioKey::CoinGet);
+	}
 }
 
 void UCollectibleComponent::OnLevelReset()

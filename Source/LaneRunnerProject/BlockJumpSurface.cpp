@@ -66,13 +66,11 @@ void ABlockJumpSurface::HandleEndOverlap(UPrimitiveComponent* OverlappedComp,
 	FName PlayerName = "PlayerColl";
 	if (OtherComp->ComponentHasTag(PlayerName))
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("block teh jump CANCEL"));
 		auto* player = Cast<APlayerCharacter>(OtherActor);
 		player->OnExitBlockJump();
 	}
 	else
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("block teh jump CANCEL NOPE"));
 	}
 }
 

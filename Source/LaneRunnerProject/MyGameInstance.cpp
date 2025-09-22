@@ -25,13 +25,13 @@ bool UMyGameInstance::AllSystemsReady()
     auto* uiSystem = GetSubsystem<UGI_UIStateSystem>();
     if (uiSystem)
     {
-        uiReady = true;
+        uiReady = uiSystem->HasInitialisedFromConfig;
     }
 
     auto* audioSystem = GetSubsystem<UGI_AudioSystem>();
     if (audioSystem)
     {
-        audioReady = true;
+        audioReady = audioSystem->HasInitialisedFromConfig;
     }
 
     if (audioReady && uiReady)
