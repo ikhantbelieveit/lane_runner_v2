@@ -124,8 +124,11 @@ void UGI_LevelSystem::EnterLevel()
 	{
 		player->ResetPlayer();
 	}
-	else
+
+	auto* audioSystem = GetGameInstance()->GetSubsystem<UGI_AudioSystem>();
+	if (audioSystem)
 	{
+		audioSystem->Play(EAudioKey::BackgroundMusic);
 	}
 
 	SetScore(0);
