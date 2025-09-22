@@ -23,8 +23,8 @@ UENUM(BlueprintType)
 enum class EAudioKey : uint8
 {
     None        UMETA(DisplayName = "None"),
-    Gunfire   UMETA(DisplayName = "Gunfire"),
-    LaneSwitch    UMETA(DisplayName = "LaneSwitch"),
+    PlayerShoot   UMETA(DisplayName = "Player Shoot"),
+    LaneSwitch    UMETA(DisplayName = "Lane Switch"),
     MenuClick   UMETA(DisplayName = "Menu Click"),
     BackgroundMusic  UMETA(DisplayName = "Background Music"),
     Jump UMETA(DisplayName = "Jump"),

@@ -1022,6 +1022,12 @@ void APlayerCharacter::Shoot(EProjectileDirection direction, bool holdNotTap)
 				break;
 			}
 		}
+
+		auto* audioSystem = GetGameInstance()->GetSubsystem<UGI_AudioSystem>();
+		if (audioSystem)
+		{
+			audioSystem->Play(EAudioKey::PlayerShoot);
+		}
 	}
 }
 
