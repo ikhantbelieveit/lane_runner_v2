@@ -60,7 +60,14 @@ void UHazardCollisionComponent::HandleBeginOverlap(
 		auto* levelSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGI_LevelSystem>();
 		if (levelSystem)
 		{
-			levelSystem->OnPlayerTouchHazard(OneHitKill, OverrideInvincibility);
+			if (IsPitfall)
+			{
+				levelSystem->OnPitfall();
+			}
+			else
+			{
+				levelSystem->OnPlayerTouchHazard(OneHitKill, OverrideInvincibility);
+			}
 		}
 	}
 }

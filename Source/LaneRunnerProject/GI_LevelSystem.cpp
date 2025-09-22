@@ -91,7 +91,16 @@ void UGI_LevelSystem::KillPlayer()
 
 void UGI_LevelSystem::OnPitfall()
 {
-	KillPlayer();
+	if (GetGameState() == EGameState::Active)
+	{
+		KillPlayer();
+
+		auto* audioSystem = GetGameInstance()->GetSubsystem<UGI_AudioSystem>();
+		if (audioSystem)
+		{
+			audioSystem->Play(EAudioKey::Pitfall);
+		}
+	}
 }
 
 void UGI_LevelSystem::SetScore(int newScore)

@@ -43,4 +43,7 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	bool OverrideInvincibility;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	bool IsPitfall;
 };
