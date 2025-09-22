@@ -6,6 +6,7 @@
 #include "GI_SaveSystem.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "GI_UIStateSystem.h"
 
 void UDeathScreenUIWidget::Initialise()
 {
@@ -32,8 +33,11 @@ void UDeathScreenUIWidget::OnRespawnButtonPressed()
 
 void UDeathScreenUIWidget::OnQuitButtonPressed()
 {
-	APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0);
-	UKismetSystemLibrary::QuitGame(this, PC, EQuitPreference::Quit, true);
+	auto* uiStateSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGI_UIStateSystem>();
+	if (uiStateSystem)
+	{
+		uiStateSystem->QuitGame();
+	}
 }
 
 void UDeathScreenUIWidget::SetupBeforeShow()

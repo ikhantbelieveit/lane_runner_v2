@@ -32,6 +32,9 @@ public:
 
 	TMap<EUIState, UBaseUIScreen*> Widgets_LUT;
 
+	UFUNCTION(BlueprintCallable)
+	void QuitGame();
+
 private:
 	UBaseUIScreen* ActiveWidget;
 

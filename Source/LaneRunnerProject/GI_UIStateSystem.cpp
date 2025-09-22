@@ -115,6 +115,14 @@ void UGI_UIStateSystem::PrintFocusedWidget()
 }
 
 
+void UGI_UIStateSystem::QuitGame()
+{
+    if (APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0))
+    {
+        UKismetSystemLibrary::QuitGame(GetWorld(), PC, EQuitPreference::Quit, true);
+    }
+}
+
 void UGI_UIStateSystem::ShowScreen(UBaseUIScreen* screen)
 {
     screen->SetupBeforeShow();

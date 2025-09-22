@@ -4,6 +4,7 @@
 #include "MyGameInstance.h"
 #include "GI_AudioSystem.h"
 #include "GI_UIStateSystem.h"
+#include "Kismet/GameplayStatics.h"
 
 void UMyGameInstance::Init()
 {
@@ -15,6 +16,20 @@ void UMyGameInstance::Shutdown()
 {
     Super::Shutdown();
 
+}
+
+void UMyGameInstance::OnStart()
+{
+    Super::OnStart();
+
+    UKismetSystemLibrary::ExecuteConsoleCommand(GetWorld(), TEXT("sg.ResolutionQuality 70"));
+    UKismetSystemLibrary::ExecuteConsoleCommand(GetWorld(), TEXT("sg.ViewDistanceQuality 1"));
+    UKismetSystemLibrary::ExecuteConsoleCommand(GetWorld(), TEXT("sg.AntiAliasingQuality 1"));
+    UKismetSystemLibrary::ExecuteConsoleCommand(GetWorld(), TEXT("sg.ShadowQuality 0"));
+    UKismetSystemLibrary::ExecuteConsoleCommand(GetWorld(), TEXT("sg.PostProcessQuality 0"));
+    UKismetSystemLibrary::ExecuteConsoleCommand(GetWorld(), TEXT("sg.TextureQuality 1"));
+    UKismetSystemLibrary::ExecuteConsoleCommand(GetWorld(), TEXT("sg.EffectsQuality 0"));
+    UKismetSystemLibrary::ExecuteConsoleCommand(GetWorld(), TEXT("sg.FoliageQuality 0"));
 }
 
 bool UMyGameInstance::AllSystemsReady()
