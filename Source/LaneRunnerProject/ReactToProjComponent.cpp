@@ -3,6 +3,9 @@
 
 #include "ReactToProjComponent.h"
 #include "DestructibleObjectComponent.h"
+#include "OneShotAnim.h"
+#include "Projectile.h"
+#include "EngineUtils.h"
 
 // Sets default values for this component's properties
 UReactToProjComponent::UReactToProjComponent()
@@ -72,8 +75,16 @@ void UReactToProjComponent::HitByProjectile(AActor* projActor)
 		}
 	}
 
+	bool impactShouldScroll = false;
+
+	if (auto* scrollComp = GetOwner()->GetComponentByClass<UScrollWithPlayerComponent>())
+	{
+		impactShouldScroll = scrollComp->Enabled;
+	}
+
 	if (BlockProj)
 	{
-		projActor->Destroy();
+		AProjectile* proj = Cast<AProjectile>(projActor);
+		proj->OnDestroy(impactShouldScroll);
 	}
 }

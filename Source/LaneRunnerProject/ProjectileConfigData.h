@@ -6,6 +6,7 @@
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
 #include "Engine/StaticMesh.h"
+#include "OneShotAnim.h"
 #include "ProjectileConfigData.generated.h"
 
 /**
@@ -37,4 +38,7 @@ public:
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Visual", meta = (AllowPrivateAccess = "true"))
     UPaperSprite* ProjSprite;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Visual", meta = (AllowPrivateAccess = "true"))
+    TSubclassOf<class AOneShotAnim> ImpactAnimClass;
 };

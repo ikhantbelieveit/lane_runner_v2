@@ -133,9 +133,6 @@ void AProjectile::Fire(EProjectileDirection Direction)
         {
             spriteComp->SetWorldRotation(FRotator(0.0f, 0.0f, 90.0f));
         }
-        /*UProjectileMovementComponent* projMoveComp = (UProjectileMovementComponent*)GetComponentByClass(UProjectileMovementComponent::StaticClass());
-        projMoveComp->InitialSpeed = 2000.0f;
-        projMoveComp->MaxSpeed = 2000.0f;*/
         break;
     }
 
@@ -152,4 +149,26 @@ EProjectileDirection AProjectile::GetFiringDirection()
 void AProjectile::SetFiringDirection(EProjectileDirection Direction)
 {
     FiringDirection = Direction;
+}
+
+void AProjectile::OnDestroy(bool impactScroll)
+{
+    if (ConfigData->ImpactAnimClass)
+    {
+        FActorSpawnParameters SpawnParams;
+        FRotator defaultRotation = FRotator(0.0f, 90.0f, 0.0f);
+
+        AOneShotAnim* impactAnim = GetWorld()->SpawnActor<AOneShotAnim>(ConfigData->ImpactAnimClass, GetActorLocation(), defaultRotation, SpawnParams);
+
+        if (impactScroll)
+        {
+            UScrollWithPlayerComponent* scrollComp = impactAnim->GetComponentByClass<UScrollWithPlayerComponent>();
+            if (scrollComp)
+            {
+                scrollComp->Enabled = impactScroll;
+            }
+        }
+    }
+
+    Destroy();
 }
