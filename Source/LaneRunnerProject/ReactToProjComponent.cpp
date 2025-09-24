@@ -20,22 +20,6 @@ void UReactToProjComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (!CollisionComponent)
-	{
-		// Automatically find the first primitive component with UPrimitiveComponent
-		CollisionComponent = GetOwner()->FindComponentByClass<UPrimitiveComponent>();
-	}
-
-	if (CollisionComponent)
-	{
-		CollisionComponent->OnComponentBeginOverlap.AddDynamic(this, &UReactToProjComponent::HandleBeginOverlap);
-
-	}
-	else
-	{
-
-	}
-
 	if (!BoxComponent)
 	{
 		BoxComponent = GetOwner()->FindComponentByClass<UBoxComponent>();
@@ -44,8 +28,6 @@ void UReactToProjComponent::BeginPlay()
 	{
 		BoxComponent->OnComponentBeginOverlap.AddDynamic(this, &UReactToProjComponent::HandleBeginOverlap);
 	}
-
-	
 }
 
 
@@ -71,8 +53,7 @@ void UReactToProjComponent::HandleBeginOverlap(
 		return;
 	}
 
-	// Check for tag
-	if (OtherActor->ActorHasTag(ProjTag))
+	if (OtherComp->ComponentHasTag(ProjTag))
 	{
 		HitByProjectile(OtherActor);
 	}

@@ -7,9 +7,8 @@ AProjectile::AProjectile()
 {
     PrimaryActorTick.bCanEverTick = true;
 
-    // Only create mesh if none exists (allows Blueprint override)
-    MeshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComp"));
-    RootComponent = MeshComp;
+    BoxComponent = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxComponent"));
+    RootComponent = BoxComponent;
 
     // Projectile movement
     ProjectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovement"));
@@ -42,8 +41,8 @@ void AProjectile::SetupFromConfig()
     
 
     UProjectileMovementComponent* projMoveComp = (UProjectileMovementComponent*)GetComponentByClass(UProjectileMovementComponent::StaticClass());
-    UStaticMeshComponent* meshComp = (UStaticMeshComponent*)GetComponentByClass(UStaticMeshComponent::StaticClass());
     UPaperSpriteComponent* spriteComp = (UPaperSpriteComponent*)GetComponentByClass(UPaperSpriteComponent::StaticClass());
+    UBoxComponent* boxComp = (UBoxComponent*)GetComponentByClass(UBoxComponent::StaticClass());
 
 
 
@@ -56,12 +55,6 @@ void AProjectile::SetupFromConfig()
         case EProjectileDirection::Forward:
             projMoveComp->InitialSpeed = ConfigData->SpeedForward;
             projMoveComp->MaxSpeed = ConfigData->SpeedForward;
-
-            if (meshComp)
-            {
-                meshComp->SetStaticMesh(ConfigData->ProjectileMesh);
-                meshComp->SetRelativeScale3D(FVector(ConfigData->MeshScale));
-            }
 
             if (ScrollWithPlayerComponent)
             {
@@ -76,31 +69,25 @@ void AProjectile::SetupFromConfig()
             projMoveComp->InitialSpeed = ConfigData->Speed;
             projMoveComp->MaxSpeed = ConfigData->Speed;
 
-            if (meshComp)
-            {
-                meshComp->SetStaticMesh(ConfigData->ProjectileMesh);
-                meshComp->SetRelativeScale3D(FVector(ConfigData->MeshScale));
-            }
             break;
         default:
             projMoveComp->InitialSpeed = ConfigData->Speed;
             projMoveComp->MaxSpeed = ConfigData->Speed;
 
-            if (meshComp)
-            {
-                meshComp->SetStaticMesh(ConfigData->ProjectileMesh);
-                meshComp->SetRelativeScale3D(FVector(ConfigData->MeshScale));
-            }
             break;
         }
         
-        if (meshComp)
-        {
-            meshComp->SetVisibility(false);
-        }
         if (spriteComp)
         {
             spriteComp->SetSprite(ConfigData->ProjSprite);
+        }
+
+        if (boxComp)
+        {
+            if (!boxComp->ComponentHasTag("PlayerProj"))
+            {
+                boxComp->ComponentTags.Add("PlayerProj");
+            }
         }
     }
 }
@@ -137,13 +124,6 @@ void AProjectile::Fire(EProjectileDirection Direction)
 
     if (!ProjectileMovement) return;
     ProjectileMovement->Velocity = directionVector.GetSafeNormal() * ProjectileMovement->InitialSpeed;
-
-    // Optional mesh default if none set in Blueprint
-    if (MeshComp && !MeshComp->GetStaticMesh())
-    {
-        // MeshComp->SetStaticMesh(DefaultMesh);
-    }
-
     
 }
 

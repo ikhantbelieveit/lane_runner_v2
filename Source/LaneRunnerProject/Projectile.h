@@ -8,6 +8,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Components/SphereComponent.h"
+#include "Components/BoxComponent.h"
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Projectile.generated.h"
@@ -35,9 +36,8 @@ protected:
 private:
     FVector Velocity;
 
-    // Mesh component: can be set in Blueprint
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-    UStaticMeshComponent* MeshComp;
+    UBoxComponent* BoxComponent;
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
     UProjectileMovementComponent* ProjectileMovement;
