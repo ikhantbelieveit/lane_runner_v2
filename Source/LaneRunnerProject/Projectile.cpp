@@ -7,20 +7,20 @@ AProjectile::AProjectile()
 {
     PrimaryActorTick.bCanEverTick = true;
 
-    BoxComponent = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxComponent"));
-    RootComponent = BoxComponent;
+    //BoxComponent = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxComponent"));
+    //RootComponent = BoxComponent;
 
-    // Projectile movement
-    ProjectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovement"));
-    ProjectileMovement->bRotationFollowsVelocity = true;
-    ProjectileMovement->bShouldBounce = false;
+    //// Projectile movement
+    //ProjectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovement"));
+    //ProjectileMovement->bRotationFollowsVelocity = true;
+    //ProjectileMovement->bShouldBounce = false;
 
-    ScrollWithPlayerComponent = CreateDefaultSubobject<UScrollWithPlayerComponent>(TEXT("ScrollWithPlayerComponent"));
+    //ScrollWithPlayerComponent = CreateDefaultSubobject<UScrollWithPlayerComponent>(TEXT("ScrollWithPlayerComponent"));
 
-    //PaperSprite Visuals
-    SpriteComponent = CreateDefaultSubobject<UPaperSpriteComponent>(TEXT("Sprite"));
-    SpriteComponent->SetupAttachment(GetRootComponent());
-    SpriteComponent->SetRelativeLocation(FVector(0.0f, 0.0f, 0.0f));
+    ////PaperSprite Visuals
+    //SpriteComponent = CreateDefaultSubobject<UPaperSpriteComponent>(TEXT("Sprite"));
+    //SpriteComponent->SetupAttachment(GetRootComponent());
+    //SpriteComponent->SetRelativeLocation(FVector(0.0f, 0.0f, 0.0f));
 }
 
 void AProjectile::BeginPlay()
@@ -43,6 +43,7 @@ void AProjectile::SetupFromConfig()
     UProjectileMovementComponent* projMoveComp = (UProjectileMovementComponent*)GetComponentByClass(UProjectileMovementComponent::StaticClass());
     UPaperSpriteComponent* spriteComp = (UPaperSpriteComponent*)GetComponentByClass(UPaperSpriteComponent::StaticClass());
     UBoxComponent* boxComp = (UBoxComponent*)GetComponentByClass(UBoxComponent::StaticClass());
+    UScrollWithPlayerComponent* scrollComp = GetComponentByClass<UScrollWithPlayerComponent>();
 
 
 
@@ -56,9 +57,9 @@ void AProjectile::SetupFromConfig()
             projMoveComp->InitialSpeed = ConfigData->SpeedForward;
             projMoveComp->MaxSpeed = ConfigData->SpeedForward;
 
-            if (ScrollWithPlayerComponent)
+            if (scrollComp)
             {
-                ScrollWithPlayerComponent->Enabled = false;
+                scrollComp->Enabled = false;
             }
 
             spriteComp->SetRelativeRotation(FRotator(0.0f, 0.0f, 90.0f));
@@ -94,19 +95,32 @@ void AProjectile::SetupFromConfig()
 
 void AProjectile::Fire(EProjectileDirection Direction)
 {
-
+    UProjectileMovementComponent* projMoveComp = (UProjectileMovementComponent*)GetComponentByClass(UProjectileMovementComponent::StaticClass());
     FVector directionVector = FVector(0.0f, 0.0f, 1.0f);
+    UPaperSpriteComponent* spriteComp = (UPaperSpriteComponent*)GetComponentByClass(UPaperSpriteComponent::StaticClass());
 
     switch (Direction)
     {
     case EProjectileDirection::Left:
         directionVector = FVector(0, -1, 0);
+        if (spriteComp)
+        {
+            spriteComp->SetWorldRotation(FRotator(0.0f, -90.0f, 0.0f));
+        }
         break;
     case EProjectileDirection::Right:
         directionVector = FVector(0, 1, 0);
+        if (spriteComp)
+        {
+            spriteComp->SetWorldRotation(FRotator(0.0f, 90.0f, 0.0f));
+        }
         break;
     case EProjectileDirection::Up:
         directionVector = FVector(0, 0, 1);
+        if (spriteComp)
+        {
+            spriteComp->SetWorldRotation(FRotator(90.0f, 90.0f, 0.0f));
+        }
         break;
     case EProjectileDirection::Forward:
         directionVector = FVector(1, 0, 0);
@@ -115,15 +129,18 @@ void AProjectile::Fire(EProjectileDirection Direction)
         {
             scrollComp->Enabled = false;
         }
-        
+        if (spriteComp)
+        {
+            spriteComp->SetWorldRotation(FRotator(0.0f, 0.0f, 90.0f));
+        }
         /*UProjectileMovementComponent* projMoveComp = (UProjectileMovementComponent*)GetComponentByClass(UProjectileMovementComponent::StaticClass());
         projMoveComp->InitialSpeed = 2000.0f;
         projMoveComp->MaxSpeed = 2000.0f;*/
         break;
     }
 
-    if (!ProjectileMovement) return;
-    ProjectileMovement->Velocity = directionVector.GetSafeNormal() * ProjectileMovement->InitialSpeed;
+    if (!projMoveComp) return;
+    projMoveComp->Velocity = directionVector.GetSafeNormal() * projMoveComp->InitialSpeed;
     
 }
 

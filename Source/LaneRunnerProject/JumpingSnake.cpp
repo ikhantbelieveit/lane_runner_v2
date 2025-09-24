@@ -3,6 +3,7 @@
 
 #include "JumpingSnake.h"
 #include "TimedActionComponent.h"
+#include "Components/BoxComponent.h"
 
 // Sets default values
 AJumpingSnake::AJumpingSnake()
@@ -18,7 +19,13 @@ void AJumpingSnake::BeginPlay()
 	Super::BeginPlay();
 	
 	UTimedActionComponent* actionComponent = GetComponentByClass<UTimedActionComponent>();
-	actionComponent->PerformActionEvent.AddDynamic(this, &AJumpingSnake::PerformJump);
+	if (actionComponent)
+	{
+		actionComponent->PerformActionEvent.AddDynamic(this, &AJumpingSnake::PerformJump);
+	}
+	else
+	{
+	}
 }
 
 // Called every frame
@@ -30,6 +37,9 @@ void AJumpingSnake::Tick(float DeltaTime)
 
 void AJumpingSnake::PerformJump()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("JUMP NOW"));
+	FVector jumpVector = FVector(0.0f, 0.0f, JumpVelocity);
+
+	UBoxComponent* boxComp = GetComponentByClass<UBoxComponent>();
+	boxComp->AddImpulse(jumpVector, NAME_None, true);
 
 }

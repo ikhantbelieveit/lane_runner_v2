@@ -36,20 +36,9 @@ protected:
 private:
     FVector Velocity;
 
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-    UBoxComponent* BoxComponent;
-
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-    UProjectileMovementComponent* ProjectileMovement;
-
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-    UScrollWithPlayerComponent* ScrollWithPlayerComponent;
-
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
     UProjectileConfigData* ConfigData;
 
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Visuals", meta = (AllowPrivateAccess = "true"))
-    UPaperSpriteComponent* SpriteComponent;
 
     UPaperSprite* ProjSprite;
 };

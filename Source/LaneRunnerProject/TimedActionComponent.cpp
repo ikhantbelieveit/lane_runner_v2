@@ -42,7 +42,8 @@ void UTimedActionComponent::StartAction()
             this,
             &UTimedActionComponent::PerformAction,
             IntervalSeconds,
-            bLooping
+            bLooping,
+            StartDelay
         );
     }
 }

@@ -23,5 +23,9 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	UFUNCTION()
 	void PerformJump();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float JumpVelocity;
 };

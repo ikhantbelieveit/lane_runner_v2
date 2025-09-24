@@ -9,7 +9,6 @@ void UGI_ProjectileSystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
 
-	// Ensure another subsystem is ready before proceeding
 	Collection.InitializeDependency<UGI_LevelSystem>();
 
 	auto* levelSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGI_LevelSystem>();
@@ -41,6 +40,7 @@ bool UGI_ProjectileSystem::ShootPlayerProjectile(FProjectileRequestData request)
 			Projectile->Fire(request.Direction);
 
 			success = true;
+
 		}
 	}
 
