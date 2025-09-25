@@ -155,18 +155,21 @@ void AProjectile::OnDestroy(bool impactScroll, float scrollWithPlayerOffset)
 {
     if (ConfigData->ImpactAnimClass)
     {
+        float randomRotate = FMath::RandRange(0.0, 360.0);
+
         FActorSpawnParameters SpawnParams;
-        FRotator defaultRotation = FRotator(0.0f, 90.0f, 0.0f);
+        FRotator defaultRotation = FRotator(randomRotate, 90.0f, 0.0f);
 
-        AOneShotAnim* impactAnim = GetWorld()->SpawnActor<AOneShotAnim>(ConfigData->ImpactAnimClass, GetActorLocation(), defaultRotation, SpawnParams);
-
-        if (impactScroll)
+        if (AOneShotAnim* impactAnim = GetWorld()->SpawnActor<AOneShotAnim>(ConfigData->ImpactAnimClass, GetActorLocation(), defaultRotation, SpawnParams))
         {
-            UScrollWithPlayerComponent* scrollComp = impactAnim->GetComponentByClass<UScrollWithPlayerComponent>();
-            if (scrollComp)
+            if (impactScroll)
             {
-                scrollComp->Enabled = impactScroll;
-                scrollComp->SetScrollWithPos(scrollWithPlayerOffset);
+                UScrollWithPlayerComponent* scrollComp = impactAnim->GetComponentByClass<UScrollWithPlayerComponent>();
+                if (scrollComp)
+                {
+                    scrollComp->Enabled = impactScroll;
+                    scrollComp->SetScrollWithPos(scrollWithPlayerOffset);
+                }
             }
         }
     }
