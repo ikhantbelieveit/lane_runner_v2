@@ -39,6 +39,20 @@ void UDestructibleObjectComponent::BeginPlay()
 	{
 		levelSystem->CleanupBeforeReset.AddDynamic(this, &UDestructibleObjectComponent::OnLevelReset);
 	}
+
+	if (SpawnItemOnDestroy)
+	{
+		FActorSpawnParameters SpawnParams;
+
+		FRotator defaultRotation = FRotator();
+
+		if (ABaseCollectible* item = GetWorld()->SpawnActor<ABaseCollectible>(SpawnCollectibleClass, GetOwner()->GetActorLocation(), defaultRotation, SpawnParams))
+		{
+			item->ResetAsSpawned = false;
+			item->Despawn();
+			ActiveCollectible = item;
+		}
+	}
 }
 
 
@@ -99,6 +113,12 @@ void UDestructibleObjectComponent::DestroyFromComp()
 	{
 		sprite->SetVisibility(false);
 	}
+
+	if (ActiveCollectible)
+	{
+		ActiveCollectible->SetActorLocation(GetOwner()->GetActorLocation());
+		ActiveCollectible->Spawn();
+	}
 	
 	Destroyed = true;
 }
@@ -127,6 +147,11 @@ void UDestructibleObjectComponent::ResetDestroy()
 		if (sprite)
 		{
 			sprite->SetVisibility(true);
+		}
+
+		if (ActiveCollectible)
+		{
+			ActiveCollectible->Despawn();
 		}
 	}
 

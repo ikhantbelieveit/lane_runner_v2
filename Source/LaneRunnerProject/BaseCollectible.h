@@ -43,4 +43,18 @@ public:
 		bool bFromSweep,
 		const FHitResult& SweepResult
 	);
+
+	UFUNCTION()
+	void Despawn();
+
+	UFUNCTION()
+	void Spawn();
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	int PointsValue = 10;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	bool GivePoints = true;
+
+	bool ResetAsSpawned = true;
 };

@@ -46,30 +46,16 @@ void ABaseCollectible::Collect()
 		return;
 	}
 
-	auto* levelSystem = GetGameInstance()->GetSubsystem<UGI_LevelSystem>();
-	if (levelSystem)
+	if (GivePoints)
 	{
-		levelSystem->AddToScore(10);
+		auto* levelSystem = GetGameInstance()->GetSubsystem<UGI_LevelSystem>();
+		if (levelSystem)
+		{
+			levelSystem->AddToScore(PointsValue);
+		}
 	}
 
-	UStaticMeshComponent* mesh = (UStaticMeshComponent*)GetComponentByClass(UStaticMeshComponent::StaticClass());
-	if (mesh)
-	{
-		mesh->SetVisibility(false);
-	}
-
-
-	UBoxComponent* box = (UBoxComponent*)GetComponentByClass(UBoxComponent::StaticClass());
-	if (box)
-	{
-		box->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	}
-
-	UPaperSpriteComponent* sprite = (UPaperSpriteComponent*)GetComponentByClass(UPaperSpriteComponent::StaticClass());
-	if (sprite)
-	{
-		sprite->SetVisibility(false);
-	}
+	Despawn();
 
 	Collected = true;
 
@@ -82,35 +68,22 @@ void ABaseCollectible::Collect()
 
 void ABaseCollectible::OnLevelReset()
 {
-	ResetCollect();
+	if (ResetAsSpawned)
+	{
+		Spawn();
+	}
+	else
+	{
+		Despawn();
+	}
+
+	Collected = false;
 }
 
 void ABaseCollectible::ResetCollect()
 {
-	if (GetIsCollected())
-	{
-		UStaticMeshComponent* mesh = (UStaticMeshComponent*)GetComponentByClass(UStaticMeshComponent::StaticClass());
-		if (mesh)
-		{
-			mesh->SetVisibility(true);
-		}
 
-
-		UBoxComponent* box = (UBoxComponent*)GetComponentByClass(UBoxComponent::StaticClass());
-		if (box)
-		{
-			box->SetCollisionEnabled(DefaultCollMode);
-		}
-
-
-		UPaperSpriteComponent* sprite = (UPaperSpriteComponent*)GetComponentByClass(UPaperSpriteComponent::StaticClass());
-		if (sprite)
-		{
-			sprite->SetVisibility(true);
-		}
-	}
-
-	Collected = false;
+	
 }
 
 void ABaseCollectible::HandleBeginOverlap(
@@ -131,5 +104,50 @@ void ABaseCollectible::HandleBeginOverlap(
 	if (OtherComp->ComponentHasTag(PlayerName))
 	{
 		Collect();
+	}
+}
+
+void ABaseCollectible::Despawn()
+{
+	UStaticMeshComponent* mesh = (UStaticMeshComponent*)GetComponentByClass(UStaticMeshComponent::StaticClass());
+	if (mesh)
+	{
+		mesh->SetVisibility(false);
+	}
+
+
+	UBoxComponent* box = (UBoxComponent*)GetComponentByClass(UBoxComponent::StaticClass());
+	if (box)
+	{
+		box->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
+
+	UPaperSpriteComponent* sprite = (UPaperSpriteComponent*)GetComponentByClass(UPaperSpriteComponent::StaticClass());
+	if (sprite)
+	{
+		sprite->SetVisibility(false);
+	}
+}
+
+void ABaseCollectible::Spawn()
+{
+	UStaticMeshComponent* mesh = (UStaticMeshComponent*)GetComponentByClass(UStaticMeshComponent::StaticClass());
+	if (mesh)
+	{
+		mesh->SetVisibility(true);
+	}
+
+
+	UBoxComponent* box = (UBoxComponent*)GetComponentByClass(UBoxComponent::StaticClass());
+	if (box)
+	{
+		box->SetCollisionEnabled(DefaultCollMode);
+	}
+
+
+	UPaperSpriteComponent* sprite = (UPaperSpriteComponent*)GetComponentByClass(UPaperSpriteComponent::StaticClass());
+	if (sprite)
+	{
+		sprite->SetVisibility(true);
 	}
 }

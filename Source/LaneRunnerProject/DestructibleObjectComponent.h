@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "Components/BoxComponent.h"
+#include "BaseCollectible.h"
 #include "DestructibleObjectComponent.generated.h"
 
 
@@ -54,4 +55,12 @@ public:
 	// New boolean property
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flags")
 	bool GivePointsOnDestroy = true;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flags")
+	bool SpawnItemOnDestroy = true;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	TSubclassOf<class ABaseCollectible> SpawnCollectibleClass;
+
+	ABaseCollectible* ActiveCollectible;
 };
