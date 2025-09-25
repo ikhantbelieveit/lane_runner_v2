@@ -589,7 +589,7 @@ void APlayerCharacter::UpdateSpeedFromInput()
 
 	if (SlowInput_Active)
 	{
-		newState = EPlayerSpeedState::Slow;
+		//newState = EPlayerSpeedState::Slow;
 	}
 
 	if (SpeedInput_Active && SlowInput_Active)

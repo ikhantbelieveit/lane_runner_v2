@@ -68,7 +68,7 @@ bool UGI_AudioSystem::InitialiseFromConfig()
 
 void UGI_AudioSystem::Play(EAudioKey Key)
 {
-    if (FAudioEntry* Entry = AudioMap.Find(Key))
+    /*if (FAudioEntry* Entry = AudioMap.Find(Key))
     {
         if (Entry->Sound)
         {
@@ -81,12 +81,12 @@ void UGI_AudioSystem::Play(EAudioKey Key)
                 Entry->Concurrency
             );
         }
-    }
+    }*/
 }
 
 void UGI_AudioSystem::PlayMusic(EAudioKey Key)
 {
-    if (FAudioEntry* Entry = AudioMap.Find(Key))
+    /*if (FAudioEntry* Entry = AudioMap.Find(Key))
     {
         if (Entry->Sound)
         {
@@ -104,7 +104,7 @@ void UGI_AudioSystem::PlayMusic(EAudioKey Key)
                 MusicComponent->SoundClassOverride = MusicClass;
             }
         }
-    }
+    }*/
 }
 
 void UGI_AudioSystem::StopMusic(float FadeOutTime)
