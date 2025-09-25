@@ -39,5 +39,9 @@ public:
 
 	FVector StartPos;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Config")
+	float ScrollWithXPos;
 
+	UFUNCTION()
+	void SetScrollWithPos(float pos);
 };

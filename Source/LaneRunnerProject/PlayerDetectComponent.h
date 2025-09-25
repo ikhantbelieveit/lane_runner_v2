@@ -14,16 +14,11 @@ class LANERUNNERPROJECT_API UPlayerDetectComponent : public UActorComponent
 	GENERATED_BODY()
 
 public:	
-	// Sets default values for this component's properties
 	UPlayerDetectComponent();
 
 protected:
-	// Called when the game starts
 	virtual void BeginPlay() override;
 
-	// The collision component we want to listen on (assignable in Blueprint instance)
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Overlap")
-	UPrimitiveComponent* CollisionComponent;
 
 	UFUNCTION()
 	void HandleBeginOverlap(

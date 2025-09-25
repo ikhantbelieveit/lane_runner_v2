@@ -76,15 +76,17 @@ void UReactToProjComponent::HitByProjectile(AActor* projActor)
 	}
 
 	bool impactShouldScroll = false;
+	float scrollWithPlayerOffset = 0.0f;
 
 	if (auto* scrollComp = GetOwner()->GetComponentByClass<UScrollWithPlayerComponent>())
 	{
 		impactShouldScroll = scrollComp->Enabled;
+		scrollWithPlayerOffset = scrollComp->ScrollWithXPos;
 	}
 
 	if (BlockProj)
 	{
 		AProjectile* proj = Cast<AProjectile>(projActor);
-		proj->OnDestroy(impactShouldScroll);
+		proj->OnDestroy(impactShouldScroll, scrollWithPlayerOffset);
 	}
 }

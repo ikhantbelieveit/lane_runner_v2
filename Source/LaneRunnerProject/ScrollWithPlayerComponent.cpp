@@ -52,15 +52,20 @@ void UScrollWithPlayerComponent::TickComponent(float DeltaTime, ELevelTick TickT
 
 	if (HasPlayerRef && Enabled)
 	{
-		FVector playerLoc = PlayerRef->GetActorLocation();
 		FVector currentLoc = GetOwner()->GetActorLocation();
+		FVector playerLoc = PlayerRef->GetActorLocation();
+
+		float newXPos = playerLoc.X + ScrollWithXPos;
 
 		FVector newActorLoc = FVector(
-			playerLoc.X,
+			newXPos,
 			currentLoc.Y,
 			currentLoc.Z);
 
-		GetOwner()->SetActorLocation(newActorLoc);
+		if (GetOwner()->SetActorLocation(newActorLoc))
+		{
+
+		};
 	}
 }
 
@@ -68,4 +73,9 @@ void UScrollWithPlayerComponent::OnLevelReset()
 {
 	Enabled = StartEnabled;
 	GetOwner()->SetActorLocation(StartPos);
+}
+
+void UScrollWithPlayerComponent::SetScrollWithPos(float pos)
+{
+	ScrollWithXPos = pos;
 }

@@ -20,26 +20,16 @@ void UPlayerDetectComponent::BeginPlay()
 	Super::BeginPlay();
 
 
-	if (!CollisionComponent)
-	{
-		// Automatically find the first primitive component with UPrimitiveComponent
-		CollisionComponent = GetOwner()->FindComponentByClass<UPrimitiveComponent>();
-	}
-
-	if (CollisionComponent)
-	{
-		CollisionComponent->OnComponentBeginOverlap.AddDynamic(this, &UPlayerDetectComponent::HandleBeginOverlap);
-
-	}
 
 	if (!BoxComponent)
 	{
 		BoxComponent = GetOwner()->FindComponentByClass<UBoxComponent>();
+		
 	}
 	if (BoxComponent)
 	{
 		BoxComponent->OnComponentBeginOverlap.AddDynamic(this, &UPlayerDetectComponent::HandleBeginOverlap);
-
+		
 	}
 }
 
@@ -66,8 +56,7 @@ void UPlayerDetectComponent::HandleBeginOverlap(
 		return;
 	}
 
-	FName PlayerName = "PlayerArea";
-	if (OtherComp->ComponentHasTag(PlayerName))
+	if (OtherComp->ComponentHasTag(PlayerAreaTag))
 	{
 		//do stuff
 		if (TriggerScrollWithPlayer)
@@ -76,6 +65,7 @@ void UPlayerDetectComponent::HandleBeginOverlap(
 
 			if (scrollWithPlayer)
 			{
+				scrollWithPlayer->SetScrollWithPos(OtherComp->GetRelativeLocation().X);
 				scrollWithPlayer->Enabled = true;
 			}
 			

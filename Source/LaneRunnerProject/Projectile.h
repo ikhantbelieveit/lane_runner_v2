@@ -29,7 +29,7 @@ public:
     EProjectileDirection GetFiringDirection();
     void SetFiringDirection(EProjectileDirection Direction);
 
-    void OnDestroy(bool impactScroll);
+    void OnDestroy(bool impactScroll, float scrollWithPlayerOffset);
 
 protected:
     virtual void BeginPlay() override;
