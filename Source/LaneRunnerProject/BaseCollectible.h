@@ -20,6 +20,8 @@ protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
+	virtual void Tick(float DeltaTime) override;
+
 	bool Collected;
 
 public:
@@ -28,8 +30,6 @@ public:
 	void Collect();
 
 	void ResetCollect();
-
-	ECollisionEnabled::Type DefaultCollMode;
 
 	UFUNCTION()
 	void OnLevelReset();

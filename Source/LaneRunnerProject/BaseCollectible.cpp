@@ -21,8 +21,6 @@ void ABaseCollectible::BeginPlay()
 	UBoxComponent* box = (UBoxComponent*)GetComponentByClass(UBoxComponent::StaticClass());
 	if (box)
 	{
-		DefaultCollMode = box->GetCollisionEnabled();
-
 		box->OnComponentBeginOverlap.AddDynamic(this, &ABaseCollectible::HandleBeginOverlap);
 	}
 
@@ -31,6 +29,11 @@ void ABaseCollectible::BeginPlay()
 	{
 		levelSystem->CleanupBeforeReset.AddDynamic(this, &ABaseCollectible::OnLevelReset);
 	}
+}
+
+void ABaseCollectible::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
 }
 
 
@@ -137,11 +140,10 @@ void ABaseCollectible::Spawn()
 		mesh->SetVisibility(true);
 	}
 
-
 	UBoxComponent* box = (UBoxComponent*)GetComponentByClass(UBoxComponent::StaticClass());
 	if (box)
 	{
-		box->SetCollisionEnabled(DefaultCollMode);
+		box->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	}
 
 

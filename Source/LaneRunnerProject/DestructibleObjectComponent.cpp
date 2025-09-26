@@ -8,6 +8,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Components/StaticMeshComponent.h"
 #include "GI_LevelSystem.h"
+#include "ScrollWithPlayerComponent.h"
 
 
 // Sets default values for this component's properties
@@ -116,8 +117,24 @@ void UDestructibleObjectComponent::DestroyFromComp()
 
 	if (ActiveCollectible)
 	{
-		ActiveCollectible->SetActorLocation(GetOwner()->GetActorLocation());
+		bool itemShouldScroll = false;
+
+		UScrollWithPlayerComponent* scrollComp = GetOwner()->GetComponentByClass<UScrollWithPlayerComponent>();
+		UScrollWithPlayerComponent* itemScrollComp = ActiveCollectible->GetComponentByClass<UScrollWithPlayerComponent>();
+
+		if (scrollComp && itemScrollComp)
+		{
+			itemShouldScroll = scrollComp->Enabled && scrollComp->ScrollWithXPos == 0.0f;
+		}
+
+		if (itemShouldScroll)
+		{
+			itemScrollComp->ScrollWithXPos = scrollComp->ScrollWithXPos;
+			itemScrollComp->Enabled = true;
+		}
 		ActiveCollectible->Spawn();
+		ActiveCollectible->SetActorLocation(GetOwner()->GetActorLocation());
+		
 	}
 	
 	Destroyed = true;
@@ -161,6 +178,13 @@ void UDestructibleObjectComponent::ResetDestroy()
 void UDestructibleObjectComponent::OnLevelReset()
 {
 	ResetDestroy();
+
+	UScrollWithPlayerComponent* itemScrollComp = ActiveCollectible->GetComponentByClass<UScrollWithPlayerComponent>();
+
+	if (itemScrollComp)
+	{
+		itemScrollComp->Enabled = false;
+	}
 }
 
 int UDestructibleObjectComponent::GetCurrentHealth()
