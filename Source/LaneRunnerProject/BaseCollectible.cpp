@@ -81,6 +81,8 @@ void ABaseCollectible::OnLevelReset()
 	}
 
 	Collected = false;
+
+	SetGravityEnabled(false);
 }
 
 void ABaseCollectible::ResetCollect()
@@ -122,7 +124,8 @@ void ABaseCollectible::Despawn()
 	UBoxComponent* box = (UBoxComponent*)GetComponentByClass(UBoxComponent::StaticClass());
 	if (box)
 	{
-		box->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		//box->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		box->SetCollisionProfileName("NoCollision");
 	}
 
 	UPaperSpriteComponent* sprite = (UPaperSpriteComponent*)GetComponentByClass(UPaperSpriteComponent::StaticClass());
@@ -143,7 +146,8 @@ void ABaseCollectible::Spawn()
 	UBoxComponent* box = (UBoxComponent*)GetComponentByClass(UBoxComponent::StaticClass());
 	if (box)
 	{
-		box->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+		//box->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+		box->SetCollisionProfileName("GravAndOverlap");
 	}
 
 
@@ -151,5 +155,14 @@ void ABaseCollectible::Spawn()
 	if (sprite)
 	{
 		sprite->SetVisibility(true);
+	}
+}
+
+void ABaseCollectible::SetGravityEnabled(bool enabled)
+{
+	UBoxComponent* box = (UBoxComponent*)GetComponentByClass(UBoxComponent::StaticClass());
+	if (box)
+	{
+		box->SetEnableGravity(enabled);
 	}
 }

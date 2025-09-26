@@ -126,15 +126,15 @@ void UDestructibleObjectComponent::DestroyFromComp()
 		{
 			itemShouldScroll = scrollComp->Enabled && scrollComp->ScrollWithXPos == 0.0f;
 		}
-
-		if (itemShouldScroll)
-		{
-			itemScrollComp->ScrollWithXPos = scrollComp->ScrollWithXPos;
-			itemScrollComp->Enabled = true;
-		}
+		
 		ActiveCollectible->Spawn();
 		ActiveCollectible->SetActorLocation(GetOwner()->GetActorLocation());
-		
+		ActiveCollectible->SetGravityEnabled(true);
+		if (itemShouldScroll)
+		{
+			itemScrollComp->ScrollWithXPos = 0.0f;
+			itemScrollComp->Enabled = true;
+		}
 	}
 	
 	Destroyed = true;

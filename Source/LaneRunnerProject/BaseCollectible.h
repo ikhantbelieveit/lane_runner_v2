@@ -57,4 +57,7 @@ public:
 	bool GivePoints = true;
 
 	bool ResetAsSpawned = true;
+
+	UFUNCTION()
+	void SetGravityEnabled(bool enabled);
 };

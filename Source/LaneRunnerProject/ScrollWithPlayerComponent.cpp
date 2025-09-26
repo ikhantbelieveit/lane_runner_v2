@@ -4,6 +4,8 @@
 #include "ScrollWithPlayerComponent.h"
 #include "GameInit.h"
 #include "GI_LevelSystem.h"
+#include "Components/BoxComponent.h"
+#include "PaperSpriteComponent.h"
 
 // Sets default values for this component's properties
 UScrollWithPlayerComponent::UScrollWithPlayerComponent()
@@ -62,10 +64,11 @@ void UScrollWithPlayerComponent::TickComponent(float DeltaTime, ELevelTick TickT
 			currentLoc.Y,
 			currentLoc.Z);
 
-		if (GetOwner()->SetActorLocation(newActorLoc))
+		if (GetOwner()->SetActorLocation(newActorLoc, false, nullptr, ETeleportType::TeleportPhysics))
 		{
 
-		};
+		}
+		
 	}
 }
 
