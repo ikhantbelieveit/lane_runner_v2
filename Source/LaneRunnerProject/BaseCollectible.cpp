@@ -5,6 +5,7 @@
 #include "GI_LevelSystem.h"
 #include "GI_AudioSystem.h"
 #include "PaperSpriteComponent.h"
+#include "GameFramework/ProjectileMovementComponent.h"
 
 // Sets default values
 ABaseCollectible::ABaseCollectible()
@@ -34,6 +35,41 @@ void ABaseCollectible::BeginPlay()
 void ABaseCollectible::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	bool checkForGround = false;
+
+	if (GravityEnabled)
+	{
+		UProjectileMovementComponent* projMoveComp = (UProjectileMovementComponent*)GetComponentByClass(UProjectileMovementComponent::StaticClass());
+		if (projMoveComp)
+		{
+			if (projMoveComp->Velocity.Z == 0.0f)
+			{
+				checkForGround = true;
+			}
+		}
+
+		if (checkForGround)
+		{
+			UWorld* World = GetWorld();
+			if (!World) return;
+
+			FVector Start = GetActorLocation();
+			FVector End = Start - FVector(0.f, 0.f, 5.f); // short downward trace
+
+			FHitResult Hit;
+			FCollisionQueryParams Params;
+			Params.AddIgnoredActor(this);
+
+			bool bOnGround = World->LineTraceSingleByChannel(Hit, Start, End, ECC_WorldStatic, Params);
+
+			if (!bOnGround)
+			{
+				SetGravityEnabled(true);
+			}
+		}
+		
+	}
 }
 
 
@@ -73,7 +109,7 @@ void ABaseCollectible::OnLevelReset()
 {
 	if (ResetAsSpawned)
 	{
-		Spawn();
+		Spawn(false);
 	}
 	else
 	{
@@ -83,6 +119,12 @@ void ABaseCollectible::OnLevelReset()
 	Collected = false;
 
 	SetGravityEnabled(false);
+
+	UProjectileMovementComponent* projMoveComp = (UProjectileMovementComponent*)GetComponentByClass(UProjectileMovementComponent::StaticClass());
+	if (projMoveComp)
+	{
+		projMoveComp->StopMovementImmediately();
+	}
 }
 
 void ABaseCollectible::ResetCollect()
@@ -135,7 +177,7 @@ void ABaseCollectible::Despawn()
 	}
 }
 
-void ABaseCollectible::Spawn()
+void ABaseCollectible::Spawn(bool fromDestroyedObject)
 {
 	UStaticMeshComponent* mesh = (UStaticMeshComponent*)GetComponentByClass(UStaticMeshComponent::StaticClass());
 	if (mesh)
@@ -150,19 +192,41 @@ void ABaseCollectible::Spawn()
 		box->SetCollisionProfileName("GravAndOverlap");
 	}
 
-
 	UPaperSpriteComponent* sprite = (UPaperSpriteComponent*)GetComponentByClass(UPaperSpriteComponent::StaticClass());
 	if (sprite)
 	{
 		sprite->SetVisibility(true);
 	}
+
+	if (fromDestroyedObject)
+	{
+		SetGravityEnabled(true);
+	}
 }
 
 void ABaseCollectible::SetGravityEnabled(bool enabled)
 {
-	UBoxComponent* box = (UBoxComponent*)GetComponentByClass(UBoxComponent::StaticClass());
-	if (box)
+	UProjectileMovementComponent* projMoveComp = (UProjectileMovementComponent*)GetComponentByClass(UProjectileMovementComponent::StaticClass());
+	if (projMoveComp)
 	{
-		box->SetEnableGravity(enabled);
+		// Ensure it has an UpdatedComponent (usually the root or collision box)
+		if (!projMoveComp->UpdatedComponent)
+		{
+			projMoveComp->SetUpdatedComponent(RootComponent);
+		}
+
+		projMoveComp->Activate(enabled);
+
+		if (enabled)
+		{
+			projMoveComp->ProjectileGravityScale = 1.0f;
+			projMoveComp->Velocity = FVector(0.f, 0.f, -1.f);
+		}
+		else
+		{
+			projMoveComp->ProjectileGravityScale = 0.0f;
+		}
 	}
+
+	GravityEnabled = enabled;
 }

@@ -48,7 +48,7 @@ public:
 	void Despawn();
 
 	UFUNCTION()
-	void Spawn();
+	void Spawn(bool fromDestroyedObject);
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	int PointsValue = 10;
@@ -60,4 +60,7 @@ public:
 
 	UFUNCTION()
 	void SetGravityEnabled(bool enabled);
+
+private:
+	bool GravityEnabled = false;
 };
