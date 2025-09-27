@@ -63,4 +63,7 @@ public:
 	TSubclassOf<class ABaseCollectible> SpawnCollectibleClass;
 
 	ABaseCollectible* ActiveCollectible;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool FlashOnDamage = false;
 };

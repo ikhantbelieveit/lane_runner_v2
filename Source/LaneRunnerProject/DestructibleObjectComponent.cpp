@@ -9,6 +9,7 @@
 #include "Components/StaticMeshComponent.h"
 #include "GI_LevelSystem.h"
 #include "ScrollWithPlayerComponent.h"
+#include "DamageFlashComponent.h"
 
 
 // Sets default values for this component's properties
@@ -77,6 +78,15 @@ void UDestructibleObjectComponent::OnHit()
 	if (CurrentHealth <= 0)
 	{
 		DestroyFromComp();
+	}
+
+	if (FlashOnDamage)
+	{
+		UDamageFlashComponent* damageFlash = (UDamageFlashComponent*)GetOwner()->GetComponentByClass(UDamageFlashComponent::StaticClass());
+		if (damageFlash)
+		{
+			damageFlash->TriggerFlash();
+		}
 	}
 }
 
