@@ -24,6 +24,8 @@ class LANERUNNERPROJECT_API UBaseUIScreen : public UUserWidget
 public:
 	virtual void Initialise() {}
 
+	virtual void Tick(float DeltaTime);
+
 	virtual void OnScreenShown() {}
 	virtual void OnScreenHidden() {}
 

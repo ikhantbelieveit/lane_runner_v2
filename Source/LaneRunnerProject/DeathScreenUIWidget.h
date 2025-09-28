@@ -6,6 +6,7 @@
 #include "BaseUIScreen.h"
 #include "Components/Button.h" 
 #include "Components/TextBlock.h"
+#include "Components/Image.h"
 #include "DeathScreenUIWidget.generated.h"
 
 /**
@@ -18,6 +19,8 @@ class LANERUNNERPROJECT_API UDeathScreenUIWidget : public UBaseUIScreen
 	
 public:
 	virtual void Initialise() override;
+
+	virtual void Tick(float DeltaTime) override;
 
 	UPROPERTY(meta = (BindWidget))
 	UButton* RespawnButton;
@@ -33,6 +36,9 @@ public:
 
 	virtual void SetupBeforeShow() override;
 
+	virtual void OnScreenShown() override;
+	virtual void OnScreenHidden() override;
+
 	UPROPERTY(meta = (BindWidget))
 	UTextBlock* ScoreText;
 
@@ -47,4 +53,10 @@ public:
 	void SetHighScoreText(int newHighScore);
 
 	void SetMessageActive(bool active);
+
+	UPROPERTY(meta = (BindWidget))
+	UImage* RespawnButtonArrow;
+
+	UPROPERTY(meta = (BindWidget))
+	UImage* QuitButtonArrow;
 };

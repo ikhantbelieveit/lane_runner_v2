@@ -22,6 +22,32 @@ void UDeathScreenUIWidget::Initialise()
 	}
 }
 
+void UDeathScreenUIWidget::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	bool showRespawnButton = RespawnButton->HasKeyboardFocus();
+	bool showQuitButton = QuitButton->HasKeyboardFocus();
+
+	if (showRespawnButton)
+	{
+		RespawnButtonArrow->SetVisibility(ESlateVisibility::Visible);
+	}
+	else
+	{
+		RespawnButtonArrow->SetVisibility(ESlateVisibility::Hidden);
+	}
+
+	if (showQuitButton)
+	{
+		QuitButtonArrow->SetVisibility(ESlateVisibility::Visible);
+	}
+	else
+	{
+		QuitButtonArrow->SetVisibility(ESlateVisibility::Hidden);
+	}
+}
+
 void UDeathScreenUIWidget::OnRespawnButtonPressed()
 {
 	auto* levelSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGI_LevelSystem>();
@@ -75,6 +101,17 @@ void UDeathScreenUIWidget::SetupBeforeShow()
 	SetMessageActive(newHighScore);
 }
 
+void UDeathScreenUIWidget::OnScreenShown()
+{
+	Super::OnScreenShown();
+
+}
+
+void UDeathScreenUIWidget::OnScreenHidden()
+{
+	Super::OnScreenHidden();
+}
+
 void UDeathScreenUIWidget::SetScoreText(int newScore)
 {
 	FText text = FText::FromString(FString::FromInt(newScore));
@@ -98,3 +135,4 @@ void UDeathScreenUIWidget::SetMessageActive(bool active)
 		NewHighScoreMessageText->SetVisibility(ESlateVisibility::Hidden);
 	}
 }
+

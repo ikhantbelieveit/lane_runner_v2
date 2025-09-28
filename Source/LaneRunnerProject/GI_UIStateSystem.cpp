@@ -2,7 +2,6 @@
 
 
 #include "GI_UIStateSystem.h"
-#include "Blueprint/UserWidget.h"
 #include "Kismet/GameplayStatics.h"
 #include "TestLevelUISystem.h"
 #include "DeathScreenUISystem.h"
@@ -207,7 +206,9 @@ void UGI_UIStateSystem::TickSubsystem(float DeltaTime)
 
     if (ActiveWidget)
     {
-        TSharedPtr<SWidget> FocusedWidget = FSlateApplication::Get().GetUserFocusedWidget(0);
+        ActiveWidget->Tick(DeltaTime);
+
+        /*TSharedPtr<SWidget> FocusedWidget = FSlateApplication::Get().GetUserFocusedWidget(0);
 
         if (!FocusedWidget.IsValid() || FocusedWidget->GetTypeAsString() == TEXT("SViewport"))
         {
@@ -215,7 +216,7 @@ void UGI_UIStateSystem::TickSubsystem(float DeltaTime)
             {
                 ActiveWidget->DefaultSelection->SetKeyboardFocus();
             }
-        }
+        }*/
     }
 }
 
