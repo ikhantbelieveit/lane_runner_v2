@@ -41,20 +41,6 @@ void UDestructibleObjectComponent::BeginPlay()
 	{
 		levelSystem->CleanupBeforeReset.AddDynamic(this, &UDestructibleObjectComponent::OnLevelReset);
 	}
-
-	if (SpawnItemOnDestroy)
-	{
-		FActorSpawnParameters SpawnParams;
-
-		FRotator defaultRotation = FRotator();
-
-		if (ABaseCollectible* item = GetWorld()->SpawnActor<ABaseCollectible>(SpawnCollectibleClass, GetOwner()->GetActorLocation(), defaultRotation, SpawnParams))
-		{
-			item->ResetAsSpawned = false;
-			item->Despawn();
-			ActiveCollectible = item;
-		}
-	}
 }
 
 
@@ -125,25 +111,43 @@ void UDestructibleObjectComponent::DestroyFromComp()
 		sprite->SetVisibility(false);
 	}
 
-	if (ActiveCollectible)
+	if (SpawnItemOnDestroy)
 	{
-		bool itemShouldScroll = false;
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.Owner = GetOwner();
+		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
-		UScrollWithPlayerComponent* scrollComp = GetOwner()->GetComponentByClass<UScrollWithPlayerComponent>();
-		UScrollWithPlayerComponent* itemScrollComp = ActiveCollectible->GetComponentByClass<UScrollWithPlayerComponent>();
+		FRotator defaultRotation = FRotator();
 
-		if (scrollComp && itemScrollComp)
+		if (ABaseCollectible* item = GetWorld()->SpawnActor<ABaseCollectible>(SpawnCollectibleClass, GetOwner()->GetActorLocation(), defaultRotation, SpawnParams))
 		{
-			itemShouldScroll = scrollComp->Enabled && scrollComp->ScrollWithXPos == 0.0f;
-		}
-		
-		ActiveCollectible->Spawn(true);
-		ActiveCollectible->SetActorLocation(GetOwner()->GetActorLocation());
-		//ActiveCollectible->SetGravityEnabled(true);
-		if (itemShouldScroll)
-		{
-			itemScrollComp->ScrollWithXPos = 0.0f;
-			itemScrollComp->Enabled = true;
+			item->ResetAsSpawned = false;
+			ActiveCollectible = item;
+
+			bool itemShouldScroll = false;
+
+			UScrollWithPlayerComponent* scrollComp = GetOwner()->GetComponentByClass<UScrollWithPlayerComponent>();
+			UScrollWithPlayerComponent* itemScrollComp = ActiveCollectible->GetComponentByClass<UScrollWithPlayerComponent>();
+
+			if (scrollComp && itemScrollComp)
+			{
+				itemShouldScroll = scrollComp->Enabled && scrollComp->ScrollWithXPos == 0.0f;
+			}
+
+			ActiveCollectible->Spawn(true);
+
+			FVector spawnLoc = GetOwner()->GetActorLocation();
+
+			float spawnPosY = FMath::RandRange(randomSpreadMin, randomSpreadMax);
+			spawnLoc.Y += spawnPosY;
+
+			ActiveCollectible->SetActorLocation(spawnLoc);
+
+			if (itemShouldScroll)
+			{
+				itemScrollComp->SetScrollWithPos(0);
+				itemScrollComp->Enabled = true;
+			}
 		}
 	}
 	
@@ -176,9 +180,11 @@ void UDestructibleObjectComponent::ResetDestroy()
 			sprite->SetVisibility(true);
 		}
 
-		if (ActiveCollectible)
+		if (ActiveCollectible &&
+			IsValid(ActiveCollectible))
 		{
-			ActiveCollectible->Despawn();
+			ActiveCollectible->Destroy();
+			ActiveCollectible = nullptr;
 		}
 	}
 
@@ -188,13 +194,6 @@ void UDestructibleObjectComponent::ResetDestroy()
 void UDestructibleObjectComponent::OnLevelReset()
 {
 	ResetDestroy();
-
-	UScrollWithPlayerComponent* itemScrollComp = ActiveCollectible->GetComponentByClass<UScrollWithPlayerComponent>();
-
-	if (itemScrollComp)
-	{
-		itemScrollComp->Enabled = false;
-	}
 }
 
 int UDestructibleObjectComponent::GetCurrentHealth()

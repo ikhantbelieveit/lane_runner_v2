@@ -62,8 +62,17 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TSubclassOf<class ABaseCollectible> SpawnCollectibleClass;
 
-	ABaseCollectible* ActiveCollectible;
+	
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool FlashOnDamage = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float randomSpreadMin = -30.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float randomSpreadMax = 30.0f;
+
+	UPROPERTY()
+	ABaseCollectible* ActiveCollectible;
 };

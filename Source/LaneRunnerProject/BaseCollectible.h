@@ -63,4 +63,6 @@ public:
 
 private:
 	bool GravityEnabled = false;
+
+	FVector StartPos;
 };

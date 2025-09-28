@@ -6,6 +6,7 @@
 #include "GI_AudioSystem.h"
 #include "PaperSpriteComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
+#include "PlayerDetectComponent.h"
 
 // Sets default values
 ABaseCollectible::ABaseCollectible()
@@ -30,6 +31,8 @@ void ABaseCollectible::BeginPlay()
 	{
 		levelSystem->CleanupBeforeReset.AddDynamic(this, &ABaseCollectible::OnLevelReset);
 	}
+
+	StartPos = GetActorLocation();
 }
 
 void ABaseCollectible::Tick(float DeltaTime)
@@ -57,11 +60,24 @@ void ABaseCollectible::Tick(float DeltaTime)
 			FVector Start = GetActorLocation();
 			FVector End = Start - FVector(0.f, 0.f, 5.f); // short downward trace
 
+			FCollisionObjectQueryParams ObjectParams;
+			ObjectParams.AddObjectTypesToQuery(ECC_WorldStatic);
+
 			FHitResult Hit;
 			FCollisionQueryParams Params;
 			Params.AddIgnoredActor(this);
 
-			bool bOnGround = World->LineTraceSingleByChannel(Hit, Start, End, ECC_WorldStatic, Params);
+			bool bOnGround = World->LineTraceSingleByObjectType(
+				Hit, Start, End, ObjectParams, Params);
+
+			if (bOnGround)
+			{
+				ECollisionChannel ObjType = Hit.Component->GetCollisionObjectType();
+				if (ObjType == ECC_GameTraceChannel1) // Collectible channel
+				{
+					bOnGround = false;
+				}
+			}
 
 			if (!bOnGround)
 			{
@@ -125,6 +141,8 @@ void ABaseCollectible::OnLevelReset()
 	{
 		projMoveComp->StopMovementImmediately();
 	}
+
+	SetActorLocation(StartPos);
 }
 
 void ABaseCollectible::ResetCollect()
@@ -201,6 +219,12 @@ void ABaseCollectible::Spawn(bool fromDestroyedObject)
 	if (fromDestroyedObject)
 	{
 		SetGravityEnabled(true);
+
+		UPlayerDetectComponent* detectComp = (UPlayerDetectComponent*)GetComponentByClass(UPlayerDetectComponent::StaticClass());
+		if (detectComp)
+		{
+			detectComp->TriggerScrollWithPlayer = true;
+		}
 	}
 }
 
