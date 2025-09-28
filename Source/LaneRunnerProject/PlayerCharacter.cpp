@@ -128,7 +128,7 @@ void APlayerCharacter::Tick(float DeltaTime)
 
 			UpdateBoost(DeltaTime);
 
-			
+
 			break;
 		case EGameState::Lose:
 			UpdateCameraPos();
@@ -140,6 +140,8 @@ void APlayerCharacter::Tick(float DeltaTime)
 	}
 
 	ClearInputValues();
+
+	JumpedThisFrame = false;
 }
 
 // Called to bind functionality to input
@@ -627,19 +629,23 @@ void APlayerCharacter::SetJumpState(EPlayerJumpState newState)
 	case EPlayerJumpState::Rise:
 		characterMovement->GravityScale = JumpRiseGravity;
 		SetFlipbookVisuals(Flipbook_Jump);
+		//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("Rise"));
 		break;
 	case EPlayerJumpState::Apex:
 		CancelVerticalSpeed();
 		characterMovement->GravityScale = 0;
 		SetFlipbookVisuals(Flipbook_Jump);
+		//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("Apex"));
 		break;
 	case EPlayerJumpState::Fall:
 		characterMovement->GravityScale = JumpFallGravity;
 		SetFlipbookVisuals(Flipbook_Jump);
+		//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("Fall"));
 		break;
 	case EPlayerJumpState::Grounded:
 		characterMovement->GravityScale = JumpRiseGravity;
 		SetFlipbookVisuals(Flipbook_Stand);
+		//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("Grounded"));
 		break;
 	}
 }
@@ -964,7 +970,8 @@ void APlayerCharacter::UpdateJumpFromInput()
 
 		if (JumpInput_Released)
 		{
-			if (!JumpBlocked)
+			if (!JumpBlocked &&
+				CurrentJumpState != EPlayerJumpState::Grounded)
 			{
 				bPressedJump = false;
 				SetJumpState(EPlayerJumpState::Fall);
