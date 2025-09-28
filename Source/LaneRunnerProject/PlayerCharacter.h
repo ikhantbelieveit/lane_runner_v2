@@ -6,6 +6,7 @@
 #include "PlayerConfigData.h"
 #include "EPlayerJumpState.h"
 #include "PaperSpriteComponent.h"
+#include "PaperFlipbookComponent.h"
 #include "PaperSprite.h"
 #include "Camera/CameraComponent.h"
 #include "EPlayerSpeedState.h"
@@ -286,8 +287,19 @@ protected:
 
 	bool JumpBlocked;
 
+	ECharacterType CharacterType;
+
+	UPaperFlipbook* Flipbook_Stand;
+	UPaperFlipbook* Flipbook_Jump;
+
 public:
 	void OnTouchBoostPad(float boostSpeed, float boostTime);
 	void OnTouchBlockJump();
 	void OnExitBlockJump();
+
+	UFUNCTION(BlueprintCallable)
+	void SetCharacterType(ECharacterType type);
+
+	void SetFlipbookVisuals(UPaperFlipbook* flipbook);
+
 };

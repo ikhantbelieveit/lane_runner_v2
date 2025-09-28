@@ -73,18 +73,6 @@ void APlayerCharacter::BeginPlay()
 		}
 	}
 
-	// assign sprite image
-	if (SpriteComponent && PlayerSprite)
-	{
-		SpriteComponent->SetSprite(PlayerSprite);
-	}
-
-	if (SpriteComponent_Ghost && PlayerSprite)
-	{
-		SpriteComponent_Ghost->SetSprite(PlayerSprite);
-		SpriteComponent_Ghost->SetSpriteColor(FLinearColor(1.0f, 1.0f, 1.0f, 0.75f));
-	}
-
 	// assign sprite transform
 	FRotator DesiredRotation = FRotator(0.0f, 90.0f, 0.0f);
 	SpriteComponent->SetWorldRotation(DesiredRotation);
@@ -93,7 +81,7 @@ void APlayerCharacter::BeginPlay()
 	SpriteComponent_Ghost->SetWorldRotation(DesiredRotation);
 	SpriteComponent_Ghost->SetRelativeScale3D(FVector(3.0f, 3.0f, 3.0f));
 
-	SpriteToggle->SetSpriteEnabled(FString("Sprite Base"));
+	//SpriteToggle->SetSpriteEnabled(FString("Sprite Base"));
 
 	//assign camera FOV
 	CameraComponent->SetFieldOfView(CameraFOV);
@@ -139,6 +127,8 @@ void APlayerCharacter::Tick(float DeltaTime)
 			UpdateMercyInvincibility(DeltaTime);
 
 			UpdateBoost(DeltaTime);
+
+			
 			break;
 		case EGameState::Lose:
 			UpdateCameraPos();
@@ -280,11 +270,11 @@ void APlayerCharacter::BeginPlay_SetupFromConfig()
 			DropShadowDecal->SetDecalMaterial(ConfigData->VisualsConfig.DropShadowMaterial); // Assign your shadow material
 		}
 
-		if (SpriteComponent_Ghost)
+		UPaperFlipbookComponent* flipbookComp = GetComponentByClass<UPaperFlipbookComponent>();
+		if (flipbookComp)
 		{
-			SpriteComponent_Ghost->SetMaterial(0, ConfigData->VisualsConfig.SpriteGhostMaterial);
+			flipbookComp->SetMaterial(0, ConfigData->VisualsConfig.SpriteDefaultMaterial);
 		}
-		
 
 	}
 	else
@@ -629,27 +619,27 @@ void APlayerCharacter::SetJumpState(EPlayerJumpState newState)
 {
 	CurrentJumpState = newState;
 	TimeSinceJumpStateChange = 0.0f;
-
+	
 	UCharacterMovementComponent* characterMovement = (UCharacterMovementComponent*)GetComponentByClass(UCharacterMovementComponent::StaticClass());
 
 	switch (CurrentJumpState)
 	{
 	case EPlayerJumpState::Rise:
 		characterMovement->GravityScale = JumpRiseGravity;
-		//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, TEXT("Rise."));
+		SetFlipbookVisuals(Flipbook_Jump);
 		break;
 	case EPlayerJumpState::Apex:
 		CancelVerticalSpeed();
 		characterMovement->GravityScale = 0;
-		//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, TEXT("Apex."));
+		SetFlipbookVisuals(Flipbook_Jump);
 		break;
 	case EPlayerJumpState::Fall:
 		characterMovement->GravityScale = JumpFallGravity;
-		//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, TEXT("Fall."));
+		SetFlipbookVisuals(Flipbook_Jump);
 		break;
 	case EPlayerJumpState::Grounded:
 		characterMovement->GravityScale = JumpRiseGravity;
-		//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, TEXT("Grounded."));
+		SetFlipbookVisuals(Flipbook_Stand);
 		break;
 	}
 }
@@ -677,6 +667,8 @@ void APlayerCharacter::ResetPlayer()
 	CancelBoost();
 
 	JumpBlocked = false;
+
+	SetJumpState(EPlayerJumpState::Grounded);
 }
 
 void APlayerCharacter::OnGameStateChanged(EGameState newState, EGameState prevState)
@@ -776,7 +768,13 @@ void APlayerCharacter::StartMercyInvincibility()
 
 	MercyInvincibleActive = true;
 
-	SpriteToggle->SetSpriteEnabled(FString("Sprite Ghost"));
+	//SpriteToggle->SetSpriteEnabled(FString("Sprite Ghost"));
+	UPaperFlipbookComponent* flipbookComp = GetComponentByClass<UPaperFlipbookComponent>();
+	if (flipbookComp)
+	{
+		flipbookComp->SetMaterial(0, ConfigData->VisualsConfig.SpriteGhostMaterial);
+		flipbookComp->SetSpriteColor(FLinearColor(1.0f, 1.0f, 1.0f, 0.75f));
+	}
 }
 
 void APlayerCharacter::CancelMercyInvincibility()
@@ -784,7 +782,13 @@ void APlayerCharacter::CancelMercyInvincibility()
 	MercyInvincibleTimeLeft = 0.0f;
 	MercyInvincibleActive = false;
 
-	SpriteToggle->SetSpriteEnabled(FString("Sprite Base"));
+	//SpriteToggle->SetSpriteEnabled(FString("Sprite Base"));
+	UPaperFlipbookComponent* flipbookComp = GetComponentByClass<UPaperFlipbookComponent>();
+	if (flipbookComp)
+	{
+		flipbookComp->SetMaterial(0, ConfigData->VisualsConfig.SpriteDefaultMaterial);
+		flipbookComp->SetSpriteColor(FLinearColor(1.0f, 1.0f, 1.0f, 1.0f));
+	}
 }
 
 void APlayerCharacter::StartBoost(float boostSpeed, float timeToBlockScroll)
@@ -821,6 +825,30 @@ void APlayerCharacter::OnTouchBlockJump()
 void APlayerCharacter::OnExitBlockJump()
 {
 	JumpBlocked = false;
+}
+
+void APlayerCharacter::SetCharacterType(ECharacterType type)
+{
+	FPlayerCharacterDataItem* data = ConfigData->CharacterDataConfig.CharacterDataMap.Find(type);
+
+	if (data)
+	{
+		Flipbook_Stand = data->StandingFlipbook;
+		Flipbook_Jump = data->JumpingFlipbook;
+
+		CharacterType = type;
+
+		SetFlipbookVisuals(Flipbook_Stand);
+	}
+}
+
+void APlayerCharacter::SetFlipbookVisuals(UPaperFlipbook* flipbook)
+{
+	UPaperFlipbookComponent* flipbookComp = GetComponentByClass<UPaperFlipbookComponent>();
+	if (flipbookComp)
+	{
+		flipbookComp->SetFlipbook(flipbook);
+	}
 }
 
 
@@ -936,8 +964,11 @@ void APlayerCharacter::UpdateJumpFromInput()
 
 		if (JumpInput_Released)
 		{
-			bPressedJump = false;
-			SetJumpState(EPlayerJumpState::Fall);
+			if (!JumpBlocked)
+			{
+				bPressedJump = false;
+				SetJumpState(EPlayerJumpState::Fall);
+			}
 		}
 	}
 }

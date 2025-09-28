@@ -207,16 +207,6 @@ void UGI_UIStateSystem::TickSubsystem(float DeltaTime)
     if (ActiveWidget)
     {
         ActiveWidget->Tick(DeltaTime);
-
-        /*TSharedPtr<SWidget> FocusedWidget = FSlateApplication::Get().GetUserFocusedWidget(0);
-
-        if (!FocusedWidget.IsValid() || FocusedWidget->GetTypeAsString() == TEXT("SViewport"))
-        {
-            if (ActiveWidget->DefaultSelection && ActiveWidget->DefaultSelection->TakeWidget()->SupportsKeyboardFocus())
-            {
-                ActiveWidget->DefaultSelection->SetKeyboardFocus();
-            }
-        }*/
     }
 }
 

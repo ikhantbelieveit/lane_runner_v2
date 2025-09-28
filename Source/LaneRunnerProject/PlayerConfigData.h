@@ -3,13 +3,39 @@
 #pragma once
 #include "PaperSpriteComponent.h"
 #include "PaperSprite.h"
+#include "PaperFlipbook.h"
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
 #include "InputMappingContext.h"
 #include "InputAction.h"
+#include "ECharacterType.h"
 #include "PlayerConfigData.generated.h"
 
 class AProjectile;
+
+USTRUCT(BlueprintType)
+struct FPlayerCharacterDataItem
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	FString DisplayName;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPaperFlipbook* StandingFlipbook;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPaperFlipbook* JumpingFlipbook;
+};
+
+USTRUCT(BlueprintType)
+struct FPlayerCharacterData
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TMap<ECharacterType, FPlayerCharacterDataItem> CharacterDataMap;
+};
 
 USTRUCT(BlueprintType)
 struct FPlayerInputAssets
@@ -84,6 +110,9 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Shadow")
 	UMaterialInterface* SpriteGhostMaterial;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Shadow")
+	UMaterialInterface* SpriteDefaultMaterial;
 };
 
 USTRUCT(BlueprintType)
@@ -178,4 +207,6 @@ public:
 	FPlayerShoot ShootConfig;
 	UPROPERTY(EditAnywhere)
 	FPlayerMisc MiscConfig;
+	UPROPERTY(EditAnywhere)
+	FPlayerCharacterData CharacterDataConfig;
 };

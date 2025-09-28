@@ -41,4 +41,7 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Config")
 	UGameInitConfigData* ConfigData;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Config")
+	ECharacterType InitCharacterType;
 };

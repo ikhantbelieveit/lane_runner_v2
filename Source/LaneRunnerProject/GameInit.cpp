@@ -6,6 +6,8 @@
 #include "TestLevelUISystem.h"
 #include "EUIState.h"
 #include "MyGameInstance.h"
+#include "Kismet/GameplayStatics.h"
+#include "PlayerCharacter.h"
 #include "GameInit.h"
 
 // Sets default values
@@ -37,6 +39,17 @@ void AGameInit::Tick(float DeltaTime)
 			if (GI->AllSystemsReady())
 			{
 				BroadcastInitFinished();
+
+				AActor* playerActor = UGameplayStatics::GetActorOfClass(GetWorld(), APlayerCharacter::StaticClass());
+
+				if (playerActor)
+				{
+					APlayerCharacter* playerRef = Cast<APlayerCharacter>(playerActor);
+					if (playerRef)
+					{
+						playerRef->SetCharacterType(InitCharacterType);
+					}
+				}
 
 				auto* levelSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGI_LevelSystem>();
 				if (levelSystem)

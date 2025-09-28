@@ -3,9 +3,7 @@
 #include "CoreMinimal.h"
 #include "EGameState.generated.h"
 
-/**
- * Custom enum to demonstrate how to expose enums to Blueprints.
- */
+
 UENUM(BlueprintType)
 enum class EGameState : uint8
 {

@@ -6,6 +6,7 @@
 #include "Engine/DataAsset.h"
 #include "BaseGameSystem.h"
 #include "SystemConfigData.h"
+#include "ECharacterType.h"
 #include "GameInitConfigData.generated.h"
 
 USTRUCT(BlueprintType)
