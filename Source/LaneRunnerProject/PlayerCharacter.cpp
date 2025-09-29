@@ -1060,6 +1060,24 @@ void APlayerCharacter::Shoot(EProjectileDirection direction, bool holdNotTap)
 		requestData.ProjectileClass = ProjectileClass;
 		requestData.ShootPos = GetActorLocation();
 
+		float shootPosOffset = 40.0f;
+
+		switch (direction)
+		{
+		case EProjectileDirection::Left:
+			requestData.ShootPos += FVector::LeftVector * shootPosOffset;
+			break;
+		case EProjectileDirection::Right:
+			requestData.ShootPos += FVector::RightVector * shootPosOffset;
+			break;
+		case EProjectileDirection::Up:
+			requestData.ShootPos += FVector::UpVector * shootPosOffset;
+			break;
+		case EProjectileDirection::Forward:
+			requestData.ShootPos += FVector::ForwardVector * shootPosOffset;
+			break;
+		}
+
 		if (projectileSystem->ShootPlayerProjectile(requestData))
 		{
 			switch (direction)
