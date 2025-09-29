@@ -15,3 +15,9 @@ void UBaseUIScreen::Tick(float DeltaTime)
         }
     }
 }
+
+void UBaseUIScreen::OnScreenHidden()
+{
+    FSlateApplication::Get().ClearKeyboardFocus(EFocusCause::Cleared);
+
+}

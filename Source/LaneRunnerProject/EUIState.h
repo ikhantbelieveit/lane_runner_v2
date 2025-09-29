@@ -9,6 +9,7 @@ UENUM(BlueprintType)
 enum class EUIState : uint8
 {
 	None       UMETA(DisplayName = "None"),
-	TestLevel    UMETA(DisplayName = "TestLevel"),
-	DeathScreen    UMETA(DisplayName = "DeathScreen"),
+	TestLevel    UMETA(DisplayName = "Test Level"),
+	DeathScreen    UMETA(DisplayName = "Death Screen"),
+	MainMenu	UMETA(DisplayName ="Main Menu")
 };

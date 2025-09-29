@@ -27,7 +27,7 @@ public:
 	virtual void Tick(float DeltaTime);
 
 	virtual void OnScreenShown() {}
-	virtual void OnScreenHidden() {}
+	virtual void OnScreenHidden();
 
 	virtual void SetupBeforeShow() {}
 	virtual void SetupBeforeHide() {}

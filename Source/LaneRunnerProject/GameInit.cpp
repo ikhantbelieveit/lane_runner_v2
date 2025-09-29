@@ -51,12 +51,19 @@ void AGameInit::Tick(float DeltaTime)
 					}
 				}
 
-				auto* levelSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGI_LevelSystem>();
+				auto* uiStateSystem = GetGameInstance()->GetSubsystem<UGI_UIStateSystem>();
+				if (uiStateSystem)
+				{
+					uiStateSystem->EnterScreen(EUIState::MainMenu);
+					HasBroadcastInitFinished = true;
+				}
+
+				/*auto* levelSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGI_LevelSystem>();
 				if (levelSystem)
 				{
 					levelSystem->EnterLevel();
-					HasBroadcastInitFinished = true;
-				}
+					
+				}*/
 			}
 		}
 	}

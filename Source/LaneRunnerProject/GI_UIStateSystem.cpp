@@ -76,18 +76,20 @@ void UGI_UIStateSystem::EnterScreen(EUIState newScreen)
         return;
     }
 
-    for (const TPair<EUIState, UBaseUIScreen*> pair : Widgets_LUT)
+    for (const TPair<EUIState, UBaseUIScreen*>& pair : Widgets_LUT)
     {
-        EUIState checkState = pair.Key;
         UBaseUIScreen* checkSystem = pair.Value;
-
-        if (checkState != newScreen)
+        if (checkSystem)
         {
             HideScreen(checkSystem);
         }
-        else
+    }
+
+    if (UBaseUIScreen** Found = Widgets_LUT.Find(newScreen))
+    {
+        if (*Found)
         {
-            ShowScreen(checkSystem);
+            ShowScreen(*Found);
         }
     }
 
@@ -141,6 +143,11 @@ void UGI_UIStateSystem::ShowScreen(UBaseUIScreen* screen)
 
 void UGI_UIStateSystem::HideScreen(UBaseUIScreen* screen)
 {
+    if (!screen)
+    {
+        return;
+    }
+
     screen->SetupBeforeHide();
 
     screen->SetVisibility(ESlateVisibility::Hidden);
@@ -155,7 +162,10 @@ void UGI_UIStateSystem::HideScreen(UBaseUIScreen* screen)
         PC->bShowMouseCursor = false;
     }
 
-    ActiveWidget = nullptr;
+    if (ActiveWidget == screen)
+    {
+        ActiveWidget = nullptr;
+    }
 }
 
 const UBaseUIScreen* UGI_UIStateSystem::GetScreenForState(EUIState state) const

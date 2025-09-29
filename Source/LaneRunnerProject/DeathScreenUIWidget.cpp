@@ -57,6 +57,8 @@ void UDeathScreenUIWidget::OnRespawnButtonPressed()
 	}
 }
 
+
+
 void UDeathScreenUIWidget::OnQuitButtonPressed()
 {
 	auto* uiStateSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGI_UIStateSystem>();
@@ -105,6 +107,7 @@ void UDeathScreenUIWidget::OnScreenShown()
 {
 	Super::OnScreenShown();
 
+	RespawnButton->SetKeyboardFocus();
 }
 
 void UDeathScreenUIWidget::OnScreenHidden()

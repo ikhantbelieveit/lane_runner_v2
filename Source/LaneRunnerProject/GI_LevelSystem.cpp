@@ -127,11 +127,7 @@ int UGI_LevelSystem::GetScore()
 
 void UGI_LevelSystem::EnterLevel()
 {
-	auto* uiStateSystem = GetGameInstance()->GetSubsystem<UGI_UIStateSystem>();
-	if (uiStateSystem)
-	{
-		uiStateSystem->EnterScreen(EUIState::TestLevel);
-	}
+	
 
 	APlayerCharacter* player = Cast<APlayerCharacter>(UGameplayStatics::GetActorOfClass(GetWorld(), APlayerCharacter::StaticClass()));
 	if (player)
