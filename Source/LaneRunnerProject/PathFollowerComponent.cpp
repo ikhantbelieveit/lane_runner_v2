@@ -19,6 +19,8 @@ void UPathFollowerComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
+	Direction = 1;
+
 	if (SplineActor)
 	{
 		USplineComponent* spline = SplineActor->FindComponentByClass<USplineComponent>();
@@ -35,7 +37,7 @@ void UPathFollowerComponent::TickComponent(float DeltaTime,ELevelTick TickType, 
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	if (SplineActor)
+	if (CurrentSplineComp)
 	{
 		FollowSpline(DeltaTime);
 	}
@@ -48,9 +50,34 @@ void UPathFollowerComponent::FollowSpline(float DeltaTime)
 	if (!CurrentSplineComp) return;
 
 	const float SplineLength = CurrentSplineComp->GetSplineLength();
-	DistanceAlongSpline += CurrentSpeed * DeltaTime;
+	DistanceAlongSpline += CurrentSpeed * DeltaTime * Direction;
 
-	if (bLoop)
+	switch (FollowMode)
+	{
+	case EPathFollowMode::Loop:
+		DistanceAlongSpline = FMath::Fmod(DistanceAlongSpline, SplineLength);
+		if (DistanceAlongSpline < 0.f)
+		{
+			DistanceAlongSpline += SplineLength;
+		}
+		break;
+	case EPathFollowMode::Clamp:
+		DistanceAlongSpline = FMath::Clamp(DistanceAlongSpline, 0.f, SplineLength);
+		break;
+	case EPathFollowMode::PingPong:
+		if (DistanceAlongSpline > SplineLength)
+		{
+			DistanceAlongSpline = SplineLength;
+			Direction *= -1;
+		}
+		else if (DistanceAlongSpline < 0.f)
+		{
+			DistanceAlongSpline = 0.f;
+			Direction *= -1;
+		}
+		break;
+	}
+	/*if (bLoop)
 	{
 		DistanceAlongSpline = FMath::Fmod(DistanceAlongSpline, SplineLength);
 		if (DistanceAlongSpline < 0.f)
@@ -61,7 +88,7 @@ void UPathFollowerComponent::FollowSpline(float DeltaTime)
 	else
 	{
 		DistanceAlongSpline = FMath::Clamp(DistanceAlongSpline, 0.f, SplineLength);
-	}
+	}*/
 
 	// Set actor location and rotation
 	FVector Location = CurrentSplineComp->GetLocationAtDistanceAlongSpline(DistanceAlongSpline, ESplineCoordinateSpace::World);

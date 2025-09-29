@@ -31,6 +31,9 @@ struct FLevelEventData
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Level Event")
 	bool BoolParam;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Level Event")
+	AActor* ActorParam;
 };
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FLevelSystemEvent);

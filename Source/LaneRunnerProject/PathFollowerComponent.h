@@ -7,6 +7,13 @@
 #include "Components/SplineComponent.h"
 #include "PathFollowerComponent.generated.h"
 
+UENUM(BlueprintType)
+enum class EPathFollowMode : uint8
+{
+	Clamp    UMETA(DisplayName = "Clamp"),
+	Loop     UMETA(DisplayName = "Loop"),
+	PingPong UMETA(DisplayName = "Ping-Pong")
+};
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class LANERUNNERPROJECT_API UPathFollowerComponent : public UActorComponent
@@ -51,10 +58,15 @@ public:
 
 	void Reset();
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spline")
+	EPathFollowMode FollowMode;
+
 private:
 	void FollowSpline(float DeltaTime);
 
 	USplineComponent* CurrentSplineComp;
 
 	float CurrentSpeed;
+
+	int Direction = 1;
 };

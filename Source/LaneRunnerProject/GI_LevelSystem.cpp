@@ -8,6 +8,8 @@
 #include "GI_AudioSystem.h"
 #include "GI_SaveSystem.h"
 #include "ScrollWithPlayerComponent.h"
+#include "PathFollowerComponent.h"
+#include "Components/SplineComponent.h"
 
 void UGI_LevelSystem::OnGameOverDelayComplete()
 {
@@ -230,13 +232,6 @@ void UGI_LevelSystem::ExecuteSingleEvent(const FLevelEventData& Event)
 				{
 					scrollComp->SetEnabled(Event.BoolParam);
 				}
-
-				// Example: tell an object to follow a path
-				//if (UPathFollowerComponent* PathComp = Target->FindComponentByClass<UPathFollowerComponent>())
-				//{
-				//	// Could use TagParam to look up a spline, or NumericParam for start distance
-				//	PathComp->SetSplineActor(Cast<AActor>(Event.TagParam));
-				//}
 			}
 		}
 	}
@@ -247,12 +242,13 @@ void UGI_LevelSystem::ExecuteSingleEvent(const FLevelEventData& Event)
 		{
 			if (Target)
 			{
-				// Example: tell an object to follow a path
-				//if (UPathFollowerComponent* PathComp = Target->FindComponentByClass<UPathFollowerComponent>())
-				//{
-				//	// Could use TagParam to look up a spline, or NumericParam for start distance
-				//	PathComp->SetSplineActor(Cast<AActor>(Event.TagParam));
-				//}
+				if (UPathFollowerComponent* pathFollowerComp = Target->FindComponentByClass<UPathFollowerComponent>())
+				{
+					if (USplineComponent* setSpline = Event.ActorParam->FindComponentByClass<USplineComponent>())
+					{
+						pathFollowerComp->SetSpline(setSpline);
+					}
+				}
 			}
 		}
 		break;
