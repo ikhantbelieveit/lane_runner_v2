@@ -227,6 +227,8 @@ public:
 	int StartHealth;
 	int CurrentHealth;
 
+	int MaxHealth;
+
 	void ResetPlayer();
 
 protected:
@@ -246,6 +248,7 @@ public:
 
 	void OnHitHazard(bool oneHitKill);
 	void SetHealthToMax();
+	void ResetHealth();
 
 	UFUNCTION(BlueprintCallable)
 	int GetCurrentHealth();
@@ -302,4 +305,6 @@ public:
 
 	void SetFlipbookVisuals(UPaperFlipbook* flipbook);
 
+	UFUNCTION(BlueprintCallable)
+	void TryAddHealth(int addHealth);
 };

@@ -126,6 +126,20 @@ void UGI_LevelSystem::SetScore(int newScore)
 {
 	CurrentScore = newScore;
 
+	if (CurrentScore > 0)
+	{
+		if (CurrentScore % PointsHealThreshold == 0)
+		{
+			//heal player every X points
+			APlayerCharacter* player = Cast<APlayerCharacter>(UGameplayStatics::GetActorOfClass(GetWorld(), APlayerCharacter::StaticClass()));
+			if (player)
+			{
+				player->TryAddHealth(1);
+			}
+		}
+	}
+
+
 	OnScoreSet.Broadcast();
 }
 

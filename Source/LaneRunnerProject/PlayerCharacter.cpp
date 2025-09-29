@@ -266,6 +266,7 @@ void APlayerCharacter::BeginPlay_SetupFromConfig()
 		}
 
 		StartHealth = ConfigData->MiscConfig.StartHealth;
+		MaxHealth = ConfigData->MiscConfig.MaxHealth;
 
 		if (DropShadowDecal)
 		{
@@ -664,7 +665,7 @@ void APlayerCharacter::ResetPlayer()
 	SetActorLocation(SpawnPos);
 	UpdateCameraPos();
 
-	SetHealthToMax();
+	ResetHealth();
 
 	CancelMercyInvincibility();
 	
@@ -731,6 +732,11 @@ void APlayerCharacter::OnHitHazard(bool oneHitKill)
 }
 
 void APlayerCharacter::SetHealthToMax()
+{
+	SetCurrentHealth(MaxHealth);
+}
+
+void APlayerCharacter::ResetHealth()
 {
 	SetCurrentHealth(StartHealth);
 }
@@ -855,6 +861,18 @@ void APlayerCharacter::SetFlipbookVisuals(UPaperFlipbook* flipbook)
 	{
 		flipbookComp->SetFlipbook(flipbook);
 	}
+}
+
+void APlayerCharacter::TryAddHealth(int addHealth)
+{
+	int newHealth = CurrentHealth + addHealth;
+
+	if (newHealth > MaxHealth)
+	{
+		newHealth = MaxHealth;
+	}
+
+	SetCurrentHealth(newHealth);
 }
 
 

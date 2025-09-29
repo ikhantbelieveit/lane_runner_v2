@@ -158,16 +158,19 @@ struct FPlayerMisc
 public:
 
 	UPROPERTY(EditAnywhere)
-	float CameraHeight = 175.0f;
+	float CameraHeight = 400.0f;
 
 	UPROPERTY(EditAnywhere)
-	float CameraFOV = 100.0f;
+	float CameraFOV = 110.0f;
 
 	UPROPERTY(EditAnywhere)
 	FVector ScrollTriggerBoxScale = FVector(1.0f);
 
 	UPROPERTY(EditAnywhere)
 	int StartHealth = 3;
+
+	UPROPERTY(EditAnywhere)
+	int MaxHealth = 9;
 };
 
 USTRUCT(BlueprintType)

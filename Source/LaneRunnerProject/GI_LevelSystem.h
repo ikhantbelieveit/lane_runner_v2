@@ -26,6 +26,8 @@ protected:
 
 	float GameOverDelay = 0.75f;
 
+	int PointsHealThreshold = 100;	//how many points the player needs to get a heal
+
 public:
 	void SetGameState(EGameState newState);
 	EGameState GetGameState();
