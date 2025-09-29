@@ -59,4 +59,20 @@ public:
 
 	UPROPERTY(meta = (BindWidget))
 	UImage* QuitButtonArrow;
+
+	UPROPERTY(meta = (BindWidget))
+	UButton* MenuButton;
+
+	UFUNCTION()
+	void OnMenuButtonPressed();
+
+	UPROPERTY(meta = (BindWidget))
+	UImage* MenuButtonArrow;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float RespawnDelay = 0.5f;
+
+private:
+	FTimerHandle RespawnDelayHandle;
+	void OnRespawnDelayComplete();
 };

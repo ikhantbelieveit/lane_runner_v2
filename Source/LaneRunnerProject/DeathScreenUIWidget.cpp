@@ -20,35 +20,48 @@ void UDeathScreenUIWidget::Initialise()
 	{
 		QuitButton->OnClicked.AddDynamic(this, &UDeathScreenUIWidget::OnQuitButtonPressed);
 	}
+
+	if (MenuButton)
+	{
+		MenuButton->OnClicked.AddDynamic(this, &UDeathScreenUIWidget::OnMenuButtonPressed);
+	}
 }
 
 void UDeathScreenUIWidget::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	bool showRespawnButton = RespawnButton->HasKeyboardFocus();
-	bool showQuitButton = QuitButton->HasKeyboardFocus();
+	ESlateVisibility respawnArrowVis = RespawnButton->HasKeyboardFocus() ? ESlateVisibility::Visible : ESlateVisibility::Hidden;
+	ESlateVisibility quitArrowVis = QuitButton->HasKeyboardFocus() ? ESlateVisibility::Visible : ESlateVisibility::Hidden;
+	ESlateVisibility menuArrowVis = MenuButton->HasKeyboardFocus() ? ESlateVisibility::Visible : ESlateVisibility::Hidden;
 
-	if (showRespawnButton)
-	{
-		RespawnButtonArrow->SetVisibility(ESlateVisibility::Visible);
-	}
-	else
-	{
-		RespawnButtonArrow->SetVisibility(ESlateVisibility::Hidden);
-	}
-
-	if (showQuitButton)
-	{
-		QuitButtonArrow->SetVisibility(ESlateVisibility::Visible);
-	}
-	else
-	{
-		QuitButtonArrow->SetVisibility(ESlateVisibility::Hidden);
-	}
+	RespawnButtonArrow->SetVisibility(respawnArrowVis);
+	QuitButtonArrow->SetVisibility(quitArrowVis);
+	MenuButtonArrow->SetVisibility(menuArrowVis);
 }
 
 void UDeathScreenUIWidget::OnRespawnButtonPressed()
+{
+	GetWorld()->GetTimerManager().SetTimer(
+		RespawnDelayHandle,
+		this,
+		&UDeathScreenUIWidget::OnRespawnDelayComplete,
+		RespawnDelay,
+		false,
+		-1.0f
+	);
+}
+
+void UDeathScreenUIWidget::OnMenuButtonPressed()
+{
+	auto* uiStateSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGI_UIStateSystem>();
+	if (uiStateSystem)
+	{
+		uiStateSystem->EnterScreen(EUIState::MainMenu);
+	}
+}
+
+void UDeathScreenUIWidget::OnRespawnDelayComplete()
 {
 	auto* levelSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGI_LevelSystem>();
 	if (levelSystem)
@@ -56,8 +69,6 @@ void UDeathScreenUIWidget::OnRespawnButtonPressed()
 		levelSystem->ResetFromLose();
 	}
 }
-
-
 
 void UDeathScreenUIWidget::OnQuitButtonPressed()
 {

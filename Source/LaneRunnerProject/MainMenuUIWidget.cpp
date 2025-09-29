@@ -52,6 +52,27 @@ void UMainMenuUIWidget::OnStartButtonPressed()
 
 void UMainMenuUIWidget::OnPlayButtonPressed()
 {
+	GetWorld()->GetTimerManager().SetTimer(
+		StartGameDelayHandle,
+		this,
+		&UMainMenuUIWidget::OnStartGameDelayComplete,
+		StartGameDelay,
+		false,
+		-1.0f
+	);
+}
+
+void UMainMenuUIWidget::OnQuitButtonPressed()
+{
+	auto* uiStateSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGI_UIStateSystem>();
+	if (uiStateSystem)
+	{
+		uiStateSystem->QuitGame();
+	}
+}
+
+void UMainMenuUIWidget::OnStartGameDelayComplete()
+{
 	auto* uiStateSystem = GetGameInstance()->GetSubsystem<UGI_UIStateSystem>();
 	if (uiStateSystem)
 	{
@@ -62,14 +83,5 @@ void UMainMenuUIWidget::OnPlayButtonPressed()
 	if (levelSystem)
 	{
 		levelSystem->EnterLevel();
-	}
-}
-
-void UMainMenuUIWidget::OnQuitButtonPressed()
-{
-	auto* uiStateSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGI_UIStateSystem>();
-	if (uiStateSystem)
-	{
-		uiStateSystem->QuitGame();
 	}
 }

@@ -21,6 +21,11 @@ protected:
 
 	int CurrentScore;
 
+	FTimerHandle GameOverDelayHandle;
+	void OnGameOverDelayComplete();
+
+	float GameOverDelay = 0.75f;
+
 public:
 	void SetGameState(EGameState newState);
 	EGameState GetGameState();

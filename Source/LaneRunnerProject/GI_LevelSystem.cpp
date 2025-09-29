@@ -8,6 +8,17 @@
 #include "GI_AudioSystem.h"
 #include "GI_SaveSystem.h"
 
+void UGI_LevelSystem::OnGameOverDelayComplete()
+{
+	auto* uiStateSystem = GetGameInstance()->GetSubsystem<UGI_UIStateSystem>();
+	//auto* audioSystem = GetGameInstance()->GetSubsystem<UGI_AudioSystem>();
+
+	if (uiStateSystem)
+	{
+		uiStateSystem->EnterScreen(EUIState::DeathScreen);
+	}
+}
+
 void UGI_LevelSystem::SetGameState(EGameState newState)
 {
 	if (CurrentGameState == newState)
@@ -21,18 +32,21 @@ void UGI_LevelSystem::SetGameState(EGameState newState)
 	switch (newState)
 	{
 	case EGameState::Lose:
-
-		if (uiStateSystem)
-		{
-			uiStateSystem->EnterScreen(EUIState::DeathScreen);
-		}
+		SaveLevelStats();
 
 		if (audioSystem)
 		{
 			audioSystem->StopMusic();
 		}
 
-		SaveLevelStats();
+		GetWorld()->GetTimerManager().SetTimer(
+			GameOverDelayHandle,
+			this,
+			&UGI_LevelSystem::OnGameOverDelayComplete,
+			GameOverDelay,
+			false,
+			-1.0f
+		);
 
 		break;
 	case EGameState::Active:

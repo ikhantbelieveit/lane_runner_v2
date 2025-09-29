@@ -20,6 +20,8 @@ class LANERUNNERPROJECT_API UMainMenuUIWidget : public UBaseUIScreen
 
 	virtual void Tick(float DeltaTime) override;
 
+
+
 public:
 	UPROPERTY(meta = (BindWidget))
 	UButton* StartButton;
@@ -47,4 +49,11 @@ public:
 
 	UPROPERTY(meta = (BindWidget))
 	UImage* QuitButtonArrow;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float StartGameDelay = 0.5f;
+
+private:
+	FTimerHandle StartGameDelayHandle;
+	void OnStartGameDelayComplete();
 };

@@ -21,7 +21,7 @@ protected:
     virtual void BeginPlay() override;
 
     FTimerHandle ActionTimerHandle;
-    //Action execute method - override in children for specific behaviour
+
     virtual void PerformAction();
 
 public:
