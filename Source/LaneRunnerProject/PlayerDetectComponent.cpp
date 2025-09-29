@@ -58,17 +58,12 @@ void UPlayerDetectComponent::HandleBeginOverlap(
 
 	if (OtherComp->ComponentHasTag(PlayerAreaTag))
 	{
-		//do stuff
-		if (TriggerScrollWithPlayer)
+		if (UGameInstance* GI = GetWorld()->GetGameInstance())
 		{
-			UScrollWithPlayerComponent* scrollWithPlayer = (UScrollWithPlayerComponent*)GetOwner()->GetComponentByClass(UScrollWithPlayerComponent::StaticClass());
-
-			if (scrollWithPlayer)
+			if (auto* levelSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGI_LevelSystem>())
 			{
-				scrollWithPlayer->SetScrollWithPos(OtherComp->GetRelativeLocation().X);
-				scrollWithPlayer->Enabled = true;
+				levelSystem->ExecuteEvents(EventsToTrigger);
 			}
-			
 		}
 	}
 }

@@ -80,7 +80,7 @@ void UReactToProjComponent::HitByProjectile(AActor* projActor)
 
 	if (auto* scrollComp = GetOwner()->GetComponentByClass<UScrollWithPlayerComponent>())
 	{
-		impactShouldScroll = scrollComp->Enabled;
+		impactShouldScroll = scrollComp->GetEnabled();
 		scrollWithPlayerOffset = scrollComp->ScrollWithXPos;
 	}
 

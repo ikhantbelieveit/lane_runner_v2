@@ -18,14 +18,14 @@ public:
 	// Sets default values for this component's properties
 	UScrollWithPlayerComponent();
 
-	bool Enabled = true;
-
 	APlayerCharacter* PlayerRef;
 	bool HasPlayerRef;
 
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
+
+	bool Enabled = true;
 
 public:	
 	// Called every frame
@@ -44,4 +44,10 @@ public:
 
 	UFUNCTION()
 	void SetScrollWithPos(float pos);
+
+	UFUNCTION()
+	void SetEnabled(bool enabled);
+
+	UFUNCTION()
+	bool GetEnabled();
 };

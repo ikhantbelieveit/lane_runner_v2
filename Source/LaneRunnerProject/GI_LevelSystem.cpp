@@ -7,6 +7,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "GI_AudioSystem.h"
 #include "GI_SaveSystem.h"
+#include "ScrollWithPlayerComponent.h"
 
 void UGI_LevelSystem::OnGameOverDelayComplete()
 {
@@ -95,10 +96,16 @@ void UGI_LevelSystem::OnPlayerTouchHazard(bool oneHitKill, bool overrideInvincib
 	}
 }
 
+void UGI_LevelSystem::ResetLevel()
+{
+	SetScore(0);
+	PointsUntilNextThreshold = PointsHealThreshold;
+}
+
 void UGI_LevelSystem::ResetFromLose()
 {
 	CleanupBeforeReset.Broadcast();
-	SetScore(0);
+	ResetLevel();
 
 	SetGameState(EGameState::Active);
 }
@@ -125,27 +132,25 @@ void UGI_LevelSystem::OnPitfall()
 void UGI_LevelSystem::SetScore(int newScore)
 {
 	CurrentScore = newScore;
-
-	if (CurrentScore > 0)
-	{
-		if (CurrentScore % PointsHealThreshold == 0)
-		{
-			//heal player every X points
-			APlayerCharacter* player = Cast<APlayerCharacter>(UGameplayStatics::GetActorOfClass(GetWorld(), APlayerCharacter::StaticClass()));
-			if (player)
-			{
-				player->TryAddHealth(1);
-			}
-		}
-	}
-
-
 	OnScoreSet.Broadcast();
 }
 
 void UGI_LevelSystem::AddToScore(int addValue)
 {
 	SetScore(CurrentScore + addValue);
+
+	PointsUntilNextThreshold -= addValue;
+
+	if (PointsUntilNextThreshold <= 1)
+	{
+		APlayerCharacter* player = Cast<APlayerCharacter>(UGameplayStatics::GetActorOfClass(GetWorld(), APlayerCharacter::StaticClass()));
+		if (player)
+		{
+			player->TryAddHealth(1);
+		}
+
+		PointsUntilNextThreshold = PointsHealThreshold;
+	}
 }
 
 int UGI_LevelSystem::GetScore()
@@ -155,15 +160,13 @@ int UGI_LevelSystem::GetScore()
 
 void UGI_LevelSystem::EnterLevel()
 {
-	
-
 	APlayerCharacter* player = Cast<APlayerCharacter>(UGameplayStatics::GetActorOfClass(GetWorld(), APlayerCharacter::StaticClass()));
 	if (player)
 	{
 		player->ResetPlayer();
 	}
 
-	SetScore(0);
+	ResetLevel();
 
 	SetGameState(EGameState::Active);
 }
@@ -203,4 +206,76 @@ void UGI_LevelSystem::SaveLevelStats()
 		saveSystem->SaveGame(saveObject);
 
 	};
+}
+
+void UGI_LevelSystem::ExecuteEvents(const TArray<FLevelEventData>& Events)
+{
+	for (const FLevelEventData& Event : Events)
+	{
+		ExecuteSingleEvent(Event);
+	}
+}
+
+void UGI_LevelSystem::ExecuteSingleEvent(const FLevelEventData& Event)
+{
+	switch (Event.EventType)
+	{
+	case ELevelEventType::TogglePlayerScroll:
+	{
+		for (AActor* Target : Event.TargetActors)
+		{
+			if (Target)
+			{
+				if (UScrollWithPlayerComponent* scrollComp = Target->FindComponentByClass<UScrollWithPlayerComponent>())
+				{
+					scrollComp->SetEnabled(Event.BoolParam);
+				}
+
+				// Example: tell an object to follow a path
+				//if (UPathFollowerComponent* PathComp = Target->FindComponentByClass<UPathFollowerComponent>())
+				//{
+				//	// Could use TagParam to look up a spline, or NumericParam for start distance
+				//	PathComp->SetSplineActor(Cast<AActor>(Event.TagParam));
+				//}
+			}
+		}
+	}
+
+	case ELevelEventType::SetObjectPath:
+	{
+		for (AActor* Target : Event.TargetActors)
+		{
+			if (Target)
+			{
+				// Example: tell an object to follow a path
+				//if (UPathFollowerComponent* PathComp = Target->FindComponentByClass<UPathFollowerComponent>())
+				//{
+				//	// Could use TagParam to look up a spline, or NumericParam for start distance
+				//	PathComp->SetSplineActor(Cast<AActor>(Event.TagParam));
+				//}
+			}
+		}
+		break;
+	}
+
+	case ELevelEventType::TogglePlatform:
+	{
+		for (AActor* Target : Event.TargetActors)
+		{
+			//if (Target)
+			//{
+			//	// You could implement an interface here (e.g., ILevelInteractable)
+			//	Target->SetActorHiddenInGame(!Target->bHidden);
+			//	Target->SetActorEnableCollision(!Target->bHidden);
+			//}
+		}
+		break;
+	}
+
+	default:
+	{
+		// For Blueprint implementable extension
+		break;
+	}
+	}
 }

@@ -5,7 +5,9 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "Components/BoxComponent.h"
+#include "GI_LevelSystem.h"
 #include "PlayerDetectComponent.generated.h"
+
 
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -35,10 +37,10 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName PlayerAreaTag;	//TODO: make deprecated
+	FName PlayerAreaTag;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool TriggerScrollWithPlayer;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Level Event")
+	TArray<FLevelEventData> EventsToTrigger;
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Overlap")

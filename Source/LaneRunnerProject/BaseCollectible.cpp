@@ -223,7 +223,14 @@ void ABaseCollectible::Spawn(bool fromDestroyedObject)
 		UPlayerDetectComponent* detectComp = (UPlayerDetectComponent*)GetComponentByClass(UPlayerDetectComponent::StaticClass());
 		if (detectComp)
 		{
-			detectComp->TriggerScrollWithPlayer = true;
+			FLevelEventData NewEvent;
+			NewEvent.EventType = ELevelEventType::TogglePlayerScroll;
+
+			NewEvent.TargetActors.Add(this);
+
+			NewEvent.BoolParam = true;
+			detectComp->EventsToTrigger.Empty();
+			detectComp->EventsToTrigger.Add(NewEvent);
 		}
 	}
 }

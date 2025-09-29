@@ -131,7 +131,7 @@ void UDestructibleObjectComponent::DestroyFromComp()
 
 			if (scrollComp && itemScrollComp)
 			{
-				itemShouldScroll = scrollComp->Enabled && scrollComp->ScrollWithXPos == 0.0f;
+				itemShouldScroll = scrollComp->GetEnabled()  && scrollComp->ScrollWithXPos == 0.0f;
 			}
 
 			ActiveCollectible->Spawn(true);
@@ -146,7 +146,7 @@ void UDestructibleObjectComponent::DestroyFromComp()
 			if (itemShouldScroll)
 			{
 				itemScrollComp->SetScrollWithPos(0);
-				itemScrollComp->Enabled = true;
+				itemScrollComp->SetEnabled(true);
 			}
 		}
 	}

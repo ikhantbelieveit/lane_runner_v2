@@ -29,7 +29,7 @@ public:
 	AActor* SplineActor;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spline")
-	float Speed;
+	float DefaultSpeed = 400.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spline")
 	float DistanceAlongSpline;
@@ -46,8 +46,15 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spline")
 	bool RotateToMatchPath;
 
+	UFUNCTION(BlueprintCallable)
+	void SetSpeed(float newSpeed);
+
+	void Reset();
+
 private:
 	void FollowSpline(float DeltaTime);
 
 	USplineComponent* CurrentSplineComp;
+
+	float CurrentSpeed;
 };

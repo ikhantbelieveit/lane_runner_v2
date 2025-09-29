@@ -59,7 +59,7 @@ void AProjectile::SetupFromConfig()
 
             if (scrollComp)
             {
-                scrollComp->Enabled = false;
+                scrollComp->SetEnabled(false);
             }
 
             spriteComp->SetRelativeRotation(FRotator(0.0f, 0.0f, 90.0f));
@@ -127,7 +127,7 @@ void AProjectile::Fire(EProjectileDirection Direction)
         UScrollWithPlayerComponent* scrollComp = (UScrollWithPlayerComponent*)GetComponentByClass(UScrollWithPlayerComponent::StaticClass());
         if (scrollComp)
         {
-            scrollComp->Enabled = false;
+            scrollComp->SetEnabled(false);
         }
         if (spriteComp)
         {
@@ -167,7 +167,7 @@ void AProjectile::OnDestroy(bool impactScroll, float scrollWithPlayerOffset)
                 UScrollWithPlayerComponent* scrollComp = impactAnim->GetComponentByClass<UScrollWithPlayerComponent>();
                 if (scrollComp)
                 {
-                    scrollComp->Enabled = impactScroll;
+                    scrollComp->SetEnabled(impactScroll);
                     scrollComp->SetScrollWithPos(scrollWithPlayerOffset);
                 }
             }

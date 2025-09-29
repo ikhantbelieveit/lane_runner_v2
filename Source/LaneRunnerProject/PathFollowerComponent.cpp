@@ -10,6 +10,11 @@ UPathFollowerComponent::UPathFollowerComponent()
 
 }
 
+void UPathFollowerComponent::Reset()
+{
+	SetSpeed(DefaultSpeed);
+}
+
 void UPathFollowerComponent::BeginPlay()
 {
 	Super::BeginPlay();
@@ -22,6 +27,8 @@ void UPathFollowerComponent::BeginPlay()
 			CurrentSplineComp = spline;
 		}
 	}
+
+	Reset();
 }
 
 void UPathFollowerComponent::TickComponent(float DeltaTime,ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -41,7 +48,7 @@ void UPathFollowerComponent::FollowSpline(float DeltaTime)
 	if (!CurrentSplineComp) return;
 
 	const float SplineLength = CurrentSplineComp->GetSplineLength();
-	DistanceAlongSpline += Speed * DeltaTime;
+	DistanceAlongSpline += CurrentSpeed * DeltaTime;
 
 	if (bLoop)
 	{
@@ -75,4 +82,9 @@ void UPathFollowerComponent::SetSpline(USplineComponent* NewSpline)
 		CurrentSplineComp = NewSpline;
 		DistanceAlongSpline = 0.f; // reset when switching spline
 	}
+}
+
+void UPathFollowerComponent::SetSpeed(float newSpeed)
+{
+	CurrentSpeed = newSpeed;
 }

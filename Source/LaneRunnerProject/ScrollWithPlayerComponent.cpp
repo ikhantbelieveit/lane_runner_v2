@@ -80,3 +80,13 @@ void UScrollWithPlayerComponent::SetScrollWithPos(float pos)
 {
 	ScrollWithXPos = pos;
 }
+
+void UScrollWithPlayerComponent::SetEnabled(bool enabled)
+{
+	Enabled = enabled;
+}
+
+bool UScrollWithPlayerComponent::GetEnabled()
+{
+	return Enabled;
+}
