@@ -6,6 +6,7 @@
 #include "OneShotAnim.h"
 #include "Projectile.h"
 #include "EngineUtils.h"
+#include "LocationManagerComponent.h"
 
 // Sets default values for this component's properties
 UReactToProjComponent::UReactToProjComponent()
@@ -78,9 +79,9 @@ void UReactToProjComponent::HitByProjectile(AActor* projActor)
 	bool impactShouldScroll = false;
 	float scrollWithPlayerOffset = 0.0f;
 
-	if (auto* scrollComp = GetOwner()->GetComponentByClass<UScrollWithPlayerComponent>())
+	if (auto* scrollComp = GetOwner()->GetComponentByClass<ULocationManagerComponent>())
 	{
-		impactShouldScroll = scrollComp->GetEnabled();
+		impactShouldScroll = scrollComp->bScrollEnabled;
 		scrollWithPlayerOffset = scrollComp->ScrollWithXPos;
 	}
 

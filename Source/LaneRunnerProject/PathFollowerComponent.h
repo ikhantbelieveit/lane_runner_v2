@@ -5,15 +5,16 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "Components/SplineComponent.h"
+#include "LocationManagerComponent.h"
 #include "PathFollowerComponent.generated.h"
 
-UENUM(BlueprintType)
-enum class EPathFollowMode : uint8
-{
-	Clamp    UMETA(DisplayName = "Clamp"),
-	Loop     UMETA(DisplayName = "Loop"),
-	PingPong UMETA(DisplayName = "Ping-Pong")
-};
+//UENUM(BlueprintType)
+//enum class EPathFollowMode : uint8
+//{
+//	Clamp    UMETA(DisplayName = "Clamp"),
+//	Loop     UMETA(DisplayName = "Loop"),
+//	PingPong UMETA(DisplayName = "Ping-Pong")
+//};
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class LANERUNNERPROJECT_API UPathFollowerComponent : public UActorComponent

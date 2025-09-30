@@ -8,7 +8,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Components/StaticMeshComponent.h"
 #include "GI_LevelSystem.h"
-#include "ScrollWithPlayerComponent.h"
+#include "LocationManagerComponent.h"
 #include "DamageFlashComponent.h"
 
 
@@ -126,12 +126,12 @@ void UDestructibleObjectComponent::DestroyFromComp()
 
 			bool itemShouldScroll = false;
 
-			UScrollWithPlayerComponent* scrollComp = GetOwner()->GetComponentByClass<UScrollWithPlayerComponent>();
-			UScrollWithPlayerComponent* itemScrollComp = ActiveCollectible->GetComponentByClass<UScrollWithPlayerComponent>();
+			ULocationManagerComponent* locationComp = GetOwner()->GetComponentByClass<ULocationManagerComponent>();
+			ULocationManagerComponent* itemLocationComp = ActiveCollectible->GetComponentByClass<ULocationManagerComponent>();
 
-			if (scrollComp && itemScrollComp)
+			if (locationComp && itemLocationComp)
 			{
-				itemShouldScroll = scrollComp->GetEnabled()  && scrollComp->ScrollWithXPos == 0.0f;
+				itemShouldScroll = locationComp->bScrollEnabled && locationComp->ScrollWithXPos == 0.0f;
 			}
 
 			ActiveCollectible->Spawn(true);
@@ -145,8 +145,8 @@ void UDestructibleObjectComponent::DestroyFromComp()
 
 			if (itemShouldScroll)
 			{
-				itemScrollComp->SetScrollWithPos(0);
-				itemScrollComp->SetEnabled(true);
+				itemLocationComp->ScrollWithXPos = 0;
+				itemLocationComp->bScrollEnabled = true;
 			}
 		}
 	}

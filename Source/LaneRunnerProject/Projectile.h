@@ -4,7 +4,7 @@
 #include "Engine/StaticMesh.h"
 #include "ProjectileConfigData.h"
 #include "EProjectileDirection.h"
-#include "ScrollWithPlayerComponent.h"
+#include "LocationManagerComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Components/SphereComponent.h"

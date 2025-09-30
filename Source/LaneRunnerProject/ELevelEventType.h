@@ -15,5 +15,6 @@ enum class ELevelEventType : uint8
 	TogglePlayerScroll    UMETA(DisplayName = "Toggle Player Scroll"),
 	SetObjectPath    UMETA(DisplayName = "Set Object Path"),
 	SetObjectSpeed    UMETA(DisplayName = "Set Object Speed"),
-	TogglePlatform   UMETA(DisplayName = "Toggle Platform")
+	TogglePlatform   UMETA(DisplayName = "Toggle Platform"),
+	TogglePathFollow UMETA(DisplayName = "Toggle Path Follow")
 };

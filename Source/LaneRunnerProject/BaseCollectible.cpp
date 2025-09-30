@@ -7,6 +7,7 @@
 #include "PaperSpriteComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "PlayerDetectComponent.h"
+#include "LocationManagerComponent.h"
 
 // Sets default values
 ABaseCollectible::ABaseCollectible()
@@ -39,53 +40,53 @@ void ABaseCollectible::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	bool checkForGround = false;
+	//bool checkForGround = false;
 
-	if (GravityEnabled)
-	{
-		UProjectileMovementComponent* projMoveComp = (UProjectileMovementComponent*)GetComponentByClass(UProjectileMovementComponent::StaticClass());
-		if (projMoveComp)
-		{
-			if (projMoveComp->Velocity.Z == 0.0f)
-			{
-				checkForGround = true;
-			}
-		}
+	//if (GravityEnabled)
+	//{
+	//	UProjectileMovementComponent* projMoveComp = (UProjectileMovementComponent*)GetComponentByClass(UProjectileMovementComponent::StaticClass());
+	//	if (projMoveComp)
+	//	{
+	//		if (projMoveComp->Velocity.Z == 0.0f)
+	//		{
+	//			checkForGround = true;
+	//		}
+	//	}
 
-		if (checkForGround)
-		{
-			UWorld* World = GetWorld();
-			if (!World) return;
+	//	if (checkForGround)
+	//	{
+	//		UWorld* World = GetWorld();
+	//		if (!World) return;
 
-			FVector Start = GetActorLocation();
-			FVector End = Start - FVector(0.f, 0.f, 5.f); // short downward trace
+	//		FVector Start = GetActorLocation();
+	//		FVector End = Start - FVector(0.f, 0.f, 5.f); // short downward trace
 
-			FCollisionObjectQueryParams ObjectParams;
-			ObjectParams.AddObjectTypesToQuery(ECC_WorldStatic);
+	//		FCollisionObjectQueryParams ObjectParams;
+	//		ObjectParams.AddObjectTypesToQuery(ECC_WorldStatic);
 
-			FHitResult Hit;
-			FCollisionQueryParams Params;
-			Params.AddIgnoredActor(this);
+	//		FHitResult Hit;
+	//		FCollisionQueryParams Params;
+	//		Params.AddIgnoredActor(this);
 
-			bool bOnGround = World->LineTraceSingleByObjectType(
-				Hit, Start, End, ObjectParams, Params);
+	//		bool bOnGround = World->LineTraceSingleByObjectType(
+	//			Hit, Start, End, ObjectParams, Params);
 
-			if (bOnGround)
-			{
-				ECollisionChannel ObjType = Hit.Component->GetCollisionObjectType();
-				if (ObjType == ECC_GameTraceChannel1) // Collectible channel
-				{
-					bOnGround = false;
-				}
-			}
+	//		if (bOnGround)
+	//		{
+	//			ECollisionChannel ObjType = Hit.Component->GetCollisionObjectType();
+	//			if (ObjType == ECC_GameTraceChannel1) // Collectible channel
+	//			{
+	//				bOnGround = false;
+	//			}
+	//		}
 
-			if (!bOnGround)
-			{
-				SetGravityEnabled(true);
-			}
-		}
-		
-	}
+	//		if (!bOnGround)
+	//		{
+	//			SetGravityEnabled(true);
+	//		}
+	//	}
+	//	
+	//}
 }
 
 
@@ -142,7 +143,7 @@ void ABaseCollectible::OnLevelReset()
 		projMoveComp->StopMovementImmediately();
 	}
 
-	SetActorLocation(StartPos);
+	//SetActorLocation(StartPos);
 }
 
 void ABaseCollectible::ResetCollect()
@@ -237,27 +238,32 @@ void ABaseCollectible::Spawn(bool fromDestroyedObject)
 
 void ABaseCollectible::SetGravityEnabled(bool enabled)
 {
-	UProjectileMovementComponent* projMoveComp = (UProjectileMovementComponent*)GetComponentByClass(UProjectileMovementComponent::StaticClass());
-	if (projMoveComp)
+	if (ULocationManagerComponent* LocManager = FindComponentByClass<ULocationManagerComponent>())
 	{
-		// Ensure it has an UpdatedComponent (usually the root or collision box)
-		if (!projMoveComp->UpdatedComponent)
-		{
-			projMoveComp->SetUpdatedComponent(RootComponent);
-		}
-
-		projMoveComp->Activate(enabled);
-
-		if (enabled)
-		{
-			projMoveComp->ProjectileGravityScale = 1.0f;
-			projMoveComp->Velocity = FVector(0.f, 0.f, -1.f);
-		}
-		else
-		{
-			projMoveComp->ProjectileGravityScale = 0.0f;
-		}
+		LocManager->SetGravityEnabled(enabled);
 	}
 
-	GravityEnabled = enabled;
+	//UProjectileMovementComponent* projMoveComp = (UProjectileMovementComponent*)GetComponentByClass(UProjectileMovementComponent::StaticClass());
+	//if (projMoveComp)
+	//{
+	//	// Ensure it has an UpdatedComponent (usually the root or collision box)
+	//	if (!projMoveComp->UpdatedComponent)
+	//	{
+	//		projMoveComp->SetUpdatedComponent(RootComponent);
+	//	}
+
+	//	projMoveComp->Activate(enabled);
+
+	//	if (enabled)
+	//	{
+	//		projMoveComp->ProjectileGravityScale = 1.0f;
+	//		projMoveComp->Velocity = FVector(0.f, 0.f, -1.f);
+	//	}
+	//	else
+	//	{
+	//		projMoveComp->ProjectileGravityScale = 0.0f;
+	//	}
+	//}
+
+	//GravityEnabled = enabled;
 }

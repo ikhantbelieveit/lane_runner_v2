@@ -43,7 +43,7 @@ void AProjectile::SetupFromConfig()
     UProjectileMovementComponent* projMoveComp = (UProjectileMovementComponent*)GetComponentByClass(UProjectileMovementComponent::StaticClass());
     UPaperSpriteComponent* spriteComp = (UPaperSpriteComponent*)GetComponentByClass(UPaperSpriteComponent::StaticClass());
     UBoxComponent* boxComp = (UBoxComponent*)GetComponentByClass(UBoxComponent::StaticClass());
-    UScrollWithPlayerComponent* scrollComp = GetComponentByClass<UScrollWithPlayerComponent>();
+    ULocationManagerComponent* scrollComp = GetComponentByClass<ULocationManagerComponent>();
 
 
 
@@ -59,7 +59,7 @@ void AProjectile::SetupFromConfig()
 
             if (scrollComp)
             {
-                scrollComp->SetEnabled(false);
+                scrollComp->bScrollEnabled = false;
             }
 
             spriteComp->SetRelativeRotation(FRotator(0.0f, 0.0f, 90.0f));
@@ -124,10 +124,10 @@ void AProjectile::Fire(EProjectileDirection Direction)
         break;
     case EProjectileDirection::Forward:
         directionVector = FVector(1, 0, 0);
-        UScrollWithPlayerComponent* scrollComp = (UScrollWithPlayerComponent*)GetComponentByClass(UScrollWithPlayerComponent::StaticClass());
+        ULocationManagerComponent* scrollComp = (ULocationManagerComponent*)GetComponentByClass(ULocationManagerComponent::StaticClass());
         if (scrollComp)
         {
-            scrollComp->SetEnabled(false);
+            scrollComp->bScrollEnabled = false;
         }
         if (spriteComp)
         {
@@ -164,11 +164,11 @@ void AProjectile::OnDestroy(bool impactScroll, float scrollWithPlayerOffset)
         {
             if (impactScroll)
             {
-                UScrollWithPlayerComponent* scrollComp = impactAnim->GetComponentByClass<UScrollWithPlayerComponent>();
+                ULocationManagerComponent* scrollComp = impactAnim->GetComponentByClass<ULocationManagerComponent>();
                 if (scrollComp)
                 {
-                    scrollComp->SetEnabled(impactScroll);
-                    scrollComp->SetScrollWithPos(scrollWithPlayerOffset);
+                    scrollComp->bScrollEnabled = impactScroll;
+                    scrollComp->ScrollWithXPos = scrollWithPlayerOffset;
                 }
             }
         }

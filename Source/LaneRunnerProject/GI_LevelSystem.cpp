@@ -7,8 +7,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "GI_AudioSystem.h"
 #include "GI_SaveSystem.h"
-#include "ScrollWithPlayerComponent.h"
-#include "PathFollowerComponent.h"
+#include "LocationManagerComponent.h"
 #include "Components/SplineComponent.h"
 
 void UGI_LevelSystem::OnGameOverDelayComplete()
@@ -228,12 +227,13 @@ void UGI_LevelSystem::ExecuteSingleEvent(const FLevelEventData& Event)
 		{
 			if (Target)
 			{
-				if (UScrollWithPlayerComponent* scrollComp = Target->FindComponentByClass<UScrollWithPlayerComponent>())
+				if (ULocationManagerComponent* locationComp = Target->FindComponentByClass<ULocationManagerComponent>())
 				{
-					scrollComp->SetEnabled(Event.BoolParam);
+					locationComp->bScrollEnabled = Event.BoolParam;
 				}
 			}
 		}
+		break;
 	}
 
 	case ELevelEventType::SetObjectPath:
@@ -242,11 +242,11 @@ void UGI_LevelSystem::ExecuteSingleEvent(const FLevelEventData& Event)
 		{
 			if (Target)
 			{
-				if (UPathFollowerComponent* pathFollowerComp = Target->FindComponentByClass<UPathFollowerComponent>())
+				if (ULocationManagerComponent* locationComp = Target->FindComponentByClass<ULocationManagerComponent>())
 				{
 					if (USplineComponent* setSpline = Event.ActorParam->FindComponentByClass<USplineComponent>())
 					{
-						pathFollowerComp->SetSpline(setSpline);
+						locationComp->SetSpline(setSpline);
 					}
 				}
 			}
