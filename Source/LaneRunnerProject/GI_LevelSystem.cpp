@@ -105,6 +105,7 @@ void UGI_LevelSystem::ResetLevel()
 
 void UGI_LevelSystem::ResetFromLose()
 {
+	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("broadcast CleanupBeforeReset"));
 	CleanupBeforeReset.Broadcast();
 	ResetLevel();
 
@@ -254,16 +255,111 @@ void UGI_LevelSystem::ExecuteSingleEvent(const FLevelEventData& Event)
 		break;
 	}
 
-	case ELevelEventType::TogglePlatform:
+	case ELevelEventType::TogglePathFollow:
 	{
 		for (AActor* Target : Event.TargetActors)
 		{
-			//if (Target)
-			//{
-			//	// You could implement an interface here (e.g., ILevelInteractable)
-			//	Target->SetActorHiddenInGame(!Target->bHidden);
-			//	Target->SetActorEnableCollision(!Target->bHidden);
-			//}
+			if (Target)
+			{
+				if (ULocationManagerComponent* locationComp = Target->FindComponentByClass<ULocationManagerComponent>())
+				{
+					locationComp->bFollowEnabled = Event.BoolParam;
+				}
+			}
+		}
+		break;
+	}
+
+	case ELevelEventType::SetObjectSpeed:
+	{
+		for (AActor* Target : Event.TargetActors)
+		{
+			if (Target)
+			{
+				if (ULocationManagerComponent* locationComp = Target->FindComponentByClass<ULocationManagerComponent>())
+				{
+					locationComp->SetPathSpeed(Event.NumericParam);
+				}
+			}
+		}
+		break;
+	}
+
+	case ELevelEventType::InvertSpeed:
+	{
+		for (AActor* Target : Event.TargetActors)
+		{
+			if (Target)
+			{
+				if (ULocationManagerComponent* locationComp = Target->FindComponentByClass<ULocationManagerComponent>())
+				{
+					locationComp->SetPathSpeed(-locationComp->GetCurrentSpeed());
+				}
+			}
+		}
+		break;
+	}
+
+	case ELevelEventType::SetAutoMoveSpeed:
+	{
+		for (AActor* Target : Event.TargetActors)
+		{
+			if (Target)
+			{
+				if (ULocationManagerComponent* locationComp = Target->FindComponentByClass<ULocationManagerComponent>())
+				{
+					if (USplineComponent* setSpline = Target->FindComponentByClass<USplineComponent>())
+					{
+						locationComp->SetAutoMoveSpeed(Event.NumericParam);
+					}
+				}
+			}
+		}
+		break;
+	}
+
+	case ELevelEventType::SetAutoMoveDirection:
+	{
+		for (AActor* Target : Event.TargetActors)
+		{
+			if (Target)
+			{
+				if (ULocationManagerComponent* locationComp = Target->FindComponentByClass<ULocationManagerComponent>())
+				{
+					locationComp->SetAutoMoveDirection(Event.DirectionParam);
+				}
+			}
+		}
+		break;
+	}
+
+	case ELevelEventType::StartAutoMove:
+	{
+		for (AActor* Target : Event.TargetActors)
+		{
+			if (Target)
+			{
+				if (ULocationManagerComponent* locationComp = Target->FindComponentByClass<ULocationManagerComponent>())
+				{
+					locationComp->bAutoMoveEnabled = true;
+					locationComp->ApplyAutoMove();
+				}
+			}
+		}
+		break;
+	}
+
+	case ELevelEventType::StopAutoMove:
+	{
+		for (AActor* Target : Event.TargetActors)
+		{
+			if (Target)
+			{
+				if (ULocationManagerComponent* locationComp = Target->FindComponentByClass<ULocationManagerComponent>())
+				{
+					locationComp->StopAutoMove();
+				}
+			}
 		}
 		break;
 	}

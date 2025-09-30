@@ -6,7 +6,9 @@
 #include "EGameState.h"
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "ELevelEventType.h"
+#include "EProjectileDirection.h"
 #include "GI_LevelSystem.generated.h"
+
 
 USTRUCT(BlueprintType)
 struct FLevelEventData
@@ -34,6 +36,12 @@ struct FLevelEventData
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Level Event")
 	AActor* ActorParam;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Level Event")
+	FVector VectorParam;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Level Event")
+	EProjectileDirection DirectionParam = EProjectileDirection::None;
 };
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FLevelSystemEvent);

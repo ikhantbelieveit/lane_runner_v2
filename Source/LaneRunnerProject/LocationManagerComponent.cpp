@@ -3,6 +3,7 @@
 #include "PlayerCharacter.h"
 #include "GI_LevelSystem.h"
 #include "GameFramework/ProjectileMovementComponent.h"
+#include "GameInit.h"
 
 ULocationManagerComponent::ULocationManagerComponent()
 {
@@ -25,7 +26,7 @@ void ULocationManagerComponent::BeginPlay()
 	auto* levelSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGI_LevelSystem>();
 	if (levelSystem)
 	{
-		levelSystem->CleanupBeforeReset.AddDynamic(this, &ULocationManagerComponent::ResetPath);
+		levelSystem->CleanupBeforeReset.AddDynamic(this, &ULocationManagerComponent::Reset);
 	}
 
 	// Cache spline
@@ -34,9 +35,10 @@ void ULocationManagerComponent::BeginPlay()
 		CurrentSplineComp = SplineActor->FindComponentByClass<USplineComponent>();
 	}
 
-	Reset();
-
 	StartPos = GetOwner()->GetActorLocation();
+
+
+	Reset();
 }
 
 void ULocationManagerComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -47,23 +49,14 @@ void ULocationManagerComponent::TickComponent(float DeltaTime, ELevelTick TickTy
 	FVector NewLoc = GetOwner()->GetActorLocation();
 	FRotator NewRot = GetOwner()->GetActorRotation();
 
-	// -------------------------------
-	// Gravity first
-	// -------------------------------
 	if (bGravityEnabled)
 	{
 		UpdateGravity(DeltaTime);
 	}
 
-	// -------------------------------
-	// Only update location if path-follow or scroll are enabled
-	// -------------------------------
 	if (!bFollowEnabled && !bScrollEnabled)
 		return;
 
-	// -------------------------------
-	// Path following (Y + rotation)
-	// -------------------------------
 	if (bFollowEnabled && CurrentSplineComp)
 	{
 		FVector PathLoc;
@@ -82,20 +75,12 @@ void ULocationManagerComponent::TickComponent(float DeltaTime, ELevelTick TickTy
 		}
 	}
 
-	// -------------------------------
-	// Scroll (X)
-	// -------------------------------
 	if (bScrollEnabled && bHasPlayerRef)
 	{
-		// bScrollEnabled controls whether scrolling is allowed
-		// ScrollActive can be used if you want delayed activation
 		float NewX = PlayerRef->GetActorLocation().X + ScrollWithXPos;
 		NewLoc.X = NewX;
 	}
 
-	// -------------------------------
-	// Apply new location + rotation once
-	// -------------------------------
 	GetOwner()->SetActorLocationAndRotation(NewLoc, NewRot, false, nullptr, ETeleportType::TeleportPhysics);
 }
 
@@ -104,7 +89,7 @@ void ULocationManagerComponent::UpdatePath(float DeltaTime, FVector& OutLocation
 	if (!bFollowEnabled || !CurrentSplineComp) return;
 
 	const float SplineLength = CurrentSplineComp->GetSplineLength();
-	DistanceAlongSpline += CurrentSpeed * DeltaTime * Direction;
+	DistanceAlongSpline += CurrentPathSpeed * DeltaTime * Direction;
 
 	switch (FollowMode)
 	{
@@ -205,18 +190,36 @@ void ULocationManagerComponent::Reset()
 	ResetPath();
 
 	bScrollEnabled = bStartScrollActive;
+	bFollowEnabled = bStartFollowEnabled;
+	bAutoMoveEnabled = bStartAutoMoveEnabled;
+
+	SetAutoMoveSpeed(StartAutoMoveSpeed);
+	SetAutoMoveDirection(StartAutoMoveDirection);
+
+	GetOwner()->SetActorLocation(StartPos);
 }
 
 void ULocationManagerComponent::ResetPath()
 {
-	CurrentSpeed = DefaultSpeed;
+	CurrentPathSpeed = DefaultSpeed;
 	DistanceAlongSpline = 0.f;
 	Direction = 1;
+	if (!InitialSplineActor)
+	{
+		ClearSpline();
+	}
+	else
+	{
+		if (USplineComponent* splineComp = InitialSplineActor->GetComponentByClass<USplineComponent>())
+		{
+			SetSpline(splineComp);
+		}
+	}
 }
 
-void ULocationManagerComponent::SetSpeed(float NewSpeed)
+void ULocationManagerComponent::SetPathSpeed(float NewSpeed)
 {
-	CurrentSpeed = NewSpeed;
+	CurrentPathSpeed = NewSpeed;
 }
 
 void ULocationManagerComponent::SetSpline(USplineComponent* NewSpline)
@@ -226,6 +229,12 @@ void ULocationManagerComponent::SetSpline(USplineComponent* NewSpline)
 		CurrentSplineComp = NewSpline;
 		DistanceAlongSpline = 0.f;
 	}
+}
+
+void ULocationManagerComponent::ClearSpline()
+{
+	CurrentSplineComp = nullptr;
+	bFollowEnabled = false;
 }
 
 void ULocationManagerComponent::SetGravityEnabled(bool bEnabled)
@@ -251,4 +260,61 @@ void ULocationManagerComponent::SetGravityEnabled(bool bEnabled)
 	}
 
 	bGravityEnabled = bEnabled;
+}
+
+float ULocationManagerComponent::GetCurrentSpeed()
+{
+	return CurrentPathSpeed;
+}
+
+void ULocationManagerComponent::ApplyAutoMove()
+{
+	if (!bAutoMoveEnabled)
+	{
+		return;
+	}
+
+	if (UProjectileMovementComponent* ProjMove = GetOwner()->FindComponentByClass<UProjectileMovementComponent>())
+	{
+		// Make sure it has a valid root to update
+		if (!ProjMove->UpdatedComponent)
+		{
+			ProjMove->SetUpdatedComponent(GetOwner()->GetRootComponent());
+		}
+
+		FVector Dir = FVector::ZeroVector;
+		switch (CurrentAutoMoveDirection)
+		{
+		case EProjectileDirection::Forward:  Dir = FVector::ForwardVector;  break;
+		case EProjectileDirection::Backward: Dir = -FVector::ForwardVector; break;
+		case EProjectileDirection::Right:    Dir = FVector::RightVector;    break;
+		case EProjectileDirection::Left:     Dir = -FVector::RightVector;   break;
+		case EProjectileDirection::Up:       Dir = FVector::UpVector;       break;
+		case EProjectileDirection::Down:     Dir = -FVector::UpVector;      break;
+		default: break;
+		}
+
+		ProjMove->ProjectileGravityScale = 0.f; // pure linear motion unless you want gravity
+		ProjMove->Velocity = Dir * CurrentAutoMoveSpeed;
+		ProjMove->Activate(true);
+	}
+}
+
+void ULocationManagerComponent::SetAutoMoveSpeed(float newSpeed)
+{
+	CurrentAutoMoveSpeed = newSpeed;
+}
+
+void ULocationManagerComponent::SetAutoMoveDirection(EProjectileDirection newDirection)
+{
+	CurrentAutoMoveDirection = newDirection;
+}
+
+void ULocationManagerComponent::StopAutoMove()
+{
+	UProjectileMovementComponent* projMoveComp = (UProjectileMovementComponent*)GetOwner()->GetComponentByClass(UProjectileMovementComponent::StaticClass());
+	if (projMoveComp)
+	{
+		projMoveComp->StopMovementImmediately();
+	}
 }

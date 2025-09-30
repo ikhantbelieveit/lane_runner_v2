@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "Components/SplineComponent.h"
+#include "EProjectileDirection.h"
 #include "LocationManagerComponent.generated.h"
 
 UENUM(BlueprintType)
@@ -42,10 +43,16 @@ public:
 	AActor* SplineActor;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Path")
+	AActor* InitialSplineActor;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Path")
 	float DefaultSpeed = 400.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Path")
 	bool bFollowEnabled = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Path")
+	bool bStartFollowEnabled = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Path")
 	bool bRotateToMatchPath = false;
@@ -66,11 +73,34 @@ public:
 	bool IsGravityEnabled() const { return bGravityEnabled; }
 
 	/** === Runtime State === */
+	UFUNCTION(BlueprintCallable)
 	void Reset();
 
 	void ResetPath();
-	void SetSpeed(float NewSpeed);
+	void SetPathSpeed(float NewSpeed);
 	void SetSpline(USplineComponent* NewSpline);
+	void ClearSpline();
+
+	float GetCurrentSpeed();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AutoMove")
+	bool bAutoMoveEnabled = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AutoMove")
+	bool bStartAutoMoveEnabled = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AutoMove")
+	EProjectileDirection StartAutoMoveDirection = EProjectileDirection::None;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AutoMove")
+	float StartAutoMoveSpeed = 600.f;
+
+	// Call to apply auto-move settings
+	UFUNCTION(BlueprintCallable, Category = "AutoMove")
+	void ApplyAutoMove();
+	void SetAutoMoveSpeed(float newSpeed);
+	void SetAutoMoveDirection(EProjectileDirection newDirection);
+	void StopAutoMove();
 
 private:
 	// Scroll
@@ -80,9 +110,13 @@ private:
 
 	// Path follow
 	USplineComponent* CurrentSplineComp = nullptr;
-	float CurrentSpeed = 0.f;
+	float CurrentPathSpeed = 0.f;
 	float DistanceAlongSpline = 0.f;
 	int Direction = 1;
+
+	//auto move
+	EProjectileDirection CurrentAutoMoveDirection;
+	float CurrentAutoMoveSpeed;
 
 	// Helpers
 	void UpdatePath(float DeltaTime, FVector& OutLocation, FRotator& OutRotation, bool& bOutHasPath);

@@ -16,5 +16,10 @@ enum class ELevelEventType : uint8
 	SetObjectPath    UMETA(DisplayName = "Set Object Path"),
 	SetObjectSpeed    UMETA(DisplayName = "Set Object Speed"),
 	TogglePlatform   UMETA(DisplayName = "Toggle Platform"),
-	TogglePathFollow UMETA(DisplayName = "Toggle Path Follow")
+	TogglePathFollow UMETA(DisplayName = "Toggle Path Follow"),
+	InvertSpeed UMETA(DisplayName = "Invert Path Speed"),
+	SetAutoMoveSpeed UMETA(DisplayName = "Set Auto Move Speed"),
+	SetAutoMoveDirection UMETA(DisplayName = "Set Auto Move Direction"),
+	StartAutoMove UMETA(DisplayName = "Start Auto Move"),
+	StopAutoMove UMETA(DisplayName = "Stop Auto Move"),
 };

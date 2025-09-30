@@ -12,5 +12,8 @@ enum class EProjectileDirection : uint8
 	Left UMETA(DisplayName = "Left"),
 	Right UMETA(DisplayName = "Right"),
 	Up UMETA(DisplayName = "Up"),
-	Forward UMETA(DisplayName = "Forward")
+	Forward UMETA(DisplayName = "Forward"),
+	Down UMETA(DisplayName = "Down"),
+	Backward UMETA(DisplayName = "Backward"),
+	None UMETA(DisplayName = "None"),
 };

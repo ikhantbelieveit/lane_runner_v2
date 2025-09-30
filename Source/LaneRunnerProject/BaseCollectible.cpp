@@ -137,11 +137,16 @@ void ABaseCollectible::OnLevelReset()
 
 	SetGravityEnabled(false);
 
-	UProjectileMovementComponent* projMoveComp = (UProjectileMovementComponent*)GetComponentByClass(UProjectileMovementComponent::StaticClass());
+	if (ULocationManagerComponent* LocManager = FindComponentByClass<ULocationManagerComponent>())
+	{
+		LocManager->StopAutoMove();
+	}
+
+	/*UProjectileMovementComponent* projMoveComp = (UProjectileMovementComponent*)GetComponentByClass(UProjectileMovementComponent::StaticClass());
 	if (projMoveComp)
 	{
 		projMoveComp->StopMovementImmediately();
-	}
+	}*/
 
 	//SetActorLocation(StartPos);
 }
