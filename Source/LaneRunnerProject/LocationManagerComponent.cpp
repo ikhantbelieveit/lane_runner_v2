@@ -196,6 +196,8 @@ void ULocationManagerComponent::Reset()
 	SetAutoMoveSpeed(StartAutoMoveSpeed);
 	SetAutoMoveDirection(StartAutoMoveDirection);
 
+	StopAutoMove();
+
 	GetOwner()->SetActorLocation(StartPos);
 }
 

@@ -335,6 +335,7 @@ void UGI_LevelSystem::ExecuteSingleEvent(const FLevelEventData& Event)
 
 	case ELevelEventType::StartAutoMove:
 	{
+
 		for (AActor* Target : Event.TargetActors)
 		{
 			if (Target)
