@@ -167,6 +167,8 @@ void UGI_LevelSystem::EnterLevel()
 		player->ResetPlayer();
 	}
 
+	CleanupBeforeReset.Broadcast();
+
 	ResetLevel();
 
 	SetGameState(EGameState::Active);
