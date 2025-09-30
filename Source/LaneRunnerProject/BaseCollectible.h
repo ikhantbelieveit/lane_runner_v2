@@ -58,11 +58,7 @@ public:
 
 	bool ResetAsSpawned = true;
 
-	UFUNCTION()
-	void SetGravityEnabled(bool enabled);
 
 private:
-	bool GravityEnabled = false;
-
 	FVector StartPos;
 };

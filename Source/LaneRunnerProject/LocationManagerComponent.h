@@ -95,12 +95,21 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AutoMove")
 	float StartAutoMoveSpeed = 600.f;
 
+	UPROPERTY(VisibleAnywhere, Category = "AutoMove")
+	bool bHasAutoMoveStop = false;
+
+	UPROPERTY(VisibleAnywhere, Category = "AutoMove")
+	FVector AutoMoveStopCoords = FVector::ZeroVector;
+
 	// Call to apply auto-move settings
 	UFUNCTION(BlueprintCallable, Category = "AutoMove")
 	void ApplyAutoMove();
 	void SetAutoMoveSpeed(float newSpeed);
 	void SetAutoMoveDirection(EProjectileDirection newDirection);
-	void StopAutoMove();
+	void StartAutoMove(EProjectileDirection direction, float Speed, bool bUseStop, FVector stopCoords);
+	void StopAutoMove(bool clampToEnd);
+
+	void UpdateAutoMove(float DeltaTime);
 
 private:
 	// Scroll
@@ -117,6 +126,7 @@ private:
 	//auto move
 	EProjectileDirection CurrentAutoMoveDirection;
 	float CurrentAutoMoveSpeed;
+	bool IsAutoMoving = false;
 
 	// Helpers
 	void UpdatePath(float DeltaTime, FVector& OutLocation, FRotator& OutRotation, bool& bOutHasPath);

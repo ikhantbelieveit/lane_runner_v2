@@ -342,8 +342,7 @@ void UGI_LevelSystem::ExecuteSingleEvent(const FLevelEventData& Event)
 			{
 				if (ULocationManagerComponent* locationComp = Target->FindComponentByClass<ULocationManagerComponent>())
 				{
-					locationComp->bAutoMoveEnabled = true;
-					locationComp->ApplyAutoMove();
+					locationComp->StartAutoMove(Event.DirectionParam, Event.NumericParam, Event.BoolParam, Event.VectorParam);
 				}
 			}
 		}
@@ -358,7 +357,7 @@ void UGI_LevelSystem::ExecuteSingleEvent(const FLevelEventData& Event)
 			{
 				if (ULocationManagerComponent* locationComp = Target->FindComponentByClass<ULocationManagerComponent>())
 				{
-					locationComp->StopAutoMove();
+					locationComp->StopAutoMove(false);
 				}
 			}
 		}

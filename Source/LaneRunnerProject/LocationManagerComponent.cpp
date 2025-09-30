@@ -54,6 +54,8 @@ void ULocationManagerComponent::TickComponent(float DeltaTime, ELevelTick TickTy
 		UpdateGravity(DeltaTime);
 	}
 
+	UpdateAutoMove(DeltaTime);
+
 	if (!bFollowEnabled && !bScrollEnabled)
 		return;
 
@@ -196,7 +198,7 @@ void ULocationManagerComponent::Reset()
 	SetAutoMoveSpeed(StartAutoMoveSpeed);
 	SetAutoMoveDirection(StartAutoMoveDirection);
 
-	StopAutoMove();
+	StopAutoMove(false);
 
 	GetOwner()->SetActorLocation(StartPos);
 }
@@ -217,6 +219,9 @@ void ULocationManagerComponent::ResetPath()
 			SetSpline(splineComp);
 		}
 	}
+
+	bAutoMoveEnabled = false;
+	bHasAutoMoveStop = false;
 }
 
 void ULocationManagerComponent::SetPathSpeed(float NewSpeed)
@@ -299,6 +304,8 @@ void ULocationManagerComponent::ApplyAutoMove()
 		ProjMove->ProjectileGravityScale = 0.f; // pure linear motion unless you want gravity
 		ProjMove->Velocity = Dir * CurrentAutoMoveSpeed;
 		ProjMove->Activate(true);
+
+		IsAutoMoving = true;
 	}
 }
 
@@ -312,11 +319,111 @@ void ULocationManagerComponent::SetAutoMoveDirection(EProjectileDirection newDir
 	CurrentAutoMoveDirection = newDirection;
 }
 
-void ULocationManagerComponent::StopAutoMove()
+void ULocationManagerComponent::StartAutoMove(EProjectileDirection direction, float Speed, bool bUseStop, FVector stopCoords)
+{
+	if (IsAutoMoving)
+	{
+		StopAutoMove(false);
+	}
+
+	bAutoMoveEnabled = true;
+	CurrentAutoMoveDirection = direction;
+	CurrentAutoMoveSpeed = Speed;
+
+	// Optional stop coordinates
+	bHasAutoMoveStop = bUseStop;
+	if (bUseStop)
+	{
+		AutoMoveStopCoords = stopCoords;
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, FString::Printf(TEXT("set to stop at position %.2f"), AutoMoveStopCoords.Y));
+	}
+
+	// Apply immediately
+	ApplyAutoMove();
+}
+
+void ULocationManagerComponent::StopAutoMove(bool clampToEnd)
 {
 	UProjectileMovementComponent* projMoveComp = (UProjectileMovementComponent*)GetOwner()->GetComponentByClass(UProjectileMovementComponent::StaticClass());
 	if (projMoveComp)
 	{
 		projMoveComp->StopMovementImmediately();
+	}
+
+	bAutoMoveEnabled = false;
+	bHasAutoMoveStop = false;
+
+	IsAutoMoving = false;
+
+	if (clampToEnd)
+	{
+		FVector currentLoc = GetOwner()->GetActorLocation();
+
+		switch (CurrentAutoMoveDirection)
+		{
+		case EProjectileDirection::Left:
+		case EProjectileDirection::Right:
+			GetOwner()->SetActorLocation(FVector(currentLoc.X, AutoMoveStopCoords.Y, currentLoc.Z));
+			break;
+		case EProjectileDirection::Up:
+		case EProjectileDirection::Down:
+			GetOwner()->SetActorLocation(FVector(currentLoc.X, currentLoc.Y, AutoMoveStopCoords.Z));
+			break;
+		case EProjectileDirection::Forward:
+		case EProjectileDirection::Backward:
+			GetOwner()->SetActorLocation(FVector(AutoMoveStopCoords.X, currentLoc.Y, currentLoc.Z));
+			break;
+		}
+	}
+}
+
+void ULocationManagerComponent::UpdateAutoMove(float DeltaTime)
+{
+	if (bHasAutoMoveStop)
+	{
+		FVector Loc = GetOwner()->GetActorLocation();
+
+		bool bStopReached = false;
+		bool bStopX = false;
+		bool bStopY = false;
+		bool bStopZ = false;
+
+		// Check X coordinate if set
+		if (!FMath::IsNearlyZero(AutoMoveStopCoords.X))
+		{
+			if ((CurrentAutoMoveDirection == EProjectileDirection::Forward && Loc.X >= AutoMoveStopCoords.X) ||
+				(CurrentAutoMoveDirection == EProjectileDirection::Backward && Loc.X <= AutoMoveStopCoords.X))
+			{
+				bStopReached = true;
+				bStopX = true;
+			}
+		}
+
+		// Check Y coordinate if set
+		if (!FMath::IsNearlyZero(AutoMoveStopCoords.Y))
+		{
+			if ((CurrentAutoMoveDirection == EProjectileDirection::Right && Loc.Y >= AutoMoveStopCoords.Y) ||
+				(CurrentAutoMoveDirection == EProjectileDirection::Left && Loc.Y <= AutoMoveStopCoords.Y))
+			{
+				bStopReached = true;
+				bStopY = true;
+			}
+		}
+
+		if (!FMath::IsNearlyZero(AutoMoveStopCoords.Z))
+		{
+			if ((CurrentAutoMoveDirection == EProjectileDirection::Up && Loc.Z >= AutoMoveStopCoords.Z) ||
+				(CurrentAutoMoveDirection == EProjectileDirection::Down && Loc.Z <= AutoMoveStopCoords.Z))
+			{
+				bStopReached = true;
+				bStopZ = true;
+			}
+		}
+
+		if (bStopReached)
+		{
+			StopAutoMove(true);
+			return;
+		}
 	}
 }

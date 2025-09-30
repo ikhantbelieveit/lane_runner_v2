@@ -40,53 +40,6 @@ void ABaseCollectible::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	//bool checkForGround = false;
-
-	//if (GravityEnabled)
-	//{
-	//	UProjectileMovementComponent* projMoveComp = (UProjectileMovementComponent*)GetComponentByClass(UProjectileMovementComponent::StaticClass());
-	//	if (projMoveComp)
-	//	{
-	//		if (projMoveComp->Velocity.Z == 0.0f)
-	//		{
-	//			checkForGround = true;
-	//		}
-	//	}
-
-	//	if (checkForGround)
-	//	{
-	//		UWorld* World = GetWorld();
-	//		if (!World) return;
-
-	//		FVector Start = GetActorLocation();
-	//		FVector End = Start - FVector(0.f, 0.f, 5.f); // short downward trace
-
-	//		FCollisionObjectQueryParams ObjectParams;
-	//		ObjectParams.AddObjectTypesToQuery(ECC_WorldStatic);
-
-	//		FHitResult Hit;
-	//		FCollisionQueryParams Params;
-	//		Params.AddIgnoredActor(this);
-
-	//		bool bOnGround = World->LineTraceSingleByObjectType(
-	//			Hit, Start, End, ObjectParams, Params);
-
-	//		if (bOnGround)
-	//		{
-	//			ECollisionChannel ObjType = Hit.Component->GetCollisionObjectType();
-	//			if (ObjType == ECC_GameTraceChannel1) // Collectible channel
-	//			{
-	//				bOnGround = false;
-	//			}
-	//		}
-
-	//		if (!bOnGround)
-	//		{
-	//			SetGravityEnabled(true);
-	//		}
-	//	}
-	//	
-	//}
 }
 
 
@@ -135,20 +88,6 @@ void ABaseCollectible::OnLevelReset()
 
 	Collected = false;
 
-	SetGravityEnabled(false);
-
-	if (ULocationManagerComponent* LocManager = FindComponentByClass<ULocationManagerComponent>())
-	{
-		LocManager->StopAutoMove();
-	}
-
-	/*UProjectileMovementComponent* projMoveComp = (UProjectileMovementComponent*)GetComponentByClass(UProjectileMovementComponent::StaticClass());
-	if (projMoveComp)
-	{
-		projMoveComp->StopMovementImmediately();
-	}*/
-
-	//SetActorLocation(StartPos);
 }
 
 void ABaseCollectible::ResetCollect()
@@ -224,7 +163,11 @@ void ABaseCollectible::Spawn(bool fromDestroyedObject)
 
 	if (fromDestroyedObject)
 	{
-		SetGravityEnabled(true);
+		ULocationManagerComponent* locManager = GetComponentByClass<ULocationManagerComponent>();
+		if (locManager)
+		{
+			locManager->SetGravityEnabled(true);
+		}
 
 		UPlayerDetectComponent* detectComp = (UPlayerDetectComponent*)GetComponentByClass(UPlayerDetectComponent::StaticClass());
 		if (detectComp)
@@ -239,36 +182,4 @@ void ABaseCollectible::Spawn(bool fromDestroyedObject)
 			detectComp->EventsToTrigger.Add(NewEvent);
 		}
 	}
-}
-
-void ABaseCollectible::SetGravityEnabled(bool enabled)
-{
-	if (ULocationManagerComponent* LocManager = FindComponentByClass<ULocationManagerComponent>())
-	{
-		LocManager->SetGravityEnabled(enabled);
-	}
-
-	//UProjectileMovementComponent* projMoveComp = (UProjectileMovementComponent*)GetComponentByClass(UProjectileMovementComponent::StaticClass());
-	//if (projMoveComp)
-	//{
-	//	// Ensure it has an UpdatedComponent (usually the root or collision box)
-	//	if (!projMoveComp->UpdatedComponent)
-	//	{
-	//		projMoveComp->SetUpdatedComponent(RootComponent);
-	//	}
-
-	//	projMoveComp->Activate(enabled);
-
-	//	if (enabled)
-	//	{
-	//		projMoveComp->ProjectileGravityScale = 1.0f;
-	//		projMoveComp->Velocity = FVector(0.f, 0.f, -1.f);
-	//	}
-	//	else
-	//	{
-	//		projMoveComp->ProjectileGravityScale = 0.0f;
-	//	}
-	//}
-
-	//GravityEnabled = enabled;
 }
