@@ -335,7 +335,6 @@ void ULocationManagerComponent::StartAutoMove(EProjectileDirection direction, fl
 	if (bUseStop)
 	{
 		AutoMoveStopCoords = stopCoords;
-		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, FString::Printf(TEXT("set to stop at position %.2f"), AutoMoveStopCoords.Y));
 	}
 
 	// Apply immediately

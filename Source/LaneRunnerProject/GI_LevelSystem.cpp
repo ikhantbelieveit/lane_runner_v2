@@ -105,7 +105,6 @@ void UGI_LevelSystem::ResetLevel()
 
 void UGI_LevelSystem::ResetFromLose()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("broadcast CleanupBeforeReset"));
 	CleanupBeforeReset.Broadcast();
 	ResetLevel();
 
