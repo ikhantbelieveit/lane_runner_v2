@@ -72,7 +72,4 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float randomSpreadMax = 30.0f;
-
-	UPROPERTY()
-	ABaseCollectible* ActiveCollectible;
 };

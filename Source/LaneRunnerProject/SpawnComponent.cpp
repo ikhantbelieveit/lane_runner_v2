@@ -123,7 +123,6 @@ void USpawnComponent::Despawn()
 	UBoxComponent* box = Cast<UBoxComponent>(GetOwner()->GetComponentByClass(UBoxComponent::StaticClass()));
 	if (box)
 	{
-		//box->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		box->SetCollisionProfileName(DespawnedCollisionTag);
 	}
 

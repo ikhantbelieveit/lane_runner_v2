@@ -35,7 +35,7 @@ struct FLevelEventData
 	bool BoolParam;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Level Event")
-	AActor* ActorParam;
+	TObjectPtr<AActor> ActorParam;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Level Event")
 	FVector VectorParam;

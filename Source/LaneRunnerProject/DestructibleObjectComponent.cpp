@@ -99,45 +99,35 @@ void UDestructibleObjectComponent::DestroyFromComp()
 		spawnComp->Despawn();
 	}
 
-	if (SpawnItemOnDestroy)
+	if (SpawnItemOnDestroy && SpawnCollectibleClass)
 	{
 		FActorSpawnParameters SpawnParams;
 		SpawnParams.Owner = GetOwner();
 		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
+		FVector spawnLoc = GetOwner()->GetActorLocation();
+		spawnLoc.Y += FMath::RandRange(randomSpreadMin, randomSpreadMax);
+
 		FRotator defaultRotation = FRotator();
 
-		if (ABaseCollectible* item = GetWorld()->SpawnActor<ABaseCollectible>(SpawnCollectibleClass, GetOwner()->GetActorLocation(), defaultRotation, SpawnParams))
+		if (ABaseCollectible* item = GetWorld()->SpawnActor<ABaseCollectible>(SpawnCollectibleClass, spawnLoc, defaultRotation, SpawnParams))
 		{
-			if (IsValid(item))
+			if (USpawnComponent* itemSpawnComp = item->FindComponentByClass<USpawnComponent>())
 			{
-				ActiveCollectible = item;
-
-				bool itemShouldScroll = false;
-
-				ULocationManagerComponent* locationComp = Cast<ULocationManagerComponent>(GetOwner()->GetComponentByClass(ULocationManagerComponent::StaticClass()));
-				ULocationManagerComponent* itemLocationComp = Cast<ULocationManagerComponent>(ActiveCollectible->GetComponentByClass(ULocationManagerComponent::StaticClass()));
-
-				if (locationComp && itemLocationComp)
-				{
-					itemShouldScroll = locationComp->bScrollEnabled && locationComp->ScrollWithXPos == 0.0f;
-				}
-
-				USpawnComponent* itemSpawnComp = Cast<USpawnComponent>(ActiveCollectible->GetComponentByClass(USpawnComponent::StaticClass()));
 				itemSpawnComp->ResetAsSpawned = false;
 
-				FVector spawnLoc = GetOwner()->GetActorLocation();
-
-				float spawnPosY = FMath::RandRange(randomSpreadMin, randomSpreadMax);
-				spawnLoc.Y += spawnPosY;
-
-				ActiveCollectible->SetActorLocation(spawnLoc);
-
-				if (itemSpawnComp)
+				bool itemShouldScroll = false;
+				if (ULocationManagerComponent* locComp = GetOwner()->FindComponentByClass<ULocationManagerComponent>())
 				{
-					itemSpawnComp->Spawn(true, itemShouldScroll, true);
+					if (ULocationManagerComponent* itemLocComp = item->FindComponentByClass<ULocationManagerComponent>())
+					{
+						itemShouldScroll = locComp->bScrollEnabled && locComp->ScrollWithXPos == 0.0f;
+						itemLocComp->bScrollEnabled = itemShouldScroll;
+					}
 				}
-			}			
+
+				itemSpawnComp->Spawn(true, itemShouldScroll, true);
+			}
 		}
 	}
 	
@@ -147,16 +137,6 @@ void UDestructibleObjectComponent::DestroyFromComp()
 void UDestructibleObjectComponent::ResetDestroy()
 {
 	CurrentHealth = StartHealth;
-
-	if (Destroyed)
-	{
-		if (ActiveCollectible &&
-			IsValid(ActiveCollectible))
-		{
-			ActiveCollectible->Destroy();
-			ActiveCollectible = nullptr;
-		}
-	}
 
 	Destroyed = false;
 }

@@ -9,6 +9,7 @@
 #include "GI_SaveSystem.h"
 #include "LocationManagerComponent.h"
 #include "Components/SplineComponent.h"
+#include "SpawnComponent.h"
 
 void UGI_LevelSystem::OnGameOverDelayComplete()
 {
@@ -204,7 +205,6 @@ void UGI_LevelSystem::SaveLevelStats()
 		UMySaveGame* saveObject = Cast<UMySaveGame>(
 			UGameplayStatics::CreateSaveGameObject(UMySaveGame::StaticClass()));
 
-		// Fill in some data
 		saveObject->StatsData.HighScore = highScore;
 		saveSystem->SaveGame(saveObject);
 
@@ -221,154 +221,201 @@ void UGI_LevelSystem::ExecuteEvents(const TArray<FLevelEventData>& Events)
 
 void UGI_LevelSystem::ExecuteSingleEvent(const FLevelEventData& Event)
 {
-	switch (Event.EventType)
-	{
-	case ELevelEventType::TogglePlayerScroll:
-	{
-		for (AActor* Target : Event.TargetActors)
-		{
-			if (Target)
-			{
-				if (ULocationManagerComponent* locationComp = Target->FindComponentByClass<ULocationManagerComponent>())
-				{
-					locationComp->bScrollEnabled = Event.BoolParam;
-				}
-			}
-		}
-		break;
-	}
+    if (!IsInGameThread())
+    {
+        UE_LOG(LogTemp, Warning, TEXT("ExecuteSingleEvent called off game thread. Scheduling on game thread."));
+        AsyncTask(ENamedThreads::GameThread, [this, Event]() { ExecuteSingleEvent(Event); });
+        return;
+    }
 
-	case ELevelEventType::SetObjectPath:
-	{
-		for (AActor* Target : Event.TargetActors)
-		{
-			if (Target)
-			{
-				if (ULocationManagerComponent* locationComp = Target->FindComponentByClass<ULocationManagerComponent>())
-				{
-					if (USplineComponent* setSpline = Event.ActorParam->FindComponentByClass<USplineComponent>())
-					{
-						locationComp->SetSpline(setSpline);
-					}
-				}
-			}
-		}
-		break;
-	}
+    switch (Event.EventType)
+    {
+    case ELevelEventType::TogglePlayerScroll:
+    {
+        for (TObjectPtr<AActor> TargetPtr : Event.TargetActors)
+        {
+            AActor* Target = TargetPtr.Get();
+            if (!IsValid(Target))
+            {
+                continue;
+            }
 
-	case ELevelEventType::TogglePathFollow:
-	{
-		for (AActor* Target : Event.TargetActors)
-		{
-			if (Target)
-			{
-				if (ULocationManagerComponent* locationComp = Target->FindComponentByClass<ULocationManagerComponent>())
-				{
-					locationComp->bFollowEnabled = Event.BoolParam;
-				}
-			}
-		}
-		break;
-	}
+            if (ULocationManagerComponent* LocationComp = Target->FindComponentByClass<ULocationManagerComponent>())
+            {
+                LocationComp->bScrollEnabled = Event.BoolParam;
+            }
+        }
+        break;
+    }
 
-	case ELevelEventType::SetObjectSpeed:
-	{
-		for (AActor* Target : Event.TargetActors)
-		{
-			if (Target)
-			{
-				if (ULocationManagerComponent* locationComp = Target->FindComponentByClass<ULocationManagerComponent>())
-				{
-					locationComp->SetPathSpeed(Event.NumericParam);
-				}
-			}
-		}
-		break;
-	}
+    case ELevelEventType::SetObjectPath:
+    {
+        AActor* SplineOwner = Event.ActorParam.Get();
+        if (!IsValid(SplineOwner))
+        {
+            UE_LOG(LogTemp, Warning, TEXT("SetObjectPath: ActorParam is invalid, skipping event."));
+            break;
+        }
 
-	case ELevelEventType::InvertSpeed:
-	{
-		for (AActor* Target : Event.TargetActors)
-		{
-			if (Target)
-			{
-				if (ULocationManagerComponent* locationComp = Target->FindComponentByClass<ULocationManagerComponent>())
-				{
-					locationComp->SetPathSpeed(-locationComp->GetCurrentSpeed());
-				}
-			}
-		}
-		break;
-	}
+        USplineComponent* SetSpline = SplineOwner->FindComponentByClass<USplineComponent>();
+        if (!IsValid(SetSpline))
+        {
+            UE_LOG(LogTemp, Warning, TEXT("SetObjectPath: ActorParam has no valid SplineComponent, skipping event."));
+            break;
+        }
 
-	case ELevelEventType::SetAutoMoveSpeed:
-	{
-		for (AActor* Target : Event.TargetActors)
-		{
-			if (Target)
-			{
-				if (ULocationManagerComponent* locationComp = Target->FindComponentByClass<ULocationManagerComponent>())
-				{
-					if (USplineComponent* setSpline = Target->FindComponentByClass<USplineComponent>())
-					{
-						locationComp->SetAutoMoveSpeed(Event.NumericParam);
-					}
-				}
-			}
-		}
-		break;
-	}
+        for (TObjectPtr<AActor> TargetPtr : Event.TargetActors)
+        {
+            AActor* Target = TargetPtr.Get();
+            if (!IsValid(Target)) continue;
 
-	case ELevelEventType::SetAutoMoveDirection:
-	{
-		for (AActor* Target : Event.TargetActors)
-		{
-			if (Target)
-			{
-				if (ULocationManagerComponent* locationComp = Target->FindComponentByClass<ULocationManagerComponent>())
-				{
-					locationComp->SetAutoMoveDirection(Event.DirectionParam);
-				}
-			}
-		}
-		break;
-	}
+            if (ULocationManagerComponent* LocationComp = Target->FindComponentByClass<ULocationManagerComponent>())
+            {
+                LocationComp->SetSpline(SetSpline);
+            }
+        }
+        break;
+    }
 
-	case ELevelEventType::StartAutoMove:
-	{
+    case ELevelEventType::TogglePathFollow:
+    {
+        for (TObjectPtr<AActor> TargetPtr : Event.TargetActors)
+        {
+            AActor* Target = TargetPtr.Get();
+            if (!IsValid(Target)) continue;
 
-		for (AActor* Target : Event.TargetActors)
-		{
-			if (Target)
-			{
-				if (ULocationManagerComponent* locationComp = Target->FindComponentByClass<ULocationManagerComponent>())
-				{
-					locationComp->StartAutoMove(Event.DirectionParam, Event.NumericParam, Event.BoolParam, Event.VectorParam);
-				}
-			}
-		}
-		break;
-	}
+            if (ULocationManagerComponent* LocationComp = Target->FindComponentByClass<ULocationManagerComponent>())
+            {
+                LocationComp->bFollowEnabled = Event.BoolParam;
+            }
+        }
+        break;
+    }
 
-	case ELevelEventType::StopAutoMove:
-	{
-		for (AActor* Target : Event.TargetActors)
-		{
-			if (Target)
-			{
-				if (ULocationManagerComponent* locationComp = Target->FindComponentByClass<ULocationManagerComponent>())
-				{
-					locationComp->StopAutoMove(false);
-				}
-			}
-		}
-		break;
-	}
+    case ELevelEventType::SetObjectSpeed:
+    {
+        for (TObjectPtr<AActor> TargetPtr : Event.TargetActors)
+        {
+            AActor* Target = TargetPtr.Get();
+            if (!IsValid(Target)) continue;
 
-	default:
-	{
-		// For Blueprint implementable extension
-		break;
-	}
-	}
+            if (ULocationManagerComponent* LocationComp = Target->FindComponentByClass<ULocationManagerComponent>())
+            {
+                LocationComp->SetPathSpeed(Event.NumericParam);
+            }
+        }
+        break;
+    }
+
+    case ELevelEventType::InvertSpeed:
+    {
+        for (TObjectPtr<AActor> TargetPtr : Event.TargetActors)
+        {
+            AActor* Target = TargetPtr.Get();
+            if (!IsValid(Target)) continue;
+
+            if (ULocationManagerComponent* LocationComp = Target->FindComponentByClass<ULocationManagerComponent>())
+            {
+                LocationComp->SetPathSpeed(-LocationComp->GetCurrentSpeed());
+            }
+        }
+        break;
+    }
+
+    case ELevelEventType::SetAutoMoveSpeed:
+    {
+        for (TObjectPtr<AActor> TargetPtr : Event.TargetActors)
+        {
+            AActor* Target = TargetPtr.Get();
+            if (!IsValid(Target)) continue;
+
+            if (ULocationManagerComponent* LocationComp = Target->FindComponentByClass<ULocationManagerComponent>())
+            {
+                LocationComp->SetAutoMoveSpeed(Event.NumericParam);
+            }
+        }
+        break;
+    }
+
+    case ELevelEventType::SetAutoMoveDirection:
+    {
+        for (TObjectPtr<AActor> TargetPtr : Event.TargetActors)
+        {
+            AActor* Target = TargetPtr.Get();
+            if (!IsValid(Target)) continue;
+
+            if (ULocationManagerComponent* LocationComp = Target->FindComponentByClass<ULocationManagerComponent>())
+            {
+                LocationComp->SetAutoMoveDirection(Event.DirectionParam);
+            }
+        }
+        break;
+    }
+
+    case ELevelEventType::StartAutoMove:
+    {
+        for (TObjectPtr<AActor> TargetPtr : Event.TargetActors)
+        {
+            AActor* Target = TargetPtr.Get();
+            if (!IsValid(Target)) continue;
+
+            if (ULocationManagerComponent* LocationComp = Target->FindComponentByClass<ULocationManagerComponent>())
+            {
+                LocationComp->StartAutoMove(Event.DirectionParam, Event.NumericParam, Event.BoolParam, Event.VectorParam);
+            }
+        }
+        break;
+    }
+
+    case ELevelEventType::StopAutoMove:
+    {
+        for (TObjectPtr<AActor> TargetPtr : Event.TargetActors)
+        {
+            AActor* Target = TargetPtr.Get();
+            if (!IsValid(Target)) continue;
+
+            if (ULocationManagerComponent* LocationComp = Target->FindComponentByClass<ULocationManagerComponent>())
+            {
+                LocationComp->StopAutoMove(false);
+            }
+        }
+        break;
+    }
+
+    case ELevelEventType::SpawnObjects:
+    {
+        for (TObjectPtr<AActor> TargetPtr : Event.TargetActors)
+        {
+            AActor* Target = TargetPtr.Get();
+            if (!IsValid(Target)) continue;
+
+            if (USpawnComponent* SpawnComp = Target->FindComponentByClass<USpawnComponent>())
+            {
+                const bool Drop = false;
+                const bool ScrollInstant = Event.BoolParam;
+                const bool ScrollOnReach = false;
+                SpawnComp->Spawn(Drop, ScrollInstant, ScrollOnReach);
+            }
+        }
+        break;
+    }
+
+    case ELevelEventType::DespawnObjects:
+    {
+        for (TObjectPtr<AActor> TargetPtr : Event.TargetActors)
+        {
+            AActor* Target = TargetPtr.Get();
+            if (!IsValid(Target)) continue;
+
+            if (USpawnComponent* SpawnComp = Target->FindComponentByClass<USpawnComponent>())
+            {
+                SpawnComp->Despawn();
+            }
+        }
+        break;
+    }
+
+    default:
+        break;
+    }
 }
