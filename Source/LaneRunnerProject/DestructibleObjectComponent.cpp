@@ -10,6 +10,7 @@
 #include "GI_LevelSystem.h"
 #include "LocationManagerComponent.h"
 #include "DamageFlashComponent.h"
+#include "SpawnComponent.h"
 
 
 // Sets default values for this component's properties
@@ -92,23 +93,10 @@ void UDestructibleObjectComponent::DestroyFromComp()
 		}
 	}
 
-	UStaticMeshComponent* mesh = (UStaticMeshComponent*)GetOwner()->GetComponentByClass(UStaticMeshComponent::StaticClass());
-	if (mesh)
+	USpawnComponent* spawnComp = Cast<USpawnComponent>(GetOwner()->GetComponentByClass(USpawnComponent::StaticClass()));
+	if (spawnComp)
 	{
-		mesh->SetVisibility(false);
-	}
-	
-
-	UBoxComponent* box = (UBoxComponent*)GetOwner()->GetComponentByClass(UBoxComponent::StaticClass());
-	if (box)
-	{
-		box->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	}
-	
-	UPaperSpriteComponent* sprite = (UPaperSpriteComponent*)GetOwner()->GetComponentByClass(UPaperSpriteComponent::StaticClass());
-	if (sprite)
-	{
-		sprite->SetVisibility(false);
+		spawnComp->Despawn();
 	}
 
 	if (SpawnItemOnDestroy)
@@ -121,33 +109,35 @@ void UDestructibleObjectComponent::DestroyFromComp()
 
 		if (ABaseCollectible* item = GetWorld()->SpawnActor<ABaseCollectible>(SpawnCollectibleClass, GetOwner()->GetActorLocation(), defaultRotation, SpawnParams))
 		{
-			item->ResetAsSpawned = false;
-			ActiveCollectible = item;
-
-			bool itemShouldScroll = false;
-
-			ULocationManagerComponent* locationComp = GetOwner()->GetComponentByClass<ULocationManagerComponent>();
-			ULocationManagerComponent* itemLocationComp = ActiveCollectible->GetComponentByClass<ULocationManagerComponent>();
-
-			if (locationComp && itemLocationComp)
+			if (IsValid(item))
 			{
-				itemShouldScroll = locationComp->bScrollEnabled && locationComp->ScrollWithXPos == 0.0f;
-			}
+				ActiveCollectible = item;
 
-			ActiveCollectible->Spawn(true);
+				bool itemShouldScroll = false;
 
-			FVector spawnLoc = GetOwner()->GetActorLocation();
+				ULocationManagerComponent* locationComp = Cast<ULocationManagerComponent>(GetOwner()->GetComponentByClass(ULocationManagerComponent::StaticClass()));
+				ULocationManagerComponent* itemLocationComp = Cast<ULocationManagerComponent>(ActiveCollectible->GetComponentByClass(ULocationManagerComponent::StaticClass()));
 
-			float spawnPosY = FMath::RandRange(randomSpreadMin, randomSpreadMax);
-			spawnLoc.Y += spawnPosY;
+				if (locationComp && itemLocationComp)
+				{
+					itemShouldScroll = locationComp->bScrollEnabled && locationComp->ScrollWithXPos == 0.0f;
+				}
 
-			ActiveCollectible->SetActorLocation(spawnLoc);
+				USpawnComponent* itemSpawnComp = Cast<USpawnComponent>(ActiveCollectible->GetComponentByClass(USpawnComponent::StaticClass()));
+				itemSpawnComp->ResetAsSpawned = false;
 
-			if (itemShouldScroll)
-			{
-				itemLocationComp->ScrollWithXPos = 0;
-				itemLocationComp->bScrollEnabled = true;
-			}
+				FVector spawnLoc = GetOwner()->GetActorLocation();
+
+				float spawnPosY = FMath::RandRange(randomSpreadMin, randomSpreadMax);
+				spawnLoc.Y += spawnPosY;
+
+				ActiveCollectible->SetActorLocation(spawnLoc);
+
+				if (itemSpawnComp)
+				{
+					itemSpawnComp->Spawn(true, itemShouldScroll, true);
+				}
+			}			
 		}
 	}
 	
@@ -160,26 +150,6 @@ void UDestructibleObjectComponent::ResetDestroy()
 
 	if (Destroyed)
 	{
-		UStaticMeshComponent* mesh = (UStaticMeshComponent*)GetOwner()->GetComponentByClass(UStaticMeshComponent::StaticClass());
-		if (mesh)
-		{
-			mesh->SetVisibility(true);
-		}
-
-
-		UBoxComponent* box = (UBoxComponent*)GetOwner()->GetComponentByClass(UBoxComponent::StaticClass());
-		if (box)
-		{
-			box->SetCollisionEnabled(DefaultCollMode);
-		}
-
-
-		UPaperSpriteComponent* sprite = (UPaperSpriteComponent*)GetOwner()->GetComponentByClass(UPaperSpriteComponent::StaticClass());
-		if (sprite)
-		{
-			sprite->SetVisibility(true);
-		}
-
 		if (ActiveCollectible &&
 			IsValid(ActiveCollectible))
 		{

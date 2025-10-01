@@ -8,6 +8,7 @@
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "PlayerDetectComponent.h"
 #include "LocationManagerComponent.h"
+#include "SpawnComponent.h"
 
 // Sets default values
 ABaseCollectible::ABaseCollectible()
@@ -64,7 +65,11 @@ void ABaseCollectible::Collect()
 		}
 	}
 
-	Despawn();
+	USpawnComponent* spawn = GetComponentByClass<USpawnComponent>();
+	if (spawn)
+	{
+		spawn->Despawn();
+	}
 
 	Collected = true;
 
@@ -77,14 +82,6 @@ void ABaseCollectible::Collect()
 
 void ABaseCollectible::OnLevelReset()
 {
-	if (ResetAsSpawned)
-	{
-		Spawn(false);
-	}
-	else
-	{
-		Despawn();
-	}
 
 	Collected = false;
 
@@ -117,69 +114,69 @@ void ABaseCollectible::HandleBeginOverlap(
 	}
 }
 
-void ABaseCollectible::Despawn()
-{
-	UStaticMeshComponent* mesh = (UStaticMeshComponent*)GetComponentByClass(UStaticMeshComponent::StaticClass());
-	if (mesh)
-	{
-		mesh->SetVisibility(false);
-	}
+//void ABaseCollectible::Despawn()
+//{
+//	//UStaticMeshComponent* mesh = (UStaticMeshComponent*)GetComponentByClass(UStaticMeshComponent::StaticClass());
+//	//if (mesh)
+//	//{
+//	//	mesh->SetVisibility(false);
+//	//}
+//
+//
+//	//UBoxComponent* box = (UBoxComponent*)GetComponentByClass(UBoxComponent::StaticClass());
+//	//if (box)
+//	//{
+//	//	//box->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+//	//	box->SetCollisionProfileName("NoCollision");
+//	//}
+//
+//	//UPaperSpriteComponent* sprite = (UPaperSpriteComponent*)GetComponentByClass(UPaperSpriteComponent::StaticClass());
+//	//if (sprite)
+//	//{
+//	//	sprite->SetVisibility(false);
+//	//}
+//}
 
-
-	UBoxComponent* box = (UBoxComponent*)GetComponentByClass(UBoxComponent::StaticClass());
-	if (box)
-	{
-		//box->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		box->SetCollisionProfileName("NoCollision");
-	}
-
-	UPaperSpriteComponent* sprite = (UPaperSpriteComponent*)GetComponentByClass(UPaperSpriteComponent::StaticClass());
-	if (sprite)
-	{
-		sprite->SetVisibility(false);
-	}
-}
-
-void ABaseCollectible::Spawn(bool fromDestroyedObject)
-{
-	UStaticMeshComponent* mesh = (UStaticMeshComponent*)GetComponentByClass(UStaticMeshComponent::StaticClass());
-	if (mesh)
-	{
-		mesh->SetVisibility(true);
-	}
-
-	UBoxComponent* box = (UBoxComponent*)GetComponentByClass(UBoxComponent::StaticClass());
-	if (box)
-	{
-		//box->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-		box->SetCollisionProfileName("GravAndOverlap");
-	}
-
-	UPaperSpriteComponent* sprite = (UPaperSpriteComponent*)GetComponentByClass(UPaperSpriteComponent::StaticClass());
-	if (sprite)
-	{
-		sprite->SetVisibility(true);
-	}
-
-	if (fromDestroyedObject)
-	{
-		ULocationManagerComponent* locManager = GetComponentByClass<ULocationManagerComponent>();
-		if (locManager)
-		{
-			locManager->SetGravityEnabled(true);
-		}
-
-		UPlayerDetectComponent* detectComp = (UPlayerDetectComponent*)GetComponentByClass(UPlayerDetectComponent::StaticClass());
-		if (detectComp)
-		{
-			FLevelEventData NewEvent;
-			NewEvent.EventType = ELevelEventType::TogglePlayerScroll;
-
-			NewEvent.TargetActors.Add(this);
-
-			NewEvent.BoolParam = true;
-			detectComp->EventsToTrigger.Empty();
-			detectComp->EventsToTrigger.Add(NewEvent);
-		}
-	}
-}
+//void ABaseCollectible::Spawn(bool fromDestroyedObject)
+//{
+//	UStaticMeshComponent* mesh = (UStaticMeshComponent*)GetComponentByClass(UStaticMeshComponent::StaticClass());
+//	if (mesh)
+//	{
+//		mesh->SetVisibility(true);
+//	}
+//
+//	UBoxComponent* box = (UBoxComponent*)GetComponentByClass(UBoxComponent::StaticClass());
+//	if (box)
+//	{
+//		//box->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+//		box->SetCollisionProfileName("GravAndOverlap");
+//	}
+//
+//	UPaperSpriteComponent* sprite = (UPaperSpriteComponent*)GetComponentByClass(UPaperSpriteComponent::StaticClass());
+//	if (sprite)
+//	{
+//		sprite->SetVisibility(true);
+//	}
+//
+//	if (fromDestroyedObject)
+//	{
+//		ULocationManagerComponent* locManager = GetComponentByClass<ULocationManagerComponent>();
+//		if (locManager)
+//		{
+//			locManager->SetGravityEnabled(true);
+//		}
+//
+//		UPlayerDetectComponent* detectComp = (UPlayerDetectComponent*)GetComponentByClass(UPlayerDetectComponent::StaticClass());
+//		if (detectComp)
+//		{
+//			FLevelEventData NewEvent;
+//			NewEvent.EventType = ELevelEventType::TogglePlayerScroll;
+//
+//			NewEvent.TargetActors.Add(this);
+//
+//			NewEvent.BoolParam = true;
+//			detectComp->EventsToTrigger.Empty();
+//			detectComp->EventsToTrigger.Add(NewEvent);
+//		}
+//	}
+//}

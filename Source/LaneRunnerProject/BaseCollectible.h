@@ -44,11 +44,11 @@ public:
 		const FHitResult& SweepResult
 	);
 
-	UFUNCTION()
+	/*UFUNCTION()
 	void Despawn();
 
 	UFUNCTION()
-	void Spawn(bool fromDestroyedObject);
+	void Spawn(bool fromDestroyedObject);*/
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	int PointsValue = 10;
@@ -56,7 +56,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	bool GivePoints = true;
 
-	bool ResetAsSpawned = true;
+	//bool ResetAsSpawned = true;
 
 
 private:
