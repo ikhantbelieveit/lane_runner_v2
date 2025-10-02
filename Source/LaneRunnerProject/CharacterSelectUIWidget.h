@@ -84,6 +84,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float StartGameDelay = 0.5f;
 
+	void ToggleConfirmButton(bool active);
+
 private:
 	FTimerHandle StartGameDelayHandle;
 	void OnStartGameDelayComplete();

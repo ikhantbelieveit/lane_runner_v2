@@ -38,7 +38,7 @@ void UCharacterSelectUIWidget::Initialise()
 
 void UCharacterSelectUIWidget::SetupBeforeShow()
 {
-	ConfirmButton->SetVisibility(ESlateVisibility::Hidden);
+	ToggleConfirmButton(false);
 
 	ShowPreviewImage(ECharacterType::Cowboy_Red);
 }
@@ -94,8 +94,8 @@ void UCharacterSelectUIWidget::OnCharacterButton1Pressed()
 		}
 	}
 
-	ConfirmButton->SetVisibility(ESlateVisibility::Visible);
-	ConfirmButton->SetKeyboardFocus();
+	ToggleConfirmButton(true);
+
 	ShowPreviewImage(ECharacterType::Cowboy_Red);
 }
 
@@ -112,8 +112,8 @@ void UCharacterSelectUIWidget::OnCharacterButton2Pressed()
 		}
 	}
 
-	ConfirmButton->SetVisibility(ESlateVisibility::Visible);
-	ConfirmButton->SetKeyboardFocus();
+	ToggleConfirmButton(true);
+
 	ShowPreviewImage(ECharacterType::Cowboy_Purple);
 }
 
@@ -130,8 +130,9 @@ void UCharacterSelectUIWidget::OnCharacterButton3Pressed()
 		}
 	}
 
-	ConfirmButton->SetVisibility(ESlateVisibility::Visible);
-	ConfirmButton->SetKeyboardFocus();
+	ToggleConfirmButton(true);
+
+
 	ShowPreviewImage(ECharacterType::Scrooge);
 }
 
@@ -159,5 +160,26 @@ void UCharacterSelectUIWidget::OnStartGameDelayComplete()
 	if (levelSystem)
 	{
 		levelSystem->EnterLevel();
+	}
+}
+
+void UCharacterSelectUIWidget::ToggleConfirmButton(bool active)
+{
+	if (active)
+	{
+		ConfirmButton->SetVisibility(ESlateVisibility::Visible);
+		ConfirmButton->SetKeyboardFocus();
+
+		CharacterButton1->SetNavigationRuleExplicit(EUINavigation::Right, ConfirmButton);
+		CharacterButton2->SetNavigationRuleExplicit(EUINavigation::Right, ConfirmButton);
+		CharacterButton3->SetNavigationRuleExplicit(EUINavigation::Right, ConfirmButton);
+	}
+	else
+	{
+		ConfirmButton->SetVisibility(ESlateVisibility::Hidden);
+
+		CharacterButton1->SetNavigationRuleBase(EUINavigation::Right, EUINavigationRule::Escape);
+		CharacterButton2->SetNavigationRuleBase(EUINavigation::Right, EUINavigationRule::Escape);
+		CharacterButton3->SetNavigationRuleBase(EUINavigation::Right, EUINavigationRule::Escape);
 	}
 }

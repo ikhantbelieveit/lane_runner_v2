@@ -140,12 +140,10 @@ void UDeathScreenUIWidget::SetMessageActive(bool active)
 	if (active)
 	{
 		NewHighScoreMessageText->SetVisibility(ESlateVisibility::Visible);
-		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("show new high score"));
 	}
 	else
 	{
 		NewHighScoreMessageText->SetVisibility(ESlateVisibility::Hidden);
-		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("show new high score... NOT"));
 	}
 }
 
