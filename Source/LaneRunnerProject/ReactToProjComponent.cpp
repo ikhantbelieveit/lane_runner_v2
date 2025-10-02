@@ -7,6 +7,7 @@
 #include "Projectile.h"
 #include "EngineUtils.h"
 #include "LocationManagerComponent.h"
+#include "GI_AudioSystem.h"
 
 // Sets default values for this component's properties
 UReactToProjComponent::UReactToProjComponent()
@@ -73,6 +74,17 @@ void UReactToProjComponent::HitByProjectile(AActor* projActor)
 		if (destructible)
 		{
 			destructible->OnHit();
+			if (auto* audioSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGI_AudioSystem>())
+			{
+				if (destructible->GetCurrentHealth() <= 0 && destructible->StartHealth > 1)
+				{
+					audioSystem->Play(EAudioKey::DestroyedByPlayer_Default);
+				}
+				else
+				{
+					audioSystem->Play(EAudioKey::ShotByPlayer_Default);
+				}
+			}
 		}
 	}
 

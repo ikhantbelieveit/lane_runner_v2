@@ -25,6 +25,11 @@ void UDeathScreenUIWidget::Initialise()
 	{
 		MenuButton->OnClicked.AddDynamic(this, &UDeathScreenUIWidget::OnMenuButtonPressed);
 	}
+
+	if (auto* levelSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGI_LevelSystem>())
+	{
+		levelSystem->OnPlayerLose.AddDynamic(this, &UDeathScreenUIWidget::SetupBeforeShow);
+	}
 }
 
 void UDeathScreenUIWidget::Tick(float DeltaTime)
@@ -91,15 +96,7 @@ void UDeathScreenUIWidget::SetupBeforeShow()
 	if (levelSystem)
 	{
 		currentScore = levelSystem->GetScore();
-	}
-
-	auto* saveSystem = GetGameInstance()->GetSubsystem<UGI_SaveSystem>();
-	if (saveSystem)
-	{
-		if (saveSystem->HasExistingSave())
-		{
-			highScore = saveSystem->CurrentSave->StatsData.HighScore;
-		}
+		highScore = levelSystem->HighScoreAtTimeOfDeath;
 	}
 
 	newHighScore = currentScore > highScore;
@@ -143,10 +140,12 @@ void UDeathScreenUIWidget::SetMessageActive(bool active)
 	if (active)
 	{
 		NewHighScoreMessageText->SetVisibility(ESlateVisibility::Visible);
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("show new high score"));
 	}
 	else
 	{
 		NewHighScoreMessageText->SetVisibility(ESlateVisibility::Hidden);
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("show new high score... NOT"));
 	}
 }
 

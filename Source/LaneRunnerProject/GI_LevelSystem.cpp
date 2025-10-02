@@ -31,10 +31,23 @@ void UGI_LevelSystem::SetGameState(EGameState newState)
 
 	auto* uiStateSystem = GetGameInstance()->GetSubsystem<UGI_UIStateSystem>();
 	auto* audioSystem = GetGameInstance()->GetSubsystem<UGI_AudioSystem>();
+    auto* saveSystem = GetGameInstance()->GetSubsystem<UGI_SaveSystem>();
 
 	switch (newState)
 	{
 	case EGameState::Lose:
+
+        
+        if (saveSystem)
+        {
+            if (saveSystem->HasExistingSave())
+            {
+                HighScoreAtTimeOfDeath = saveSystem->CurrentSave->StatsData.HighScore;
+            }
+        }
+
+        OnPlayerLose.Broadcast();
+
 		SaveLevelStats();
 
 		if (audioSystem)
@@ -143,15 +156,20 @@ void UGI_LevelSystem::AddToScore(int addValue)
 
 	PointsUntilNextThreshold -= addValue;
 
-	if (PointsUntilNextThreshold <= 1)
+	if (PointsUntilNextThreshold <= 0)
 	{
 		APlayerCharacter* player = Cast<APlayerCharacter>(UGameplayStatics::GetActorOfClass(GetWorld(), APlayerCharacter::StaticClass()));
 		if (player)
 		{
 			player->TryAddHealth(1);
+            auto* audioSystem = GetGameInstance()->GetSubsystem<UGI_AudioSystem>();
+            if (audioSystem)
+            {
+                audioSystem->Play(EAudioKey::HealPlayer);
+            }
 		}
 
-		PointsUntilNextThreshold = PointsHealThreshold;
+		PointsUntilNextThreshold = PointsHealThreshold + PointsUntilNextThreshold;
 	}
 }
 
@@ -207,7 +225,6 @@ void UGI_LevelSystem::SaveLevelStats()
 
 		saveObject->StatsData.HighScore = highScore;
 		saveSystem->SaveGame(saveObject);
-
 	};
 }
 

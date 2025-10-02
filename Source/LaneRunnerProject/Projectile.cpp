@@ -172,6 +172,11 @@ void AProjectile::OnDestroy(bool impactScroll, float scrollWithPlayerOffset)
                 }
             }
         }
+
+        /*if (auto* audioSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGI_AudioSystem>())
+        {
+            audioSystem->Play(ConfigData->ImpactSoundKey);
+        }*/
     }
 
     Destroy();

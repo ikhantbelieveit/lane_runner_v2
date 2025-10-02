@@ -32,6 +32,9 @@ enum class EAudioKey : uint8
     TakeDamage UMETA(DisplayName = "Take Damage"),
     GameOver UMETA(DisplayName = "Game Over"),
     CoinGet UMETA(DisplayName = "Coin Get"),
+    ShotByPlayer_Default UMETA(DisplayName = "Shot By Player"),
+    HealPlayer UMETA(DisplayName = "Heal Player"),
+    DestroyedByPlayer_Default UMETA(DisplayName = "Destroyed By Player")
 };
 
 USTRUCT(BlueprintType)

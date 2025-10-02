@@ -52,14 +52,19 @@ void UMainMenuUIWidget::OnStartButtonPressed()
 
 void UMainMenuUIWidget::OnPlayButtonPressed()
 {
-	GetWorld()->GetTimerManager().SetTimer(
+	/*GetWorld()->GetTimerManager().SetTimer(
 		StartGameDelayHandle,
 		this,
 		&UMainMenuUIWidget::OnStartGameDelayComplete,
 		StartGameDelay,
 		false,
 		-1.0f
-	);
+	);*/
+	auto* uiStateSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGI_UIStateSystem>();
+	if (uiStateSystem)
+	{
+		uiStateSystem->EnterScreen(EUIState::CharacterSelect);
+	}
 }
 
 void UMainMenuUIWidget::OnQuitButtonPressed()
@@ -71,17 +76,17 @@ void UMainMenuUIWidget::OnQuitButtonPressed()
 	}
 }
 
-void UMainMenuUIWidget::OnStartGameDelayComplete()
-{
-	auto* uiStateSystem = GetGameInstance()->GetSubsystem<UGI_UIStateSystem>();
-	if (uiStateSystem)
-	{
-		uiStateSystem->EnterScreen(EUIState::TestLevel);
-	}
-
-	auto* levelSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGI_LevelSystem>();
-	if (levelSystem)
-	{
-		levelSystem->EnterLevel();
-	}
-}
+//void UMainMenuUIWidget::OnStartGameDelayComplete()
+//{
+//	auto* uiStateSystem = GetGameInstance()->GetSubsystem<UGI_UIStateSystem>();
+//	if (uiStateSystem)
+//	{
+//		uiStateSystem->EnterScreen(EUIState::TestLevel);
+//	}
+//
+//	auto* levelSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGI_LevelSystem>();
+//	if (levelSystem)
+//	{
+//		levelSystem->EnterLevel();
+//	}
+//}

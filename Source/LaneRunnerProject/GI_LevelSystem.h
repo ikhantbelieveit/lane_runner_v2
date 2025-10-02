@@ -69,6 +69,8 @@ protected:
 
 	void ExecuteSingleEvent(const FLevelEventData& Event);
 
+	
+
 public:
 	void SetGameState(EGameState newState);
 	EGameState GetGameState();
@@ -109,4 +111,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void ExecuteEvents(const TArray<FLevelEventData>& Events);
+
+	UPROPERTY(BlueprintAssignable, Category = "Events")
+	FLevelSystemEvent OnPlayerLose;
+
+	int HighScoreAtTimeOfDeath;
 };

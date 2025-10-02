@@ -11,6 +11,7 @@
 #include "LocationManagerComponent.h"
 #include "DamageFlashComponent.h"
 #include "SpawnComponent.h"
+#include "GI_AudioSystem.h"
 
 
 // Sets default values for this component's properties

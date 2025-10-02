@@ -40,7 +40,7 @@ void AGameInit::Tick(float DeltaTime)
 			{
 				BroadcastInitFinished();
 
-				AActor* playerActor = UGameplayStatics::GetActorOfClass(GetWorld(), APlayerCharacter::StaticClass());
+				/*AActor* playerActor = UGameplayStatics::GetActorOfClass(GetWorld(), APlayerCharacter::StaticClass());
 
 				if (playerActor)
 				{
@@ -49,7 +49,7 @@ void AGameInit::Tick(float DeltaTime)
 					{
 						playerRef->SetCharacterType(InitCharacterType);
 					}
-				}
+				}*/
 
 				auto* uiStateSystem = GetGameInstance()->GetSubsystem<UGI_UIStateSystem>();
 				if (uiStateSystem)

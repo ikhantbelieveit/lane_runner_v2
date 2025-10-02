@@ -11,5 +11,6 @@ enum class EUIState : uint8
 	None       UMETA(DisplayName = "None"),
 	TestLevel    UMETA(DisplayName = "Test Level"),
 	DeathScreen    UMETA(DisplayName = "Death Screen"),
-	MainMenu	UMETA(DisplayName ="Main Menu")
+	MainMenu	UMETA(DisplayName = "Main Menu"),
+	CharacterSelect UMETA(DisplayName = "Character Select")
 };

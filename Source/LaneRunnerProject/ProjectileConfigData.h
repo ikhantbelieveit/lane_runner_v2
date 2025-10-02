@@ -7,6 +7,7 @@
 #include "Engine/DataAsset.h"
 #include "Engine/StaticMesh.h"
 #include "OneShotAnim.h"
+#include "GI_AudioSystem.h"
 #include "ProjectileConfigData.generated.h"
 
 /**
@@ -41,4 +42,7 @@ public:
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Visual", meta = (AllowPrivateAccess = "true"))
     TSubclassOf<class AOneShotAnim> ImpactAnimClass;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Audio")
+    EAudioKey ImpactSoundKey = EAudioKey::ShotByPlayer_Default;
 };
