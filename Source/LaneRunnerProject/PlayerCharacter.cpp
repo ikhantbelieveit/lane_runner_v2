@@ -162,16 +162,16 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 		EnhancedInputComponent->BindAction(Input_SpeedUpAction, ETriggerEvent::Started, this, &APlayerCharacter::Input_SpeedUpStart);
 		EnhancedInputComponent->BindAction(Input_SpeedUpAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Input_SpeedUp);
 		EnhancedInputComponent->BindAction(Input_SpeedUpAction, ETriggerEvent::Completed, this, &APlayerCharacter::Input_SpeedUpCancel);
-		EnhancedInputComponent->BindAction(Input_SpeedUpAction_Joystick, ETriggerEvent::Started, this, &APlayerCharacter::Input_SpeedUpStart_Joystick);
+		/*EnhancedInputComponent->BindAction(Input_SpeedUpAction_Joystick, ETriggerEvent::Started, this, &APlayerCharacter::Input_SpeedUpStart_Joystick);
 		EnhancedInputComponent->BindAction(Input_SpeedUpAction_Joystick, ETriggerEvent::Triggered, this, &APlayerCharacter::Input_SpeedUp_Joystick);
-		EnhancedInputComponent->BindAction(Input_SpeedUpAction_Joystick, ETriggerEvent::Completed, this, &APlayerCharacter::Input_SpeedUpCancel_Joystick);
+		EnhancedInputComponent->BindAction(Input_SpeedUpAction_Joystick, ETriggerEvent::Completed, this, &APlayerCharacter::Input_SpeedUpCancel_Joystick);*/
 
 		EnhancedInputComponent->BindAction(Input_SlowDownAction, ETriggerEvent::Started, this, &APlayerCharacter::Input_SlowDownStart);
 		EnhancedInputComponent->BindAction(Input_SlowDownAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Input_SlowDown);
 		EnhancedInputComponent->BindAction(Input_SlowDownAction, ETriggerEvent::Completed, this, &APlayerCharacter::Input_SlowDownCancel);
-		EnhancedInputComponent->BindAction(Input_SlowDownAction_Joystick, ETriggerEvent::Started, this, &APlayerCharacter::Input_SlowDownStart_Joystick);
+		/*EnhancedInputComponent->BindAction(Input_SlowDownAction_Joystick, ETriggerEvent::Started, this, &APlayerCharacter::Input_SlowDownStart_Joystick);
 		EnhancedInputComponent->BindAction(Input_SlowDownAction_Joystick, ETriggerEvent::Triggered, this, &APlayerCharacter::Input_SlowDown_Joystick);
-		EnhancedInputComponent->BindAction(Input_SlowDownAction_Joystick, ETriggerEvent::Completed, this, &APlayerCharacter::Input_SlowDownCancel_Joystick);
+		EnhancedInputComponent->BindAction(Input_SlowDownAction_Joystick, ETriggerEvent::Completed, this, &APlayerCharacter::Input_SlowDownCancel_Joystick);*/
 
 		EnhancedInputComponent->BindAction(Input_JumpAction, ETriggerEvent::Started, this, &APlayerCharacter::Input_JumpStart);
 		EnhancedInputComponent->BindAction(Input_JumpAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Input_Jump);
@@ -560,6 +560,11 @@ void APlayerCharacter::UpdateLaneScroll()
 
 void APlayerCharacter::UpdateLaneFromInput()
 {
+	if (LaneMovementBlocked)
+	{
+		return;
+	}
+
 	if (LeftInput_Pressed)
 	{
 		MoveLane_Left();
@@ -674,6 +679,7 @@ void APlayerCharacter::ResetPlayer()
 	CancelBoost();
 
 	JumpBlocked = false;
+	LaneMovementBlocked = false;
 
 	SetJumpState(EPlayerJumpState::Grounded);
 }
@@ -1307,13 +1313,7 @@ void APlayerCharacter::UpdateCheckForPit()
 			// Check if actor has a specific tag
 			if (HitActor->ActorHasTag(FName("Pitfall")))
 			{
-				GetCharacterMovement()->StopMovementImmediately();
-
-				auto* levelSystem = GetGameInstance()->GetSubsystem<UGI_LevelSystem>();
-				if (levelSystem)
-				{
-					levelSystem->OnPitfall();
-				}
+				LaneMovementBlocked = true;
 			}
 		}
 	}

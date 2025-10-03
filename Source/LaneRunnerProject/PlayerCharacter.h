@@ -295,6 +295,8 @@ protected:
 	UPaperFlipbook* Flipbook_Stand;
 	UPaperFlipbook* Flipbook_Jump;
 
+	bool LaneMovementBlocked;
+
 public:
 	void OnTouchBoostPad(float boostSpeed, float boostTime);
 	void OnTouchBlockJump();
