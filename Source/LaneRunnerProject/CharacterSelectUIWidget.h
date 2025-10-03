@@ -56,6 +56,12 @@ public:
 	void OnCharacterButton3Pressed();
 
 	UPROPERTY(meta = (BindWidget))
+	UButton* CharacterButton4;
+
+	UFUNCTION()
+	void OnCharacterButton4Pressed();
+
+	UPROPERTY(meta = (BindWidget))
 	UImage* BackButtonArrow;
 
 	UPROPERTY(meta = (BindWidget))
@@ -71,6 +77,9 @@ public:
 	UImage* CharacterButton3Arrow;
 
 	UPROPERTY(meta = (BindWidget))
+	UImage* CharacterButton4Arrow;
+
+	UPROPERTY(meta = (BindWidget))
 	UImage* Character1PreviewImage;
 
 	UPROPERTY(meta = (BindWidget))
@@ -78,6 +87,9 @@ public:
 
 	UPROPERTY(meta = (BindWidget))
 	UImage* Character3PreviewImage;
+
+	UPROPERTY(meta = (BindWidget))
+	UImage* Character4PreviewImage;
 
 	void ShowPreviewImage(ECharacterType characterType);
 

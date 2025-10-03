@@ -34,6 +34,11 @@ void UCharacterSelectUIWidget::Initialise()
 	{
 		CharacterButton3->OnClicked.AddDynamic(this, &UCharacterSelectUIWidget::OnCharacterButton3Pressed);
 	}
+
+	if (CharacterButton4)
+	{
+		CharacterButton4->OnClicked.AddDynamic(this, &UCharacterSelectUIWidget::OnCharacterButton4Pressed);
+	}
 }
 
 void UCharacterSelectUIWidget::SetupBeforeShow()
@@ -52,12 +57,14 @@ void UCharacterSelectUIWidget::Tick(float DeltaTime)
 	ESlateVisibility CharacterButton1ArrowShow = CharacterButton1->HasKeyboardFocus() ? ESlateVisibility::Visible : ESlateVisibility::Hidden;
 	ESlateVisibility CharacterButton2ArrowShow = CharacterButton2->HasKeyboardFocus() ? ESlateVisibility::Visible : ESlateVisibility::Hidden;
 	ESlateVisibility CharacterButton3ArrowShow = CharacterButton3->HasKeyboardFocus() ? ESlateVisibility::Visible : ESlateVisibility::Hidden;
+	ESlateVisibility CharacterButton4ArrowShow = CharacterButton4->HasKeyboardFocus() ? ESlateVisibility::Visible : ESlateVisibility::Hidden;
 
 	ConfirmButtonArrow->SetVisibility(ConfirmButtonArrowShow);
 	BackButtonArrow->SetVisibility(BackButtonArrowShow);
 	CharacterButton1Arrow->SetVisibility(CharacterButton1ArrowShow);
 	CharacterButton2Arrow->SetVisibility(CharacterButton2ArrowShow);
 	CharacterButton3Arrow->SetVisibility(CharacterButton3ArrowShow);
+	CharacterButton4Arrow->SetVisibility(CharacterButton4ArrowShow);
 }
 
 void UCharacterSelectUIWidget::OnBackButtonPressed()
@@ -136,15 +143,36 @@ void UCharacterSelectUIWidget::OnCharacterButton3Pressed()
 	ShowPreviewImage(ECharacterType::Scrooge);
 }
 
+void UCharacterSelectUIWidget::OnCharacterButton4Pressed()
+{
+	AActor* playerActor = UGameplayStatics::GetActorOfClass(GetWorld(), APlayerCharacter::StaticClass());
+
+	if (playerActor)
+	{
+		APlayerCharacter* playerRef = Cast<APlayerCharacter>(playerActor);
+		if (playerRef)
+		{
+			playerRef->SetCharacterType(ECharacterType::Cow);
+		}
+	}
+
+	ToggleConfirmButton(true);
+
+
+	ShowPreviewImage(ECharacterType::Cow);
+}
+
 void UCharacterSelectUIWidget::ShowPreviewImage(ECharacterType characterType)
 {
 	bool showRedCowboy = characterType == ECharacterType::Cowboy_Red;
 	bool showPurpleCowboy = characterType == ECharacterType::Cowboy_Purple;
 	bool showScrooge = characterType == ECharacterType::Scrooge;
+	bool showCow = characterType == ECharacterType::Cow;
 
 	Character1PreviewImage->SetVisibility(showRedCowboy ? ESlateVisibility::Visible : ESlateVisibility::Hidden);
 	Character2PreviewImage->SetVisibility(showPurpleCowboy ? ESlateVisibility::Visible : ESlateVisibility::Hidden);
 	Character3PreviewImage->SetVisibility(showScrooge ? ESlateVisibility::Visible : ESlateVisibility::Hidden);
+	Character4PreviewImage->SetVisibility(showCow ? ESlateVisibility::Visible : ESlateVisibility::Hidden);
 }
 
 
@@ -173,6 +201,7 @@ void UCharacterSelectUIWidget::ToggleConfirmButton(bool active)
 		CharacterButton1->SetNavigationRuleExplicit(EUINavigation::Right, ConfirmButton);
 		CharacterButton2->SetNavigationRuleExplicit(EUINavigation::Right, ConfirmButton);
 		CharacterButton3->SetNavigationRuleExplicit(EUINavigation::Right, ConfirmButton);
+		CharacterButton4->SetNavigationRuleExplicit(EUINavigation::Right, ConfirmButton);
 	}
 	else
 	{
@@ -181,5 +210,6 @@ void UCharacterSelectUIWidget::ToggleConfirmButton(bool active)
 		CharacterButton1->SetNavigationRuleBase(EUINavigation::Right, EUINavigationRule::Escape);
 		CharacterButton2->SetNavigationRuleBase(EUINavigation::Right, EUINavigationRule::Escape);
 		CharacterButton3->SetNavigationRuleBase(EUINavigation::Right, EUINavigationRule::Escape);
+		CharacterButton4->SetNavigationRuleBase(EUINavigation::Right, EUINavigationRule::Escape);
 	}
 }
