@@ -128,6 +128,8 @@ void APlayerCharacter::Tick(float DeltaTime)
 
 			UpdateBoost(DeltaTime);
 
+			UpdateCoyoteTime(DeltaTime);
+
 
 			break;
 		case EGameState::Lose:
@@ -648,6 +650,8 @@ void APlayerCharacter::SetJumpState(EPlayerJumpState newState)
 	case EPlayerJumpState::Grounded:
 		characterMovement->GravityScale = JumpRiseGravity;
 		SetFlipbookVisuals(Flipbook_Stand);
+		HasJumpAvailable = true;
+		TimeSinceLeftGround = 0.0f;
 		break;
 	}
 }
@@ -696,6 +700,7 @@ void APlayerCharacter::ResetPlayer()
 
 	JumpBlocked = false;
 	LaneMovementBlocked = false;
+	HasJumpAvailable = true;
 
 	SetJumpState(EPlayerJumpState::Grounded);
 }
@@ -993,10 +998,25 @@ void APlayerCharacter::UpdateJumpFromInput()
 	{
 		if (JumpInput_Pressed)
 		{
-			DebugPrintJumpState();
+			bool jumpAllowed = false;
 
-			if (CurrentJumpState == EPlayerJumpState::Grounded &&
-				!JumpBlocked)
+			switch (CurrentJumpState)
+			{
+			case EPlayerJumpState::Grounded:
+				jumpAllowed = true;
+				break;
+			case EPlayerJumpState::Fall:
+				jumpAllowed = TimeSinceLeftGround < MaxCoyoteTime;
+				break;
+			}
+
+			if (JumpBlocked ||
+				!HasJumpAvailable)
+			{
+				jumpAllowed = false;
+			}
+
+			if (jumpAllowed)
 			{
 				FVector Vel = GetCharacterMovement()->Velocity;
 				Vel.Z = GetCharacterMovement()->JumpZVelocity; // use your config value
@@ -1006,6 +1026,7 @@ void APlayerCharacter::UpdateJumpFromInput()
 				SetJumpState(EPlayerJumpState::Rise);
 				JumpedThisFrame = true;
 				LaneMovementBlocked = false;
+				HasJumpAvailable = false;
 
 				auto* audioSystem = GetGameInstance()->GetSubsystem<UGI_AudioSystem>();
 				if (audioSystem)
@@ -1064,9 +1085,9 @@ void APlayerCharacter::UpdateJumpState(float DeltaTime)
 		}
 		break;
 	case EPlayerJumpState::Grounded:
-		if (GetVelocity().Z <= 0.01f)
+		if (GetVelocity().Z < 0)
 		{
-			//SetJumpState(EPlayerJumpState::Fall);
+			SetJumpState(EPlayerJumpState::Fall);
 		}
 		break;
 	}
@@ -1369,5 +1390,20 @@ void APlayerCharacter::UpdateBoost(float DeltaTime)
 		{
 			CancelBoost();
 		}
+	}
+}
+
+void APlayerCharacter::UpdateCoyoteTime(float DeltaTime)
+{
+	if (CurrentJumpState == EPlayerJumpState::Fall)
+	{
+		if (TimeSinceLeftGround < MaxCoyoteTime)
+		{
+			TimeSinceLeftGround += DeltaTime;
+		}
+	}
+	else
+	{
+		TimeSinceLeftGround = 0.0f;
 	}
 }

@@ -204,6 +204,7 @@ public:
 	void UpdateCheckForPit();
 	void UpdateMercyInvincibility(float DeltaTime);
 	void UpdateBoost(float DeltaTime);
+	void UpdateCoyoteTime(float DeltaTime);
 
 	//lane
 	bool MoveLane_Left();
@@ -298,6 +299,11 @@ protected:
 	bool LaneMovementBlocked;
 
 	void DebugPrintJumpState();
+
+	float TimeSinceLeftGround = 0.0f;
+	float MaxCoyoteTime = 0.2f;
+
+	bool HasJumpAvailable;
 
 public:
 	void OnTouchBoostPad(float boostSpeed, float boostTime);
