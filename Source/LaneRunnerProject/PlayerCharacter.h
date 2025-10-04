@@ -205,6 +205,7 @@ public:
 	void UpdateMercyInvincibility(float DeltaTime);
 	void UpdateBoost(float DeltaTime);
 	void UpdateCoyoteTime(float DeltaTime);
+	void UpdateDropShadow();
 
 	//lane
 	bool MoveLane_Left();
@@ -277,9 +278,6 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Visuals", meta = (AllowPrivateAccess = "true"))
 	UPaperSpriteComponent* SpriteComponent_Ghost;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Visuals")
-	UDecalComponent* DropShadowDecal;
-
 	bool IsBoosting = false;
 	float BoostOverrideSpeed;
 	float BoostTimeRemaining;
@@ -304,6 +302,8 @@ protected:
 	float MaxCoyoteTime = 0.2f;
 
 	bool HasJumpAvailable;
+
+	UStaticMeshComponent* ShadowPlaneMesh;
 
 public:
 	void OnTouchBoostPad(float boostSpeed, float boostTime);

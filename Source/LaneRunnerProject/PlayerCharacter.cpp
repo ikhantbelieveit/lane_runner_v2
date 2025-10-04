@@ -41,12 +41,6 @@ APlayerCharacter::APlayerCharacter()
 	ScrollTriggerBox->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 
 	SpriteToggle = CreateDefaultSubobject<USpriteToggleComponent>(TEXT("SpriteToggle"));
-
-	
-	DropShadowDecal = CreateDefaultSubobject<UDecalComponent>(TEXT("DropShadowDecal"));
-	DropShadowDecal->SetupAttachment(GetRootComponent());
-
-	
 }
 
 // Called when the game starts or when spawned
@@ -80,6 +74,8 @@ void APlayerCharacter::BeginPlay()
 
 	SpriteComponent_Ghost->SetWorldRotation(DesiredRotation);
 	SpriteComponent_Ghost->SetRelativeScale3D(FVector(3.0f, 3.0f, 3.0f));
+
+	ShadowPlaneMesh = FindComponentByTag<UStaticMeshComponent>(TEXT("ShadowPlane"));
 
 	//SpriteToggle->SetSpriteEnabled(FString("Sprite Base"));
 
@@ -129,6 +125,8 @@ void APlayerCharacter::Tick(float DeltaTime)
 			UpdateBoost(DeltaTime);
 
 			UpdateCoyoteTime(DeltaTime);
+
+			UpdateDropShadow();
 
 
 			break;
@@ -269,11 +267,6 @@ void APlayerCharacter::BeginPlay_SetupFromConfig()
 
 		StartHealth = ConfigData->MiscConfig.StartHealth;
 		MaxHealth = ConfigData->MiscConfig.MaxHealth;
-
-		if (DropShadowDecal)
-		{
-			DropShadowDecal->SetDecalMaterial(ConfigData->VisualsConfig.DropShadowMaterial); // Assign your shadow material
-		}
 
 		UPaperFlipbookComponent* flipbookComp = GetComponentByClass<UPaperFlipbookComponent>();
 		if (flipbookComp)
@@ -1405,5 +1398,64 @@ void APlayerCharacter::UpdateCoyoteTime(float DeltaTime)
 	else
 	{
 		TimeSinceLeftGround = 0.0f;
+	}
+}
+
+void APlayerCharacter::UpdateDropShadow()
+{
+	if (!ShadowPlaneMesh)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("no drop shadow"));
+		return;
+	}
+
+	if (CurrentJumpState == EPlayerJumpState::Grounded)
+	{
+		ShadowPlaneMesh->SetVisibility(false);
+		return;
+	}
+
+	FVector Start = GetActorLocation();
+	FVector End = Start - FVector(0, 0, 500.0f); // trace 500 units down
+
+	FHitResult HitResult;
+	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(this); // don’t hit self
+
+	bool bHit = GetWorld()->LineTraceSingleByChannel(
+		HitResult,
+		Start,
+		End,
+		ECC_Visibility, // or create a custom trace channel
+		Params
+	);
+
+	if (bHit && HitResult.GetActor()->ActorHasTag(FName("Floor")))
+	{
+		ShadowPlaneMesh->SetWorldLocation(HitResult.ImpactPoint + FVector(0, 0, 0.1f));
+
+		FRotator ShadowRotation = HitResult.ImpactNormal.Rotation();
+		ShadowRotation.Pitch -= 90.0f;
+		ShadowPlaneMesh->SetWorldRotation(ShadowRotation);
+
+		float HeightAboveFloor = (Start.Z - HitResult.ImpactPoint.Z);
+
+		float MinScale = 1.0f;   // biggest size closest to ground
+		float MaxScale = 0.3f;   // smallest size furthest from ground
+		float MaxHeight = 300.0f; // height at which shadow is largest
+
+		float ScaleFactor = FMath::GetMappedRangeValueClamped(
+			FVector2D(0.0f, MaxHeight),
+			FVector2D(MinScale, MaxScale),
+			HeightAboveFloor
+		);
+
+		ShadowPlaneMesh->SetWorldScale3D(FVector(ScaleFactor, ScaleFactor, 1.0f));
+
+		ShadowPlaneMesh->SetVisibility(true);
+	}
+	else
+	{
+		ShadowPlaneMesh->SetVisibility(false);
 	}
 }
