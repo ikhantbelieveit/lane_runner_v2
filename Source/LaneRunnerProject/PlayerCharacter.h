@@ -297,6 +297,8 @@ protected:
 
 	bool LaneMovementBlocked;
 
+	void DebugPrintJumpState();
+
 public:
 	void OnTouchBoostPad(float boostSpeed, float boostTime);
 	void OnTouchBlockJump();

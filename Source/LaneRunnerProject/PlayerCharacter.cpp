@@ -635,23 +635,39 @@ void APlayerCharacter::SetJumpState(EPlayerJumpState newState)
 	case EPlayerJumpState::Rise:
 		characterMovement->GravityScale = JumpRiseGravity;
 		SetFlipbookVisuals(Flipbook_Jump);
-		//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("Rise"));
 		break;
 	case EPlayerJumpState::Apex:
 		CancelVerticalSpeed();
 		characterMovement->GravityScale = 0;
 		SetFlipbookVisuals(Flipbook_Jump);
-		//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("Apex"));
 		break;
 	case EPlayerJumpState::Fall:
 		characterMovement->GravityScale = JumpFallGravity;
 		SetFlipbookVisuals(Flipbook_Jump);
-		//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("Fall"));
 		break;
 	case EPlayerJumpState::Grounded:
 		characterMovement->GravityScale = JumpRiseGravity;
 		SetFlipbookVisuals(Flipbook_Stand);
-		//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("Grounded"));
+		break;
+	}
+}
+
+void APlayerCharacter::DebugPrintJumpState()
+{
+	switch (CurrentJumpState)
+	{
+	case EPlayerJumpState::Rise:
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("Rise"));
+		break;
+	case EPlayerJumpState::Apex:
+		CancelVerticalSpeed();
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("Apex"));
+		break;
+	case EPlayerJumpState::Fall:
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("Fall"));
+		break;
+	case EPlayerJumpState::Grounded:
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("Grounded"));
 		break;
 	}
 }
@@ -977,12 +993,19 @@ void APlayerCharacter::UpdateJumpFromInput()
 	{
 		if (JumpInput_Pressed)
 		{
+			DebugPrintJumpState();
+
 			if (CurrentJumpState == EPlayerJumpState::Grounded &&
 				!JumpBlocked)
 			{
+				FVector Vel = GetCharacterMovement()->Velocity;
+				Vel.Z = GetCharacterMovement()->JumpZVelocity; // use your config value
+				GetCharacterMovement()->Velocity = Vel;
+				
 				bPressedJump = true;
 				SetJumpState(EPlayerJumpState::Rise);
 				JumpedThisFrame = true;
+				LaneMovementBlocked = false;
 
 				auto* audioSystem = GetGameInstance()->GetSubsystem<UGI_AudioSystem>();
 				if (audioSystem)
@@ -1038,6 +1061,12 @@ void APlayerCharacter::UpdateJumpState(float DeltaTime)
 		if (apexToFall)
 		{
 			SetJumpState(EPlayerJumpState::Fall);
+		}
+		break;
+	case EPlayerJumpState::Grounded:
+		if (GetVelocity().Z <= 0.01f)
+		{
+			//SetJumpState(EPlayerJumpState::Fall);
 		}
 		break;
 	}
