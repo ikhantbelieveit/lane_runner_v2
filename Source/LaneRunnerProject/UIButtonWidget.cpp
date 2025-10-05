@@ -2,6 +2,7 @@
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
 #include "Components/Image.h"
+#include "GI_AudioSystem.h"
 #include "Engine/Texture2D.h"
 
 void UUIButtonWidget::NativeConstruct()
@@ -126,4 +127,9 @@ void UUIButtonWidget::ShowArrow(bool bShow)
 void UUIButtonWidget::OnRootButtonClick()
 {
 	BroadcastButtonClick.Broadcast();
+
+	if (auto* audioSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGI_AudioSystem>())
+	{
+		audioSystem->Play(EAudioKey::MenuClick);
+	}
 }
