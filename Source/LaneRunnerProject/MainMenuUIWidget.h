@@ -6,6 +6,7 @@
 #include "BaseUIScreen.h"
 #include "Components/Button.h" 
 #include "Components/Image.h" 
+#include "UIButtonWidget.h"
 #include "MainMenuUIWidget.generated.h"
 
 /**
@@ -20,17 +21,19 @@ class LANERUNNERPROJECT_API UMainMenuUIWidget : public UBaseUIScreen
 
 	virtual void Tick(float DeltaTime) override;
 
+	virtual void OnScreenShown() override;
+
 
 
 public:
 	UPROPERTY(meta = (BindWidget))
-	UButton* StartButton;
+	UUIButtonWidget* StartButton;
 
 	UPROPERTY(meta = (BindWidget))
-	UButton* PlayButton;
+	UUIButtonWidget* PlayButton;
 
 	UPROPERTY(meta = (BindWidget))
-	UButton* QuitButton;
+	UUIButtonWidget* QuitButton;
 
 	UFUNCTION()
 	void OnStartButtonPressed();
@@ -40,20 +43,4 @@ public:
 
 	UFUNCTION()
 	void OnQuitButtonPressed();
-
-	UPROPERTY(meta = (BindWidget))
-	UImage* StartButtonArrow;
-
-	UPROPERTY(meta = (BindWidget))
-	UImage* PlayButtonArrow;
-
-	UPROPERTY(meta = (BindWidget))
-	UImage* QuitButtonArrow;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float StartGameDelay = 0.5f;
-
-private:
-	FTimerHandle StartGameDelayHandle;
-	void OnStartGameDelayComplete();
 };

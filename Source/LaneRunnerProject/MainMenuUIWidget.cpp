@@ -10,19 +10,19 @@ void UMainMenuUIWidget::Initialise()
 	if (StartButton)
 	{
 		DefaultSelection = StartButton;
-		StartButton->OnClicked.AddDynamic(this, &UMainMenuUIWidget::OnStartButtonPressed);
+		StartButton->BroadcastButtonClick.AddDynamic(this, &UMainMenuUIWidget::OnStartButtonPressed);
 		StartButton->SetVisibility(ESlateVisibility::Visible);
 	}
 
 	if (PlayButton)
 	{
-		PlayButton->OnClicked.AddDynamic(this, &UMainMenuUIWidget::OnPlayButtonPressed);
+		PlayButton->BroadcastButtonClick.AddDynamic(this, &UMainMenuUIWidget::OnPlayButtonPressed);
 		PlayButton->SetVisibility(ESlateVisibility::Hidden);
 	}
 
 	if (QuitButton)
 	{
-		QuitButton->OnClicked.AddDynamic(this, &UMainMenuUIWidget::OnQuitButtonPressed);
+		QuitButton->BroadcastButtonClick.AddDynamic(this, &UMainMenuUIWidget::OnQuitButtonPressed);
 		QuitButton->SetVisibility(ESlateVisibility::Hidden);
 	}
 }
@@ -31,13 +31,19 @@ void UMainMenuUIWidget::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	ESlateVisibility startArrowShow = StartButton->HasKeyboardFocus() ? ESlateVisibility::Visible : ESlateVisibility::Hidden;
-	ESlateVisibility playArrowShow = PlayButton->HasKeyboardFocus() ? ESlateVisibility::Visible : ESlateVisibility::Hidden;
-	ESlateVisibility quitArrowShow = QuitButton->HasKeyboardFocus() ? ESlateVisibility::Visible : ESlateVisibility::Hidden;
 
-	StartButtonArrow->SetVisibility(startArrowShow);
-	PlayButtonArrow->SetVisibility(playArrowShow);
-	QuitButtonArrow->SetVisibility(quitArrowShow);
+}
+
+void UMainMenuUIWidget::OnScreenShown()
+{
+	if (StartButton->IsVisible())
+	{
+		StartButton->SetKeyboardFocus();
+	}
+	else
+	{
+		PlayButton->SetKeyboardFocus();
+	}
 }
 
 void UMainMenuUIWidget::OnStartButtonPressed()
@@ -52,14 +58,6 @@ void UMainMenuUIWidget::OnStartButtonPressed()
 
 void UMainMenuUIWidget::OnPlayButtonPressed()
 {
-	/*GetWorld()->GetTimerManager().SetTimer(
-		StartGameDelayHandle,
-		this,
-		&UMainMenuUIWidget::OnStartGameDelayComplete,
-		StartGameDelay,
-		false,
-		-1.0f
-	);*/
 	auto* uiStateSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGI_UIStateSystem>();
 	if (uiStateSystem)
 	{
@@ -75,18 +73,3 @@ void UMainMenuUIWidget::OnQuitButtonPressed()
 		uiStateSystem->QuitGame();
 	}
 }
-
-//void UMainMenuUIWidget::OnStartGameDelayComplete()
-//{
-//	auto* uiStateSystem = GetGameInstance()->GetSubsystem<UGI_UIStateSystem>();
-//	if (uiStateSystem)
-//	{
-//		uiStateSystem->EnterScreen(EUIState::TestLevel);
-//	}
-//
-//	auto* levelSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGI_LevelSystem>();
-//	if (levelSystem)
-//	{
-//		levelSystem->EnterLevel();
-//	}
-//}

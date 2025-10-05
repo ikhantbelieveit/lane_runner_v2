@@ -8,7 +8,6 @@ void UUIButtonWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	// Apply the properties to the bound widgets
 	if (LabelTextBlock)
 	{
 		LabelTextBlock->SetText(LabelText);
@@ -27,11 +26,10 @@ void UUIButtonWidget::NativeConstruct()
 		}
 	}
 
-	// Optional: hook up the button click if you want to expose clicked event via Blueprint
-	// if (RootButton)
-	// {
-	//     RootButton->OnClicked.AddDynamic(this, &UCustomButtonWidget::YourClickHandler);
-	// }
+	 if (RootButton)
+	 {
+	     RootButton->OnClicked.AddDynamic(this, &UUIButtonWidget::OnRootButtonClick);
+	 }
 }
 
 void UUIButtonWidget::SynchronizeProperties()
@@ -69,7 +67,27 @@ FReply UUIButtonWidget::NativeOnFocusReceived(const FGeometry& InGeometry, const
 void UUIButtonWidget::NativeOnFocusLost(const FFocusEvent& InFocusEvent)
 {
 	ShowArrow(false);
+
 	Super::NativeOnFocusLost(InFocusEvent);
+}
+
+FReply UUIButtonWidget::NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent)
+{
+	const FKey Key = InKeyEvent.GetKey();
+
+	if (!InKeyEvent.IsRepeat())
+	{
+		if (Key == EKeys::Enter || Key == EKeys::SpaceBar || Key == EKeys::Virtual_Accept)
+		{
+			if (RootButton)
+			{
+				OnRootButtonClick();
+				return FReply::Handled();
+			}
+		}
+	}
+
+	return Super::NativeOnKeyDown(InGeometry, InKeyEvent);
 }
 
 void UUIButtonWidget::SetLabelText(const FText& NewText)
@@ -103,4 +121,9 @@ void UUIButtonWidget::ShowArrow(bool bShow)
 	if (!ArrowImage) return;
 
 	ArrowImage->SetVisibility(bShow ? ESlateVisibility::Visible : ESlateVisibility::Hidden);
+}
+
+void UUIButtonWidget::OnRootButtonClick()
+{
+	BroadcastButtonClick.Broadcast();
 }
