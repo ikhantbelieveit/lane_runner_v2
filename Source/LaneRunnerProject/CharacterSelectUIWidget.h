@@ -8,6 +8,7 @@
 #include "Components/TextBlock.h"
 #include "Components/Image.h"
 #include "ECharacterType.h"
+#include "UIButtonWidget.h"
 #include "CharacterSelectUIWidget.generated.h"
 
 /**
@@ -26,58 +27,40 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	UPROPERTY(meta = (BindWidget))
-	UButton* BackButton;
+	UUIButtonWidget* BackButton;
 
 	UFUNCTION()
 	void OnBackButtonPressed();
 
 	UPROPERTY(meta = (BindWidget))
-	UButton* ConfirmButton;
+	UUIButtonWidget* ConfirmButton;
 
 	UFUNCTION()
 	void OnConfirmButtonPressed();
 
 	UPROPERTY(meta = (BindWidget))
-	UButton* CharacterButton1;
+	UUIButtonWidget* CharacterButton1;
 
 	UFUNCTION()
 	void OnCharacterButton1Pressed();
 
 	UPROPERTY(meta = (BindWidget))
-	UButton* CharacterButton2;
+	UUIButtonWidget* CharacterButton2;
 
 	UFUNCTION()
 	void OnCharacterButton2Pressed();
 
 	UPROPERTY(meta = (BindWidget))
-	UButton* CharacterButton3;
+	UUIButtonWidget* CharacterButton3;
 
 	UFUNCTION()
 	void OnCharacterButton3Pressed();
 
 	UPROPERTY(meta = (BindWidget))
-	UButton* CharacterButton4;
+	UUIButtonWidget* CharacterButton4;
 
 	UFUNCTION()
 	void OnCharacterButton4Pressed();
-
-	UPROPERTY(meta = (BindWidget))
-	UImage* BackButtonArrow;
-
-	UPROPERTY(meta = (BindWidget))
-	UImage* ConfirmButtonArrow;
-
-	UPROPERTY(meta = (BindWidget))
-	UImage* CharacterButton1Arrow;
-
-	UPROPERTY(meta = (BindWidget))
-	UImage* CharacterButton2Arrow;
-
-	UPROPERTY(meta = (BindWidget))
-	UImage* CharacterButton3Arrow;
-
-	UPROPERTY(meta = (BindWidget))
-	UImage* CharacterButton4Arrow;
 
 	UPROPERTY(meta = (BindWidget))
 	UImage* Character1PreviewImage;

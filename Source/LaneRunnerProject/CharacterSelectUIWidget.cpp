@@ -11,33 +11,33 @@ void UCharacterSelectUIWidget::Initialise()
 {
 	if (ConfirmButton)
 	{
-		ConfirmButton->OnClicked.AddDynamic(this, &UCharacterSelectUIWidget::OnConfirmButtonPressed);
+		ConfirmButton->BroadcastButtonClick.AddDynamic(this, &UCharacterSelectUIWidget::OnConfirmButtonPressed);
 	}
 
 	if (BackButton)
 	{
-		BackButton->OnClicked.AddDynamic(this, &UCharacterSelectUIWidget::OnBackButtonPressed);
+		BackButton->BroadcastButtonClick.AddDynamic(this, &UCharacterSelectUIWidget::OnBackButtonPressed);
 	}
 
 	if (CharacterButton1)
 	{
 		DefaultSelection = CharacterButton1;
-		CharacterButton1->OnClicked.AddDynamic(this, &UCharacterSelectUIWidget::OnCharacterButton1Pressed);
+		CharacterButton1->BroadcastButtonClick.AddDynamic(this, &UCharacterSelectUIWidget::OnCharacterButton1Pressed);
 	}
 
 	if (CharacterButton2)
 	{
-		CharacterButton2->OnClicked.AddDynamic(this, &UCharacterSelectUIWidget::OnCharacterButton2Pressed);
+		CharacterButton2->BroadcastButtonClick.AddDynamic(this, &UCharacterSelectUIWidget::OnCharacterButton2Pressed);
 	}
 
 	if (CharacterButton3)
 	{
-		CharacterButton3->OnClicked.AddDynamic(this, &UCharacterSelectUIWidget::OnCharacterButton3Pressed);
+		CharacterButton3->BroadcastButtonClick.AddDynamic(this, &UCharacterSelectUIWidget::OnCharacterButton3Pressed);
 	}
 
 	if (CharacterButton4)
 	{
-		CharacterButton4->OnClicked.AddDynamic(this, &UCharacterSelectUIWidget::OnCharacterButton4Pressed);
+		CharacterButton4->BroadcastButtonClick.AddDynamic(this, &UCharacterSelectUIWidget::OnCharacterButton4Pressed);
 	}
 }
 
@@ -52,7 +52,7 @@ void UCharacterSelectUIWidget::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	ESlateVisibility ConfirmButtonArrowShow = ConfirmButton->HasKeyboardFocus() ? ESlateVisibility::Visible : ESlateVisibility::Hidden;
+	/*ESlateVisibility ConfirmButtonArrowShow = ConfirmButton->HasKeyboardFocus() ? ESlateVisibility::Visible : ESlateVisibility::Hidden;
 	ESlateVisibility BackButtonArrowShow = BackButton->HasKeyboardFocus() ? ESlateVisibility::Visible : ESlateVisibility::Hidden;
 	ESlateVisibility CharacterButton1ArrowShow = CharacterButton1->HasKeyboardFocus() ? ESlateVisibility::Visible : ESlateVisibility::Hidden;
 	ESlateVisibility CharacterButton2ArrowShow = CharacterButton2->HasKeyboardFocus() ? ESlateVisibility::Visible : ESlateVisibility::Hidden;
@@ -64,7 +64,7 @@ void UCharacterSelectUIWidget::Tick(float DeltaTime)
 	CharacterButton1Arrow->SetVisibility(CharacterButton1ArrowShow);
 	CharacterButton2Arrow->SetVisibility(CharacterButton2ArrowShow);
 	CharacterButton3Arrow->SetVisibility(CharacterButton3ArrowShow);
-	CharacterButton4Arrow->SetVisibility(CharacterButton4ArrowShow);
+	CharacterButton4Arrow->SetVisibility(CharacterButton4ArrowShow);*/
 }
 
 void UCharacterSelectUIWidget::OnBackButtonPressed()
@@ -202,6 +202,7 @@ void UCharacterSelectUIWidget::ToggleConfirmButton(bool active)
 		CharacterButton2->SetNavigationRuleExplicit(EUINavigation::Right, ConfirmButton);
 		CharacterButton3->SetNavigationRuleExplicit(EUINavigation::Right, ConfirmButton);
 		CharacterButton4->SetNavigationRuleExplicit(EUINavigation::Right, ConfirmButton);
+		CharacterButton4->SetNavigationRuleExplicit(EUINavigation::Down, ConfirmButton);
 	}
 	else
 	{
@@ -211,5 +212,6 @@ void UCharacterSelectUIWidget::ToggleConfirmButton(bool active)
 		CharacterButton2->SetNavigationRuleBase(EUINavigation::Right, EUINavigationRule::Escape);
 		CharacterButton3->SetNavigationRuleBase(EUINavigation::Right, EUINavigationRule::Escape);
 		CharacterButton4->SetNavigationRuleBase(EUINavigation::Right, EUINavigationRule::Escape);
+		CharacterButton4->SetNavigationRuleBase(EUINavigation::Down, EUINavigationRule::Escape);
 	}
 }

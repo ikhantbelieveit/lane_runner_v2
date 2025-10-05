@@ -7,6 +7,7 @@
 #include "Components/Button.h" 
 #include "Components/TextBlock.h"
 #include "Components/Image.h"
+#include "UIButtonWidget.h"
 #include "DeathScreenUIWidget.generated.h"
 
 /**
@@ -23,13 +24,13 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	UPROPERTY(meta = (BindWidget))
-	UButton* RespawnButton;
+	UUIButtonWidget* RespawnButton;
 
 	UFUNCTION()
 	void OnRespawnButtonPressed();
 
 	UPROPERTY(meta = (BindWidget))
-	UButton* QuitButton;
+	UUIButtonWidget* QuitButton;
 
 	UFUNCTION()
 	void OnQuitButtonPressed();
@@ -55,19 +56,10 @@ public:
 	void SetMessageActive(bool active);
 
 	UPROPERTY(meta = (BindWidget))
-	UImage* RespawnButtonArrow;
-
-	UPROPERTY(meta = (BindWidget))
-	UImage* QuitButtonArrow;
-
-	UPROPERTY(meta = (BindWidget))
-	UButton* MenuButton;
+	UUIButtonWidget* MenuButton;
 
 	UFUNCTION()
 	void OnMenuButtonPressed();
-
-	UPROPERTY(meta = (BindWidget))
-	UImage* MenuButtonArrow;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float RespawnDelay = 0.5f;

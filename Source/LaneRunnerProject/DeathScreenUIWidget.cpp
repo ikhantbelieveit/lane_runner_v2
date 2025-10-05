@@ -13,17 +13,17 @@ void UDeathScreenUIWidget::Initialise()
 	if (RespawnButton)
 	{
 		DefaultSelection = RespawnButton;
-		RespawnButton->OnClicked.AddDynamic(this, &UDeathScreenUIWidget::OnRespawnButtonPressed);
+		RespawnButton->BroadcastButtonClick.AddDynamic(this, &UDeathScreenUIWidget::OnRespawnButtonPressed);
 	}
 
 	if (QuitButton)
 	{
-		QuitButton->OnClicked.AddDynamic(this, &UDeathScreenUIWidget::OnQuitButtonPressed);
+		QuitButton->BroadcastButtonClick.AddDynamic(this, &UDeathScreenUIWidget::OnQuitButtonPressed);
 	}
 
 	if (MenuButton)
 	{
-		MenuButton->OnClicked.AddDynamic(this, &UDeathScreenUIWidget::OnMenuButtonPressed);
+		MenuButton->BroadcastButtonClick.AddDynamic(this, &UDeathScreenUIWidget::OnMenuButtonPressed);
 	}
 
 	if (auto* levelSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGI_LevelSystem>())
@@ -36,13 +36,13 @@ void UDeathScreenUIWidget::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	ESlateVisibility respawnArrowVis = RespawnButton->HasKeyboardFocus() ? ESlateVisibility::Visible : ESlateVisibility::Hidden;
+	/*ESlateVisibility respawnArrowVis = RespawnButton->HasKeyboardFocus() ? ESlateVisibility::Visible : ESlateVisibility::Hidden;
 	ESlateVisibility quitArrowVis = QuitButton->HasKeyboardFocus() ? ESlateVisibility::Visible : ESlateVisibility::Hidden;
 	ESlateVisibility menuArrowVis = MenuButton->HasKeyboardFocus() ? ESlateVisibility::Visible : ESlateVisibility::Hidden;
 
 	RespawnButtonArrow->SetVisibility(respawnArrowVis);
 	QuitButtonArrow->SetVisibility(quitArrowVis);
-	MenuButtonArrow->SetVisibility(menuArrowVis);
+	MenuButtonArrow->SetVisibility(menuArrowVis);*/
 }
 
 void UDeathScreenUIWidget::OnRespawnButtonPressed()
