@@ -876,11 +876,44 @@ void APlayerCharacter::SetCharacterType(ECharacterType type)
 
 void APlayerCharacter::SetFlipbookVisuals(UPaperFlipbook* flipbook)
 {
-	UPaperFlipbookComponent* flipbookComp = GetComponentByClass<UPaperFlipbookComponent>();
-	if (flipbookComp)
+	UPaperFlipbookComponent* FlipbookComp = GetComponentByClass<UPaperFlipbookComponent>();
+	if (!FlipbookComp || !flipbook) return;
+
+	FlipbookComp->SetFlipbook(flipbook);
+
+	//refresh flipbook to stand just above ground level
+
+	float LowestZ = 0.f;
+	bool bHasBounds = false;
+
+	for (int32 i = 0; i < flipbook->GetNumFrames(); ++i)
 	{
-		flipbookComp->SetFlipbook(flipbook);
+		if (UPaperSprite* Sprite = flipbook->GetSpriteAtFrame(i))
+		{
+			FBoxSphereBounds Bounds = Sprite->GetRenderBounds();
+			const float SpriteMinZ = Bounds.Origin.Z - Bounds.BoxExtent.Z;
+			if (!bHasBounds || SpriteMinZ < LowestZ)
+			{
+				LowestZ = SpriteMinZ;
+				bHasBounds = true;
+			}
+		}
 	}
+
+	if (!bHasBounds) return;
+
+	const FVector Scale = FlipbookComp->GetRelativeScale3D();
+	const float ScaledLowestZ = LowestZ * Scale.Z;
+
+	float CapsuleHalfHeight = 0.f;
+	if (UCapsuleComponent* Capsule = GetCapsuleComponent())
+	{
+		CapsuleHalfHeight = Capsule->GetScaledCapsuleHalfHeight();
+	}
+
+	FVector RelLoc = FlipbookComp->GetRelativeLocation();
+	RelLoc.Z = -ScaledLowestZ - CapsuleHalfHeight + 5.0f;
+	FlipbookComp->SetRelativeLocation(RelLoc);
 }
 
 void APlayerCharacter::TryAddHealth(int addHealth)
@@ -1107,7 +1140,9 @@ void APlayerCharacter::Shoot(EProjectileDirection direction, bool holdNotTap)
 		FProjectileRequestData requestData = FProjectileRequestData();
 		requestData.Direction = direction;
 		requestData.ProjectileClass = ProjectileClass;
-		requestData.ShootPos = GetActorLocation();
+
+		UPaperFlipbookComponent* FlipbookComp = GetComponentByClass<UPaperFlipbookComponent>();
+		requestData.ShootPos = FlipbookComp->GetComponentLocation();
 
 		float shootPosOffset = 40.0f;
 
