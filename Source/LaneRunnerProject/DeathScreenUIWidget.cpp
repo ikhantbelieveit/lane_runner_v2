@@ -28,7 +28,7 @@ void UDeathScreenUIWidget::Initialise()
 
 	if (auto* levelSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGI_LevelSystem>())
 	{
-		levelSystem->OnPlayerLose.AddDynamic(this, &UDeathScreenUIWidget::SetupBeforeShow);
+		levelSystem->OnPlayerLose.AddDynamic(this, &UDeathScreenUIWidget::SetupOnPlayerDeath);
 	}
 }
 
@@ -66,28 +66,8 @@ void UDeathScreenUIWidget::OnMenuButtonPressed()
 	}
 }
 
-void UDeathScreenUIWidget::OnRespawnDelayComplete()
+void UDeathScreenUIWidget::SetupOnPlayerDeath()
 {
-	auto* levelSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGI_LevelSystem>();
-	if (levelSystem)
-	{
-		levelSystem->ResetFromLose();
-	}
-}
-
-void UDeathScreenUIWidget::OnQuitButtonPressed()
-{
-	auto* uiStateSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGI_UIStateSystem>();
-	if (uiStateSystem)
-	{
-		uiStateSystem->QuitGame();
-	}
-}
-
-void UDeathScreenUIWidget::SetupBeforeShow()
-{
-	Super::SetupBeforeShow();
-
 	int currentScore = 0;
 	int highScore = 0;
 	bool newHighScore = false;
@@ -109,6 +89,24 @@ void UDeathScreenUIWidget::SetupBeforeShow()
 	SetScoreText(currentScore);
 	SetHighScoreText(highScore);
 	SetMessageActive(newHighScore);
+}
+
+void UDeathScreenUIWidget::OnRespawnDelayComplete()
+{
+	auto* levelSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGI_LevelSystem>();
+	if (levelSystem)
+	{
+		levelSystem->ResetFromLose();
+	}
+}
+
+void UDeathScreenUIWidget::OnQuitButtonPressed()
+{
+	auto* uiStateSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGI_UIStateSystem>();
+	if (uiStateSystem)
+	{
+		uiStateSystem->QuitGame();
+	}
 }
 
 void UDeathScreenUIWidget::OnScreenShown()

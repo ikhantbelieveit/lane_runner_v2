@@ -35,8 +35,6 @@ public:
 	UFUNCTION()
 	void OnQuitButtonPressed();
 
-	virtual void SetupBeforeShow() override;
-
 	virtual void OnScreenShown() override;
 	virtual void OnScreenHidden() override;
 
@@ -63,6 +61,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float RespawnDelay = 0.5f;
+
+	UFUNCTION()
+	void SetupOnPlayerDeath();
 
 private:
 	FTimerHandle RespawnDelayHandle;
