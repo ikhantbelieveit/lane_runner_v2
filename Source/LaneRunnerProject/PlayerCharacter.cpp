@@ -93,6 +93,11 @@ void APlayerCharacter::BeginPlay()
 	{
 		levelSystem->OnGameStateChanged.AddDynamic(this, &APlayerCharacter::OnGameStateChanged);
 	}
+
+	if (auto* flipbookComp = GetComponentByClass<UPaperFlipbookComponent>())
+	{
+		flipbookComp->OnFinishedPlaying.AddDynamic(this, &APlayerCharacter::OnFlipbookFinish);
+	}
 }
 
 // Called every frame
@@ -128,6 +133,7 @@ void APlayerCharacter::Tick(float DeltaTime)
 
 			UpdateDropShadow();
 
+			UpdateAnimation();
 
 			break;
 		case EGameState::Lose:
@@ -629,20 +635,20 @@ void APlayerCharacter::SetJumpState(EPlayerJumpState newState)
 	{
 	case EPlayerJumpState::Rise:
 		characterMovement->GravityScale = JumpRiseGravity;
-		SetFlipbookVisuals(Flipbook_Jump);
+		//SetFlipbookVisuals(Flipbook_Jump);
 		break;
 	case EPlayerJumpState::Apex:
 		CancelVerticalSpeed();
 		characterMovement->GravityScale = 0;
-		SetFlipbookVisuals(Flipbook_Jump);
+		//SetFlipbookVisuals(Flipbook_Jump);
 		break;
 	case EPlayerJumpState::Fall:
 		characterMovement->GravityScale = JumpFallGravity;
-		SetFlipbookVisuals(Flipbook_Jump);
+		//SetFlipbookVisuals(Flipbook_Jump);
 		break;
 	case EPlayerJumpState::Grounded:
 		characterMovement->GravityScale = JumpRiseGravity;
-		SetFlipbookVisuals(Flipbook_Stand);
+		//SetFlipbookVisuals(Flipbook_Stand);
 		HasJumpAvailable = true;
 		TimeSinceLeftGround = 0.0f;
 		break;
@@ -696,6 +702,28 @@ void APlayerCharacter::ResetPlayer()
 	HasJumpAvailable = true;
 
 	SetJumpState(EPlayerJumpState::Grounded);
+
+	SetAnimState(ECharacterAnimState::Grounded);
+}
+
+void APlayerCharacter::SetAnimState(ECharacterAnimState newState)
+{
+	if (CurrentAnimState == newState) return;
+
+	CurrentAnimState = newState;
+
+	switch (CurrentAnimState)
+	{
+	case ECharacterAnimState::Grounded:
+		SetFlipbookVisuals(Flipbook_Stand);
+		break;
+	case ECharacterAnimState::JumpLoop:
+		SetFlipbookVisuals(Flipbook_Jump);
+		break;
+	case ECharacterAnimState::JumpStart:
+		SetFlipbookVisuals(Flipbook_JumpStart);
+		break;
+	}
 }
 
 void APlayerCharacter::OnGameStateChanged(EGameState newState, EGameState prevState)
@@ -867,6 +895,7 @@ void APlayerCharacter::SetCharacterType(ECharacterType type)
 	{
 		Flipbook_Stand = data->StandingFlipbook;
 		Flipbook_Jump = data->JumpingFlipbook;
+		Flipbook_JumpStart = data->JumpStartFlipbook;
 
 		CharacterType = type;
 
@@ -880,6 +909,10 @@ void APlayerCharacter::SetFlipbookVisuals(UPaperFlipbook* flipbook)
 	if (!FlipbookComp || !flipbook) return;
 
 	FlipbookComp->SetFlipbook(flipbook);
+
+
+	FlipbookComp->SetLooping(flipbook != Flipbook_JumpStart);
+	FlipbookComp->PlayFromStart();
 
 	//refresh flipbook to stand just above ground level
 
@@ -1440,7 +1473,6 @@ void APlayerCharacter::UpdateDropShadow()
 {
 	if (!ShadowPlaneMesh)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("no drop shadow"));
 		return;
 	}
 
@@ -1451,7 +1483,7 @@ void APlayerCharacter::UpdateDropShadow()
 	}
 
 	FVector Start = GetActorLocation();
-	FVector End = Start - FVector(0, 0, 500.0f); // trace 500 units down
+	FVector End = Start - FVector(0, 0, 500.0f);
 
 	FHitResult HitResult;
 	FCollisionQueryParams Params;
@@ -1461,7 +1493,7 @@ void APlayerCharacter::UpdateDropShadow()
 		HitResult,
 		Start,
 		End,
-		ECC_Visibility, // or create a custom trace channel
+		ECC_Visibility, // or custom channel
 		Params
 	);
 
@@ -1492,5 +1524,32 @@ void APlayerCharacter::UpdateDropShadow()
 	else
 	{
 		ShadowPlaneMesh->SetVisibility(false);
+	}
+}
+
+void APlayerCharacter::UpdateAnimation()
+{
+	if (JumpedThisFrame)
+	{
+		SetAnimState(ECharacterAnimState::JumpStart);
+	}
+	else
+	{
+		switch (CurrentJumpState)
+		{
+		case EPlayerJumpState::Grounded:
+			SetAnimState(ECharacterAnimState::Grounded);
+			break;
+		}
+	}
+}
+
+void APlayerCharacter::OnFlipbookFinish()
+{
+	switch (CurrentAnimState)
+	{
+	case ECharacterAnimState::JumpStart:
+		SetAnimState(ECharacterAnimState::JumpLoop);
+		break;
 	}
 }

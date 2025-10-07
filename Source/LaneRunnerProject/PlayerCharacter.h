@@ -20,6 +20,7 @@
 #include "EGameState.h"
 #include "SpriteToggleComponent.h"
 #include "Components/DecalComponent.h"
+#include "ECharacterAnimState.h"
 #include "PlayerCharacter.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FPlayerCharacterEvent);
@@ -206,6 +207,7 @@ public:
 	void UpdateBoost(float DeltaTime);
 	void UpdateCoyoteTime(float DeltaTime);
 	void UpdateDropShadow();
+	void UpdateAnimation();
 
 	//lane
 	bool MoveLane_Left();
@@ -232,6 +234,8 @@ public:
 	int MaxHealth;
 
 	void ResetPlayer();
+
+	void SetAnimState(ECharacterAnimState newState);
 
 protected:
 	UInputAction* Input_JumpAction;
@@ -293,6 +297,7 @@ protected:
 
 	UPaperFlipbook* Flipbook_Stand;
 	UPaperFlipbook* Flipbook_Jump;
+	UPaperFlipbook* Flipbook_JumpStart;
 
 	bool LaneMovementBlocked;
 
@@ -317,4 +322,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void TryAddHealth(int addHealth);
+
+protected:
+	ECharacterAnimState CurrentAnimState;
+
+	void OnFlipbookFinish();
 };
