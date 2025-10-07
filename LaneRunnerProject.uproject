@@ -21,6 +21,14 @@
 			"TargetAllowList": [
 				"Editor"
 			]
+		},
+		{
+			"Name": "RawInput",
+			"Enabled": true
+		},
+		{
+			"Name": "WindowsDualsense_ds5w",
+			"Enabled": true
 		}
 	]
 }
