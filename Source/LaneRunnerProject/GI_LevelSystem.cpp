@@ -430,6 +430,8 @@ void UGI_LevelSystem::ExecuteSingleEvent(const FLevelEventData& Event)
             AActor* Target = TargetPtr.Get();
             if (!IsValid(Target)) continue;
 
+            GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("SPAWN A GUY"));
+
             if (USpawnComponent* SpawnComp = Target->FindComponentByClass<USpawnComponent>())
             {
                 const bool Drop = false;

@@ -23,6 +23,10 @@ struct FLevelEventData
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Level Event")
 	TArray<TObjectPtr<AActor>> TargetActors;
 
+	//Target actor IDs - for chunks
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Level Event")
+	TArray<FName> TargetActorIDs;
+
 	/** Optional float/int parameter (e.g., distance along path, toggle state) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Level Event")
 	float NumericParam = 0.f;

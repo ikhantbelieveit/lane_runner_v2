@@ -6,6 +6,7 @@
 #include "Components/ActorComponent.h"
 #include "Components/BoxComponent.h"
 #include "GI_LevelSystem.h"
+#include "LevelChunkActor.h"
 #include "PlayerDetectComponent.generated.h"
 
 
@@ -45,4 +46,11 @@ public:
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Overlap")
 	UBoxComponent* BoxComponent;
+
+public:
+	UFUNCTION(BlueprintCallable)
+	void ResolveTargetActorIDs(ALevelChunkActor* parentChunk);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Level Event")
+	bool UseParentEventLogic = true;	//optional control over outdated logic from here or new EventTrigger logic
 };

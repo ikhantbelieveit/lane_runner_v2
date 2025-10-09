@@ -2,6 +2,7 @@
 
 #include "PlayerDetectComponent.h"
 #include "ScrollWithPlayerComponent.h"
+#include "EventTrigger.h"
 
 // Sets default values for this component's properties
 UPlayerDetectComponent::UPlayerDetectComponent()
@@ -42,6 +43,44 @@ void UPlayerDetectComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 	// ...
 }
 
+void UPlayerDetectComponent::ResolveTargetActorIDs(ALevelChunkActor* parentChunk)
+{
+	for (FLevelEventData& Event : EventsToTrigger)
+	{
+		Event.TargetActors.Empty();
+		for (const FName& ID : Event.TargetActorIDs)
+		{
+			bool success = false;
+			AActor* foundActor = parentChunk->GetChildActorByID(ID, success);
+
+			if (success && foundActor)
+			{
+				Event.TargetActors.Add(foundActor);
+				GEngine->AddOnScreenDebugMessage(
+					-1,
+					4.f,
+					FColor::Green,
+					FString::Printf(TEXT("[ResolveTargetActorIDs] '%s' matched tag '%s' in chunk '%s'"),
+						*foundActor->GetName(),
+						*ID.ToString(),
+						*parentChunk->GetName())
+				);
+			}
+			else
+			{
+				GEngine->AddOnScreenDebugMessage(
+					-1,
+					4.f,
+					FColor::Red,
+					FString::Printf(TEXT("[ResolveTargetActorIDs] No match found for tag '%s' in chunk '%s'"),
+						*ID.ToString(),
+						*parentChunk->GetName())
+				);
+			}
+		}
+	}
+}
+
 void UPlayerDetectComponent::HandleBeginOverlap(
 	UPrimitiveComponent* OverlappedComp,
 	AActor* OtherActor,
@@ -58,12 +97,26 @@ void UPlayerDetectComponent::HandleBeginOverlap(
 
 	if (OtherComp->ComponentHasTag(PlayerAreaTag))
 	{
-		if (UGameInstance* GI = GetWorld()->GetGameInstance())
+		
+
+		if (UseParentEventLogic)
 		{
-			if (auto* levelSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGI_LevelSystem>())
+			if (AEventTrigger* trigger = Cast<AEventTrigger>(GetOwner()))
 			{
-				levelSystem->ExecuteEvents(EventsToTrigger);
+				trigger->TriggerEvents();
+				GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("BOOM BABY"));
 			}
 		}
+		else
+		{
+			if (UGameInstance* GI = GetWorld()->GetGameInstance())
+			{
+				if (auto* levelSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGI_LevelSystem>())
+				{
+					levelSystem->ExecuteEvents(EventsToTrigger);
+				}
+			}
+		}
+		
 	}
 }
