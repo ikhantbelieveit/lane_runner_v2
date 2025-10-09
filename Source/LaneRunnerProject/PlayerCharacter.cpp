@@ -524,6 +524,7 @@ void APlayerCharacter::Input_DebugResetStart(const FInputActionValue& Value)
 	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("SHOULD DEBUG RESET"));
 }
 
+
 void APlayerCharacter::ClearInputValues()
 {
 	LeftInput_Pressed = false;

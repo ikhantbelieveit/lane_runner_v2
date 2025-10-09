@@ -35,6 +35,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void QuitGame();
 
+	UFUNCTION(BlueprintCallable)
+	void ApplyInputMode(EScreenInputMode inputMode);
+
 private:
 	UBaseUIScreen* ActiveWidget;
 

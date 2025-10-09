@@ -124,6 +124,30 @@ void UGI_UIStateSystem::QuitGame()
     }
 }
 
+void UGI_UIStateSystem::ApplyInputMode(EScreenInputMode inputMode)
+{
+    APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+    if (!PC) return;
+
+    switch (inputMode)
+    {
+    case EScreenInputMode::None:
+        PC->SetInputMode(FInputModeGameOnly());
+        PC->bShowMouseCursor = false;
+        break;
+
+    case EScreenInputMode::UIOnly:
+        PC->SetInputMode(FInputModeUIOnly());
+        PC->bShowMouseCursor = true;
+        break;
+
+    case EScreenInputMode::GameAndUI:
+        PC->SetInputMode(FInputModeGameAndUI());
+        PC->bShowMouseCursor = true;
+        break;
+    }
+}
+
 void UGI_UIStateSystem::ShowScreen(UBaseUIScreen* screen)
 {
     screen->SetupBeforeShow();
@@ -154,13 +178,9 @@ void UGI_UIStateSystem::HideScreen(UBaseUIScreen* screen)
     screen->OnScreenHidden();
 
 
+    
     // Reapply mode for last active screen, or reset
-    APlayerController* PC = UGameplayStatics::GetPlayerController(screen->GetWorld(), 0);
-    if (PC)
-    {
-        PC->SetInputMode(FInputModeGameOnly());
-        PC->bShowMouseCursor = false;
-    }
+    ApplyInputMode(EScreenInputMode::None);
 
     if (ActiveWidget == screen)
     {
@@ -182,26 +202,7 @@ void UGI_UIStateSystem::ApplyInputMode(UBaseUIScreen* widget)
 {
     if (!widget) return;
 
-    APlayerController* PC = UGameplayStatics::GetPlayerController(widget->GetWorld(), 0);
-    if (!PC) return;
-
-    switch (widget->ScreenInputMode)
-    {
-    case EScreenInputMode::None:
-        PC->SetInputMode(FInputModeGameOnly());
-        PC->bShowMouseCursor = false;
-        break;
-
-    case EScreenInputMode::UIOnly:
-        PC->SetInputMode(FInputModeUIOnly());
-        PC->bShowMouseCursor = true;
-        break;
-
-    case EScreenInputMode::GameAndUI:
-        PC->SetInputMode(FInputModeGameAndUI());
-        PC->bShowMouseCursor = true;
-        break;
-    }
+    ApplyInputMode(widget->ScreenInputMode);
 }
 
 void UGI_UIStateSystem::TickSubsystem(float DeltaTime)

@@ -96,6 +96,11 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	UInputAction* Input_DebugReset;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	UInputAction* Input_Pause;
+
+
 };
 
 USTRUCT(BlueprintType)

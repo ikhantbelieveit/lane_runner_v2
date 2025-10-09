@@ -60,7 +60,6 @@ protected:
 	UInputAction* Input_DebugReset;
 
 
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Visuals", meta = (AllowPrivateAccess = "true"))
 	UPaperSpriteComponent* SpriteComponent;
 

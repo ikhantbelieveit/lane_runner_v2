@@ -116,4 +116,13 @@ public:
 	FLevelSystemEvent OnPlayerLose;
 
 	int HighScoreAtTimeOfDeath;
+
+	UFUNCTION(BlueprintCallable)
+	void TogglePause();
+
+	UPROPERTY(BlueprintAssignable, Category = "Events")
+	FLevelSystemEvent OnPause;
+
+	UPROPERTY(BlueprintAssignable, Category = "Events")
+	FLevelSystemEvent OnUnpause;
 };

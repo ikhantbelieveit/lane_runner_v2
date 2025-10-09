@@ -35,6 +35,10 @@ void UGI_LevelSystem::SetGameState(EGameState newState)
 
 	switch (newState)
 	{
+    case EGameState::Paused:
+        UGameplayStatics::SetGamePaused(GetWorld(), true);
+        OnPause.Broadcast();
+        break;
 	case EGameState::Lose:
 
         
@@ -76,6 +80,13 @@ void UGI_LevelSystem::SetGameState(EGameState newState)
 		{
 			audioSystem->PlayMusic(EAudioKey::BackgroundMusic);
 		}
+
+        if (CurrentGameState == EGameState::Paused)
+        {
+            UGameplayStatics::SetGamePaused(GetWorld(), false);
+            OnUnpause.Broadcast();
+        }
+        
 		break;
 	}
 
@@ -234,6 +245,19 @@ void UGI_LevelSystem::ExecuteEvents(const TArray<FLevelEventData>& Events)
 	{
 		ExecuteSingleEvent(Event);
 	}
+}
+
+void UGI_LevelSystem::TogglePause()
+{
+    switch (CurrentGameState)
+    {
+    case EGameState::Active:
+        SetGameState(EGameState::Paused);
+        break;
+    case EGameState::Paused:
+        SetGameState(EGameState::Active);
+        break;
+    }
 }
 
 void UGI_LevelSystem::ExecuteSingleEvent(const FLevelEventData& Event)

@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "BaseUIScreen.h"
 #include "Components/TextBlock.h"
+#include "PauseUIWidget.h"
 #include "LevelUIWidget.generated.h"
 
 /**
@@ -29,4 +30,13 @@ public:
 
 	UFUNCTION()
 	void OnHealthUpdate();
+
+	UPROPERTY(meta = (BindWidget))
+	UPauseUIWidget* PauseUIOverlay;
+
+	UFUNCTION(BlueprintCallable)
+	void ShowPauseUI();
+
+	UFUNCTION(BlueprintCallable)
+	void HidePauseUI();
 };

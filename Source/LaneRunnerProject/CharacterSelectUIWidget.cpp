@@ -52,19 +52,6 @@ void UCharacterSelectUIWidget::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	/*ESlateVisibility ConfirmButtonArrowShow = ConfirmButton->HasKeyboardFocus() ? ESlateVisibility::Visible : ESlateVisibility::Hidden;
-	ESlateVisibility BackButtonArrowShow = BackButton->HasKeyboardFocus() ? ESlateVisibility::Visible : ESlateVisibility::Hidden;
-	ESlateVisibility CharacterButton1ArrowShow = CharacterButton1->HasKeyboardFocus() ? ESlateVisibility::Visible : ESlateVisibility::Hidden;
-	ESlateVisibility CharacterButton2ArrowShow = CharacterButton2->HasKeyboardFocus() ? ESlateVisibility::Visible : ESlateVisibility::Hidden;
-	ESlateVisibility CharacterButton3ArrowShow = CharacterButton3->HasKeyboardFocus() ? ESlateVisibility::Visible : ESlateVisibility::Hidden;
-	ESlateVisibility CharacterButton4ArrowShow = CharacterButton4->HasKeyboardFocus() ? ESlateVisibility::Visible : ESlateVisibility::Hidden;
-
-	ConfirmButtonArrow->SetVisibility(ConfirmButtonArrowShow);
-	BackButtonArrow->SetVisibility(BackButtonArrowShow);
-	CharacterButton1Arrow->SetVisibility(CharacterButton1ArrowShow);
-	CharacterButton2Arrow->SetVisibility(CharacterButton2ArrowShow);
-	CharacterButton3Arrow->SetVisibility(CharacterButton3ArrowShow);
-	CharacterButton4Arrow->SetVisibility(CharacterButton4ArrowShow);*/
 }
 
 void UCharacterSelectUIWidget::OnBackButtonPressed()

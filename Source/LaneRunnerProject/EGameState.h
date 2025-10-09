@@ -11,5 +11,6 @@ enum class EGameState : uint8
 	Win UMETA(DisplayName = "Win"),
 	Lose UMETA(DisplayName = "Lose"),
 	Dormant UMETA(DisplayName = "Dormant"),
-	AwaitContinue UMETA(DisplayName = "AwaitContinue")	//level is halted after taking damage, needs player to press continue
+	AwaitContinue UMETA(DisplayName = "AwaitContinue"),	//level is halted after taking damage, needs player to press continue
+	Paused UMETA(DisplayName = "Paused")
 };

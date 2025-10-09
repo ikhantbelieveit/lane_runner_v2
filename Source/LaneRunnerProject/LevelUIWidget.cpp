@@ -4,6 +4,7 @@
 #include "LevelUIWidget.h"
 #include "GI_LevelSystem.h"
 #include "PlayerCharacter.h"
+#include "GI_UIStateSystem.h"
 #include "Kismet/GameplayStatics.h"
 
 void ULevelUIWidget::Initialise()
@@ -22,6 +23,14 @@ void ULevelUIWidget::Initialise()
 	if (levelSystem)
 	{
 		levelSystem->OnScoreSet.AddDynamic(this, &ULevelUIWidget::OnScoreUpdate);
+		levelSystem->OnPause.AddDynamic(this, &ULevelUIWidget::ShowPauseUI);
+		levelSystem->OnUnpause.AddDynamic(this, &ULevelUIWidget::HidePauseUI);
+	}
+
+	if (PauseUIOverlay)
+	{
+		PauseUIOverlay->Initialise();
+		PauseUIOverlay->SetVisibility(ESlateVisibility::Hidden);
 	}
 }
 
@@ -63,4 +72,30 @@ void ULevelUIWidget::OnHealthUpdate()
 		FText text = FText::FromString(healthString);
 		HealthText->SetText(text);
 	}
+}
+
+void ULevelUIWidget::ShowPauseUI()
+{
+	if (PauseUIOverlay)
+	{
+		PauseUIOverlay->SetVisibility(ESlateVisibility::Visible);
+		
+		if (auto* uiSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGI_UIStateSystem>())
+		{
+			uiSystem->ApplyInputMode(PauseUIOverlay->PauseInputMode);
+		}
+
+		DefaultSelection = PauseUIOverlay->ResumeButton;
+		PauseUIOverlay->ResumeButton->SetKeyboardFocus();
+	}
+}
+
+void ULevelUIWidget::HidePauseUI()
+{
+	if (PauseUIOverlay)
+	{
+		PauseUIOverlay->SetVisibility(ESlateVisibility::Hidden);
+	}
+
+	DefaultSelection = nullptr;
 }
