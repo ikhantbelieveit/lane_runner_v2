@@ -71,10 +71,13 @@ void AEventTrigger::InitializeFromChunkData_Implementation(const FChunkSpawnEntr
 				EventObj->TryGetNumberField(TEXT("NumericParam"), EventData.NumericParam);
 
 				// BoolParam
-				EventObj->TryGetBoolField(TEXT("BoolParam"), EventData.BoolParam);
-
+				bool boolParam;
+				if (EventObj->TryGetBoolField(TEXT("BoolParam"), boolParam))
+				{
+					EventData.BoolParam = boolParam;
+				}
+				
 				EventsToTrigger.Add(EventData);
-				GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("added awesome level event"));
 			}
 		}
 

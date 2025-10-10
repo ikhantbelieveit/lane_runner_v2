@@ -74,9 +74,6 @@ AActor* ALevelChunkActor::GetChildActorByID(FName childID, bool& success)
     if (childID.IsNone())
         return nullptr;
 
-    /*TArray<AActor*> ChildActors;
-    GetAllChildActors(ChildActors, true);*/
-
     for (AActor* Child : SpawnedActors)
     {
         if (!Child)

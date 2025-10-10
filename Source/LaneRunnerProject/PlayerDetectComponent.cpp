@@ -20,12 +20,24 @@ void UPlayerDetectComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
+	
+
 
 
 	if (!BoxComponent)
 	{
 		BoxComponent = GetOwner()->FindComponentByClass<UBoxComponent>();
 		
+		TArray<UBoxComponent*> boxComponents;
+		GetOwner()->GetComponents<UBoxComponent>(boxComponents);
+		for (UBoxComponent* Comp : boxComponents)
+		{
+			if (Comp && Comp->ComponentHasTag(TEXT("PlayerDetect")))
+			{
+				BoxComponent = Comp;
+				break;
+			}
+		}
 	}
 	if (BoxComponent)
 	{
@@ -97,14 +109,11 @@ void UPlayerDetectComponent::HandleBeginOverlap(
 
 	if (OtherComp->ComponentHasTag(PlayerAreaTag))
 	{
-		
-
 		if (UseParentEventLogic)
 		{
 			if (AEventTrigger* trigger = Cast<AEventTrigger>(GetOwner()))
 			{
 				trigger->TriggerEvents();
-				GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("BOOM BABY"));
 			}
 		}
 		else

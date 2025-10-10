@@ -430,14 +430,44 @@ void UGI_LevelSystem::ExecuteSingleEvent(const FLevelEventData& Event)
             AActor* Target = TargetPtr.Get();
             if (!IsValid(Target)) continue;
 
-            GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("SPAWN A GUY"));
-
             if (USpawnComponent* SpawnComp = Target->FindComponentByClass<USpawnComponent>())
             {
                 const bool Drop = false;
                 const bool ScrollInstant = Event.BoolParam;
                 const bool ScrollOnReach = false;
                 SpawnComp->Spawn(Drop, ScrollInstant, ScrollOnReach);
+            }
+            else
+            {
+                GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("NO SPAWN COMPONENT FOUND"));
+            }
+        }
+        break;
+    }
+
+    case ELevelEventType::SpawnObjectGroup:
+    {
+        for (TObjectPtr<AActor> TargetPtr : Event.TargetActors)
+        {
+            AActor* Target = TargetPtr.Get();
+            if (!IsValid(Target)) continue;
+
+            TArray<AActor*> TargetChildren;
+            Target->GetAllChildActors(TargetChildren, true);
+
+            for (auto* child : TargetChildren)
+            {
+                if (USpawnComponent* SpawnComp = child->FindComponentByClass<USpawnComponent>())
+                {
+                    const bool Drop = false;
+                    const bool ScrollInstant = Event.BoolParam;
+                    const bool ScrollOnReach = false;
+                    SpawnComp->Spawn(Drop, ScrollInstant, ScrollOnReach);
+                }
+                else
+                {
+                    GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("NO SPAWN COMPONENT FOUND"));
+                }
             }
         }
         break;
@@ -453,6 +483,31 @@ void UGI_LevelSystem::ExecuteSingleEvent(const FLevelEventData& Event)
             if (USpawnComponent* SpawnComp = Target->FindComponentByClass<USpawnComponent>())
             {
                 SpawnComp->Despawn();
+            }
+        }
+        break;
+    }
+
+    case ELevelEventType::DespawnObjectGroup:
+    {
+        for (TObjectPtr<AActor> TargetPtr : Event.TargetActors)
+        {
+            AActor* Target = TargetPtr.Get();
+            if (!IsValid(Target)) continue;
+
+            TArray<AActor*> TargetChildren;
+            Target->GetAllChildActors(TargetChildren, true);
+
+            for (auto* child : TargetChildren)
+            {
+                if (USpawnComponent* SpawnComp = child->FindComponentByClass<USpawnComponent>())
+                {
+                    SpawnComp->Despawn();
+                }
+                else
+                {
+                    GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("NO SPAWN COMPONENT FOUND"));
+                }
             }
         }
         break;

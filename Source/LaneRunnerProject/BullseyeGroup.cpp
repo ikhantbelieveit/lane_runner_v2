@@ -1,13 +1,14 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
+#include "BullseyeGroup.h"
 #include "Bullseye.h"
 #include "LocationManagerComponent.h"
 #include "SpawnComponent.h"
 #include "PlayerDetectComponent.h"
 
 // Sets default values
-ABullseye::ABullseye()
+ABullseyeGroup::ABullseyeGroup()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -15,20 +16,20 @@ ABullseye::ABullseye()
 }
 
 // Called when the game starts or when spawned
-void ABullseye::BeginPlay()
+void ABullseyeGroup::BeginPlay()
 {
 	Super::BeginPlay();
 	
 }
 
 // Called every frame
-void ABullseye::Tick(float DeltaTime)
+void ABullseyeGroup::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
 }
 
-void ABullseye::InitializeFromChunkData_Implementation(const FChunkSpawnEntry& Entry)
+void ABullseyeGroup::InitializeFromChunkData_Implementation(const FChunkSpawnEntry& Entry)
 {
     if (Entry.Metadata.IsEmpty()) return;
 
@@ -43,7 +44,7 @@ void ABullseye::InitializeFromChunkData_Implementation(const FChunkSpawnEntry& E
         if (JsonObject->HasField(TEXT("ScrollEnabled")))
         {
             bScrollEnabled = JsonObject->GetBoolField(TEXT("ScrollEnabled"));
-            
+
         }
 
 
@@ -65,31 +66,38 @@ void ABullseye::InitializeFromChunkData_Implementation(const FChunkSpawnEntry& E
             bScrollOnPlayerDetect = JsonObject->GetBoolField(TEXT("ScrollOnPlayerDetect"));
         }
 
-        if (ULocationManagerComponent* locManager = FindComponentByClass<ULocationManagerComponent>())
-        {
-            locManager->bStartScrollActive = bScrollEnabled;
-            locManager->bScrollEnabled = bScrollEnabled;
-            locManager->ScrollWithXPos = ScrollXPos;
-        }
+        TArray<AActor*> childActors;
 
-        if (USpawnComponent* spawnComp = FindComponentByClass<USpawnComponent>())
-        {
-            spawnComp->ResetAsSpawned = bStartSpawned;
-        }
+        GetAllChildActors(childActors, true);
 
-        if (bScrollOnPlayerDetect)
+        for (AActor* child : childActors)
         {
-            
-            if (UPlayerDetectComponent* detectComp = FindComponentByClass<UPlayerDetectComponent>())
+            if (!child) continue;
+
+            if (ULocationManagerComponent* locManager = child->FindComponentByClass<ULocationManagerComponent>())
             {
-                FLevelEventData triggerScrollEvent = FLevelEventData();
-                triggerScrollEvent.EventType = ELevelEventType::TogglePlayerScroll;
-                triggerScrollEvent.BoolParam = true;
-                triggerScrollEvent.TargetActors.Add(this);
-                detectComp->EventsToTrigger.Add(triggerScrollEvent);
+                locManager->bStartScrollActive = bScrollEnabled;
+                locManager->bScrollEnabled = bScrollEnabled;
+                locManager->ScrollWithXPos = ScrollXPos;
+            }
+
+            if (USpawnComponent* spawnComp = child->FindComponentByClass<USpawnComponent>())
+            {
+                spawnComp->ResetAsSpawned = bStartSpawned;
+            }
+
+            if (bScrollOnPlayerDetect)
+            {
+
+                if (UPlayerDetectComponent* detectComp = child->FindComponentByClass<UPlayerDetectComponent>())
+                {
+                    FLevelEventData triggerScrollEvent = FLevelEventData();
+                    triggerScrollEvent.EventType = ELevelEventType::TogglePlayerScroll;
+                    triggerScrollEvent.BoolParam = true;
+                    triggerScrollEvent.TargetActors.Add(this);
+                    detectComp->EventsToTrigger.Add(triggerScrollEvent);
+                }
             }
         }
-        
     }
 }
-

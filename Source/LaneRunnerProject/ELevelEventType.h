@@ -23,5 +23,7 @@ enum class ELevelEventType : uint8
 	StartAutoMove UMETA(DisplayName = "Start Auto Move"),
 	StopAutoMove UMETA(DisplayName = "Stop Auto Move"),
 	SpawnObjects UMETA(DisplayName = "Spawn Objects"),
-	DespawnObjects UMETA(DisplayName = "Despawn Objects")
+	DespawnObjects UMETA(DisplayName = "Despawn Objects"),
+	SpawnObjectGroup UMETA(DisplayName = "Spawn Object Group"),
+	DespawnObjectGroup UMETA(DisplayName = "Despawn Object Group")
 };
