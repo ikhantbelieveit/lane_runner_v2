@@ -9,6 +9,7 @@
 #include "GI_SaveSystem.h"
 #include "LocationManagerComponent.h"
 #include "Components/SplineComponent.h"
+#include "PlayerDetectComponent.h"
 #include "SpawnComponent.h"
 
 void UGI_LevelSystem::OnGameOverDelayComplete()
@@ -408,6 +409,31 @@ void UGI_LevelSystem::ExecuteSingleEvent(const FLevelEventData& Event)
         break;
     }
 
+    case ELevelEventType::StartAutoMoveGroup:
+    {
+        for (TObjectPtr<AActor> TargetPtr : Event.TargetActors)
+        {
+            AActor* Target = TargetPtr.Get();
+            if (!IsValid(Target)) continue;
+
+            TArray<AActor*> TargetChildren;
+            Target->GetAllChildActors(TargetChildren, true);
+
+            for (auto* child : TargetChildren)
+            {
+                if (ULocationManagerComponent* LocationComp = child->FindComponentByClass<ULocationManagerComponent>())
+                {
+                    LocationComp->StartAutoMove(Event.DirectionParam, Event.NumericParam, Event.BoolParam, Event.VectorParam);
+                }
+                else
+                {
+
+                }
+            }
+        }
+        break;
+    }
+
     case ELevelEventType::StopAutoMove:
     {
         for (TObjectPtr<AActor> TargetPtr : Event.TargetActors)
@@ -418,6 +444,31 @@ void UGI_LevelSystem::ExecuteSingleEvent(const FLevelEventData& Event)
             if (ULocationManagerComponent* LocationComp = Target->FindComponentByClass<ULocationManagerComponent>())
             {
                 LocationComp->StopAutoMove(false);
+            }
+        }
+        break;
+    }
+
+    case ELevelEventType::StopAutoMoveGroup:
+    {
+        for (TObjectPtr<AActor> TargetPtr : Event.TargetActors)
+        {
+            AActor* Target = TargetPtr.Get();
+            if (!IsValid(Target)) continue;
+
+            TArray<AActor*> TargetChildren;
+            Target->GetAllChildActors(TargetChildren, true);
+
+            for (auto* child : TargetChildren)
+            {
+                if (ULocationManagerComponent* LocationComp = child->FindComponentByClass<ULocationManagerComponent>())
+                {
+                    LocationComp->StopAutoMove(false);
+                }
+                else
+                {
+                    GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("NO LOCATION COMPONENT FOUND"));
+                }
             }
         }
         break;
@@ -447,6 +498,10 @@ void UGI_LevelSystem::ExecuteSingleEvent(const FLevelEventData& Event)
 
     case ELevelEventType::SpawnObjectGroup:
     {
+        const bool Drop = false;
+        const bool ScrollInstant = Event.BoolParam;
+        const bool ScrollOnReach = false;
+
         for (TObjectPtr<AActor> TargetPtr : Event.TargetActors)
         {
             AActor* Target = TargetPtr.Get();
@@ -459,14 +514,34 @@ void UGI_LevelSystem::ExecuteSingleEvent(const FLevelEventData& Event)
             {
                 if (USpawnComponent* SpawnComp = child->FindComponentByClass<USpawnComponent>())
                 {
-                    const bool Drop = false;
-                    const bool ScrollInstant = Event.BoolParam;
-                    const bool ScrollOnReach = false;
-                    SpawnComp->Spawn(Drop, ScrollInstant, ScrollOnReach);
+                    
+                    SpawnComp->Spawn(Drop, false, false);
                 }
                 else
                 {
                     GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("NO SPAWN COMPONENT FOUND"));
+                }
+            }
+
+            //this is where we actually set scroll 
+            if (ULocationManagerComponent* groupLocManager = Target->GetComponentByClass<ULocationManagerComponent>())
+            {
+                groupLocManager->bScrollEnabled = ScrollInstant;
+            }
+
+            if (ScrollOnReach)
+            {
+                UPlayerDetectComponent* detectComp = Cast<UPlayerDetectComponent>(Target->GetComponentByClass(UPlayerDetectComponent::StaticClass()));
+                if (detectComp)
+                {
+                    FLevelEventData NewEvent;
+                    NewEvent.EventType = ELevelEventType::TogglePlayerScroll;
+
+                    NewEvent.TargetActors.Add(Target);
+
+                    NewEvent.BoolParam = true;
+                    detectComp->EventsToTrigger.Empty();
+                    detectComp->EventsToTrigger.Add(NewEvent);
                 }
             }
         }

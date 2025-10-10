@@ -93,3 +93,17 @@ void ABullseye::InitializeFromChunkData_Implementation(const FChunkSpawnEntry& E
     }
 }
 
+void ABullseye::OnAddedToGroup_Implementation(AActor* InGroupActor, ULocationManagerComponent* Manager)
+{
+    GroupActorRef = InGroupActor;
+    GroupManagerRef = Manager;
+
+    UE_LOG(LogTemp, Log, TEXT("%s added to group %s"), *GetName(), *InGroupActor->GetName());
+}
+
+void ABullseye::OnRemovedFromGroup_Implementation()
+{
+    UE_LOG(LogTemp, Log, TEXT("%s removed from group"), *GetName());
+    GroupActorRef = nullptr;
+    GroupManagerRef = nullptr;
+}

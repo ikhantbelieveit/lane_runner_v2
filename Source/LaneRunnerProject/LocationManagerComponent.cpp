@@ -35,7 +35,9 @@ void ULocationManagerComponent::BeginPlay()
 		CurrentSplineComp = SplineActor->FindComponentByClass<USplineComponent>();
 	}
 
-	StartPos = GetOwner()->GetActorLocation();
+	TargetActor = GetOwner();
+
+	StartPos = TargetActor->GetActorLocation();
 
 
 	Reset();
@@ -44,10 +46,10 @@ void ULocationManagerComponent::BeginPlay()
 void ULocationManagerComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-	if (!GetOwner()) return;
+	if (!TargetActor) return;
 
-	FVector NewLoc = GetOwner()->GetActorLocation();
-	FRotator NewRot = GetOwner()->GetActorRotation();
+	FVector NewLoc = TargetActor->GetActorLocation();
+	FRotator NewRot = TargetActor->GetActorRotation();
 
 	if (bGravityEnabled)
 	{
@@ -83,7 +85,7 @@ void ULocationManagerComponent::TickComponent(float DeltaTime, ELevelTick TickTy
 		NewLoc.X = NewX;
 	}
 
-	GetOwner()->SetActorLocationAndRotation(NewLoc, NewRot, false, nullptr, ETeleportType::TeleportPhysics);
+	TargetActor->SetActorLocationAndRotation(NewLoc, NewRot, false, nullptr, ETeleportType::TeleportPhysics);
 }
 
 void ULocationManagerComponent::UpdatePath(float DeltaTime, FVector& OutLocation, FRotator& OutRotation, bool& bOutHasPath)
@@ -140,7 +142,7 @@ void ULocationManagerComponent::UpdateGravity(float DeltaTime)
 {
 	if (!bGravityEnabled) return;
 
-	if (UProjectileMovementComponent* ProjMove = GetOwner()->FindComponentByClass<UProjectileMovementComponent>())
+	if (UProjectileMovementComponent* ProjMove = TargetActor->FindComponentByClass<UProjectileMovementComponent>())
 	{
 		bool bCheckForGround = false;
 
@@ -155,7 +157,7 @@ void ULocationManagerComponent::UpdateGravity(float DeltaTime)
 			UWorld* World = GetWorld();
 			if (World)
 			{
-				FVector Start = GetOwner()->GetActorLocation();
+				FVector Start = TargetActor->GetActorLocation();
 				FVector End = Start - FVector(0.f, 0.f, GroundCheckDistance);
 
 				FCollisionObjectQueryParams ObjParams;
@@ -200,7 +202,7 @@ void ULocationManagerComponent::Reset()
 
 	StopAutoMove(false);
 
-	GetOwner()->SetActorLocation(StartPos);
+	TargetActor->SetActorLocation(StartPos);
 }
 
 void ULocationManagerComponent::ResetPath()
@@ -246,11 +248,11 @@ void ULocationManagerComponent::ClearSpline()
 
 void ULocationManagerComponent::SetGravityEnabled(bool bEnabled)
 {
-	if (UProjectileMovementComponent* ProjMove = GetOwner()->FindComponentByClass<UProjectileMovementComponent>())
+	if (UProjectileMovementComponent* ProjMove = TargetActor->FindComponentByClass<UProjectileMovementComponent>())
 	{
 		if (!ProjMove->UpdatedComponent)
 		{
-			ProjMove->SetUpdatedComponent(GetOwner()->GetRootComponent());
+			ProjMove->SetUpdatedComponent(TargetActor->GetRootComponent());
 		}
 
 		ProjMove->Activate(bEnabled);
@@ -281,12 +283,12 @@ void ULocationManagerComponent::ApplyAutoMove()
 		return;
 	}
 
-	if (UProjectileMovementComponent* ProjMove = GetOwner()->FindComponentByClass<UProjectileMovementComponent>())
+	if (UProjectileMovementComponent* ProjMove = TargetActor->FindComponentByClass<UProjectileMovementComponent>())
 	{
 		// Make sure it has a valid root to update
 		if (!ProjMove->UpdatedComponent)
 		{
-			ProjMove->SetUpdatedComponent(GetOwner()->GetRootComponent());
+			ProjMove->SetUpdatedComponent(TargetActor->GetRootComponent());
 		}
 
 		FVector Dir = FVector::ZeroVector;
@@ -321,6 +323,7 @@ void ULocationManagerComponent::SetAutoMoveDirection(EProjectileDirection newDir
 
 void ULocationManagerComponent::StartAutoMove(EProjectileDirection direction, float Speed, bool bUseStop, FVector stopCoords)
 {
+
 	if (IsAutoMoving)
 	{
 		StopAutoMove(false);
@@ -335,6 +338,8 @@ void ULocationManagerComponent::StartAutoMove(EProjectileDirection direction, fl
 	if (bUseStop)
 	{
 		AutoMoveStopCoords = stopCoords;
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Magenta, TEXT("should use stop"));
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Magenta, AutoMoveStopCoords.ToString());
 	}
 
 	// Apply immediately
@@ -343,7 +348,7 @@ void ULocationManagerComponent::StartAutoMove(EProjectileDirection direction, fl
 
 void ULocationManagerComponent::StopAutoMove(bool clampToEnd)
 {
-	UProjectileMovementComponent* projMoveComp = (UProjectileMovementComponent*)GetOwner()->GetComponentByClass(UProjectileMovementComponent::StaticClass());
+	UProjectileMovementComponent* projMoveComp = (UProjectileMovementComponent*)TargetActor->GetComponentByClass(UProjectileMovementComponent::StaticClass());
 	if (projMoveComp)
 	{
 		projMoveComp->StopMovementImmediately();
@@ -356,21 +361,23 @@ void ULocationManagerComponent::StopAutoMove(bool clampToEnd)
 
 	if (clampToEnd)
 	{
-		FVector currentLoc = GetOwner()->GetActorLocation();
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, TEXT("stop and clamp to end"));
+
+		FVector currentLoc = TargetActor->GetActorLocation();
 
 		switch (CurrentAutoMoveDirection)
 		{
 		case EProjectileDirection::Left:
 		case EProjectileDirection::Right:
-			GetOwner()->SetActorLocation(FVector(currentLoc.X, AutoMoveStopCoords.Y, currentLoc.Z));
+			TargetActor->SetActorLocation(FVector(currentLoc.X, AutoMoveStopCoords.Y, currentLoc.Z));
 			break;
 		case EProjectileDirection::Up:
 		case EProjectileDirection::Down:
-			GetOwner()->SetActorLocation(FVector(currentLoc.X, currentLoc.Y, AutoMoveStopCoords.Z));
+			TargetActor->SetActorLocation(FVector(currentLoc.X, currentLoc.Y, AutoMoveStopCoords.Z));
 			break;
 		case EProjectileDirection::Forward:
 		case EProjectileDirection::Backward:
-			GetOwner()->SetActorLocation(FVector(AutoMoveStopCoords.X, currentLoc.Y, currentLoc.Z));
+			TargetActor->SetActorLocation(FVector(AutoMoveStopCoords.X, currentLoc.Y, currentLoc.Z));
 			break;
 		}
 	}
@@ -380,7 +387,7 @@ void ULocationManagerComponent::UpdateAutoMove(float DeltaTime)
 {
 	if (bHasAutoMoveStop)
 	{
-		FVector Loc = GetOwner()->GetActorLocation();
+		FVector Loc = TargetActor->GetActorLocation();
 
 		bool bStopReached = false;
 		bool bStopX = false;
@@ -388,39 +395,31 @@ void ULocationManagerComponent::UpdateAutoMove(float DeltaTime)
 		bool bStopZ = false;
 
 		// Check X coordinate if set
-		if (!FMath::IsNearlyZero(AutoMoveStopCoords.X))
+		if ((CurrentAutoMoveDirection == EProjectileDirection::Forward && Loc.X >= AutoMoveStopCoords.X) ||
+			(CurrentAutoMoveDirection == EProjectileDirection::Backward && Loc.X <= AutoMoveStopCoords.X))
 		{
-			if ((CurrentAutoMoveDirection == EProjectileDirection::Forward && Loc.X >= AutoMoveStopCoords.X) ||
-				(CurrentAutoMoveDirection == EProjectileDirection::Backward && Loc.X <= AutoMoveStopCoords.X))
-			{
-				bStopReached = true;
-				bStopX = true;
-			}
+			bStopReached = true;
+			bStopX = true;
 		}
 
 		// Check Y coordinate if set
-		if (!FMath::IsNearlyZero(AutoMoveStopCoords.Y))
+		if ((CurrentAutoMoveDirection == EProjectileDirection::Right && Loc.Y >= AutoMoveStopCoords.Y) ||
+			(CurrentAutoMoveDirection == EProjectileDirection::Left && Loc.Y <= AutoMoveStopCoords.Y))
 		{
-			if ((CurrentAutoMoveDirection == EProjectileDirection::Right && Loc.Y >= AutoMoveStopCoords.Y) ||
-				(CurrentAutoMoveDirection == EProjectileDirection::Left && Loc.Y <= AutoMoveStopCoords.Y))
-			{
-				bStopReached = true;
-				bStopY = true;
-			}
+			bStopReached = true;
+			bStopY = true;
 		}
 
-		if (!FMath::IsNearlyZero(AutoMoveStopCoords.Z))
+		if ((CurrentAutoMoveDirection == EProjectileDirection::Up && Loc.Z >= AutoMoveStopCoords.Z) ||
+			(CurrentAutoMoveDirection == EProjectileDirection::Down && Loc.Z <= AutoMoveStopCoords.Z))
 		{
-			if ((CurrentAutoMoveDirection == EProjectileDirection::Up && Loc.Z >= AutoMoveStopCoords.Z) ||
-				(CurrentAutoMoveDirection == EProjectileDirection::Down && Loc.Z <= AutoMoveStopCoords.Z))
-			{
-				bStopReached = true;
-				bStopZ = true;
-			}
+			bStopReached = true;
+			bStopZ = true;
 		}
 
 		if (bStopReached)
 		{
+			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, TEXT("TRY AND STOP"));
 			StopAutoMove(true);
 			return;
 		}

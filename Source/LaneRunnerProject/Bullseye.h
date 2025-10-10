@@ -5,10 +5,11 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "ChunkInitializable.h"
+#include "GroupMember.h"
 #include "Bullseye.generated.h"
 
 UCLASS()
-class LANERUNNERPROJECT_API ABullseye : public AActor, public IChunkInitializable
+class LANERUNNERPROJECT_API ABullseye : public AActor, public IChunkInitializable, public IGroupMemberInterface
 {
 	GENERATED_BODY()
 	
@@ -24,4 +25,18 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 	virtual void InitializeFromChunkData_Implementation(const FChunkSpawnEntry& Entry) override;
+
+protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Group")
+	TObjectPtr<ULocationManagerComponent> GroupManagerRef;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Group")
+	TObjectPtr<AActor> GroupActorRef;
+
+public:
+	// IGroupMemberInterface overrides
+	virtual void OnAddedToGroup_Implementation(AActor* InGroupActor, ULocationManagerComponent* Manager) override;
+	virtual void OnRemovedFromGroup_Implementation() override;
+	virtual ULocationManagerComponent* GetGroupManager_Implementation() const override { return GroupManagerRef; }
+	virtual AActor* GetGroupActor_Implementation() const override { return GroupActorRef; }
 };

@@ -12,6 +12,7 @@
 #include "DamageFlashComponent.h"
 #include "SpawnComponent.h"
 #include "GI_AudioSystem.h"
+#include "GroupMember.h"
 
 
 // Sets default values for this component's properties
@@ -118,14 +119,27 @@ void UDestructibleObjectComponent::DestroyFromComp()
 				itemSpawnComp->ResetAsSpawned = false;
 
 				bool itemShouldScroll = false;
-				if (ULocationManagerComponent* locComp = GetOwner()->FindComponentByClass<ULocationManagerComponent>())
+
+				if (GetOwner()->GetClass()->ImplementsInterface(UGroupMemberInterface::StaticClass()))
+				{
+					if (ULocationManagerComponent* locComp = IGroupMemberInterface::Execute_GetGroupManager(GetOwner()))
+					{
+						if (ULocationManagerComponent* itemLocComp = item->FindComponentByClass<ULocationManagerComponent>())
+						{
+							itemShouldScroll = locComp->bScrollEnabled && locComp->ScrollWithXPos == 0.0f;
+							itemLocComp->bScrollEnabled = itemShouldScroll;
+						}
+					}
+				}
+
+				/*if (ULocationManagerComponent* locComp = GetOwner()->FindComponentByClass<ULocationManagerComponent>())
 				{
 					if (ULocationManagerComponent* itemLocComp = item->FindComponentByClass<ULocationManagerComponent>())
 					{
 						itemShouldScroll = locComp->bScrollEnabled && locComp->ScrollWithXPos == 0.0f;
 						itemLocComp->bScrollEnabled = itemShouldScroll;
 					}
-				}
+				}*/
 
 				itemSpawnComp->Spawn(true, itemShouldScroll, true);
 			}

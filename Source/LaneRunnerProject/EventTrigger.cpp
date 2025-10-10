@@ -3,6 +3,7 @@
 
 #include "EventTrigger.h"
 #include "GI_LevelSystem.h"
+#include "EProjectileDirection.h"
 #include "PlayerDetectComponent.h"
 
 // Sets default values
@@ -65,16 +66,41 @@ void AEventTrigger::InitializeFromChunkData_Implementation(const FChunkSpawnEntr
 					}
 				}
 
-				
+				// DirectionParam
+				int directionParamInt;
+				if (EventObj->TryGetNumberField(TEXT("DirectionParam"), directionParamInt))
+				{
+					EventData.DirectionParam = static_cast<EProjectileDirection>(directionParamInt);
+				}
 
 				// NumericParam
-				EventObj->TryGetNumberField(TEXT("NumericParam"), EventData.NumericParam);
+				float numParam;
+				if (EventObj->TryGetNumberField(TEXT("NumericParam"), numParam))
+				{
+					EventData.NumericParam = numParam;
+				}
 
 				// BoolParam
 				bool boolParam;
 				if (EventObj->TryGetBoolField(TEXT("BoolParam"), boolParam))
 				{
 					EventData.BoolParam = boolParam;
+				}
+
+				if (EventObj->HasTypedField<EJson::Object>(TEXT("VectorParam")))
+				{
+					TSharedPtr<FJsonObject> VecObj = EventObj->GetObjectField(TEXT("VectorParam"));
+
+					FVector ParsedVector;
+					ParsedVector.X = VecObj->GetNumberField(TEXT("X"));
+					ParsedVector.Y = VecObj->GetNumberField(TEXT("Y"));
+					ParsedVector.Z = VecObj->GetNumberField(TEXT("Z"));
+
+					// Assign it to your struct or component
+					EventData.VectorParam = ParsedVector;
+
+					UE_LOG(LogTemp, Warning, TEXT("Parsed VectorParam: X=%f Y=%f Z=%f"),
+						ParsedVector.X, ParsedVector.Y, ParsedVector.Z);
 				}
 				
 				EventsToTrigger.Add(EventData);
@@ -85,13 +111,6 @@ void AEventTrigger::InitializeFromChunkData_Implementation(const FChunkSpawnEntr
 		if (JsonObject->HasField(TEXT("DetectCollTag")))
 		{
 			detectCollName = JsonObject->GetStringField(TEXT("DetectCollTag"));
-		}
-
-		if (UPlayerDetectComponent* detectComp = FindComponentByClass<UPlayerDetectComponent>())
-		{
-			detectComp->PlayerAreaTag = FName(detectCollName);
-			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("set detect coll to"));
-			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, detectComp->PlayerAreaTag.ToString());
 		}
 	}
 }

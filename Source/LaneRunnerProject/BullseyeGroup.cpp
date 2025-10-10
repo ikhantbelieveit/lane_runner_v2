@@ -20,6 +20,19 @@ void ABullseyeGroup::BeginPlay()
 {
 	Super::BeginPlay();
 	
+    TArray<AActor*> AttachedActors;
+    GetAttachedActors(AttachedActors);
+
+    if (ULocationManagerComponent* locManager = FindComponentByClass<ULocationManagerComponent>())
+    {
+        for (AActor* Child : AttachedActors)
+        {
+            if (Child->GetClass()->ImplementsInterface(UGroupMemberInterface::StaticClass()))
+            {
+                IGroupMemberInterface::Execute_OnAddedToGroup(Child, this, locManager);
+            }
+        }
+    }
 }
 
 // Called every frame
@@ -88,7 +101,6 @@ void ABullseyeGroup::InitializeFromChunkData_Implementation(const FChunkSpawnEnt
 
             if (bScrollOnPlayerDetect)
             {
-
                 if (UPlayerDetectComponent* detectComp = child->FindComponentByClass<UPlayerDetectComponent>())
                 {
                     FLevelEventData triggerScrollEvent = FLevelEventData();

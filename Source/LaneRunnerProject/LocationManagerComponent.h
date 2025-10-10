@@ -132,4 +132,6 @@ private:
 	void UpdatePath(float DeltaTime, FVector& OutLocation, FRotator& OutRotation, bool& bOutHasPath);
 	void UpdateScroll(FVector& InOutLocation, bool& bOutHasScroll);
 	void UpdateGravity(float DeltaTime);
+
+	AActor* TargetActor;
 };
