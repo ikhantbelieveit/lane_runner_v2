@@ -429,7 +429,6 @@ void ULocationManagerComponent::UpdateAutoMove(float DeltaTime)
 
 		if (bStopReached)
 		{
-			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, TEXT("TRY AND STOP"));
 			StopAutoMove(true);
 			return;
 		}
