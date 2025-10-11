@@ -97,6 +97,8 @@ void ALevelChunkActor::SpawnChunkElements()
     UWorld* World = GetWorld();
     if (!World) return;
 
+    if (!ConfigData) return;
+
     for (AActor* oldActor : SpawnedActors)
     {
         oldActor->Destroy();
