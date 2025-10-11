@@ -9,6 +9,7 @@
 #include "InputMappingContext.h"
 #include "InputAction.h"
 #include "ECharacterType.h"
+#include "OneShotAnim.h"
 #include "PlayerConfigData.generated.h"
 
 class AProjectile;
@@ -121,6 +122,18 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Shadow")
 	UMaterialInterface* SpriteDefaultMaterial;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Visual", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<class AOneShotAnim> MuzzleShot_Right;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Visual", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<class AOneShotAnim> MuzzleShot_Left;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Visual", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<class AOneShotAnim> MuzzleShot_Up;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Visual", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<class AOneShotAnim> MuzzleShot_Forward;
 };
 
 USTRUCT(BlueprintType)

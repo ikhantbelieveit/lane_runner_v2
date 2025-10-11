@@ -1178,7 +1178,7 @@ void APlayerCharacter::Shoot(EProjectileDirection direction, bool holdNotTap)
 		UPaperFlipbookComponent* FlipbookComp = GetComponentByClass<UPaperFlipbookComponent>();
 		requestData.ShootPos = FlipbookComp->GetComponentLocation();
 
-		float shootPosOffset = 40.0f;
+		float shootPosOffset = 100.0f;
 
 		switch (direction)
 		{
@@ -1198,19 +1198,44 @@ void APlayerCharacter::Shoot(EProjectileDirection direction, bool holdNotTap)
 
 		if (projectileSystem->ShootPlayerProjectile(requestData))
 		{
+			FActorSpawnParameters SpawnParams;
+			FRotator defaultRotation = FRotator(0.0f, 90.0f, 0.0f);
+
+			FVector muzzleShotPos = requestData.ShootPos;
+
 			switch (direction)
 			{
 			case EProjectileDirection::Left:
 				TimeSinceShoot_Left = 0;
+				if (AOneShotAnim* impactAnim = GetWorld()->SpawnActor<AOneShotAnim>(ConfigData->VisualsConfig.MuzzleShot_Left, muzzleShotPos, defaultRotation, SpawnParams))
+				{
+
+				}
 				break;
 			case EProjectileDirection::Right:
+				if (AOneShotAnim* impactAnim = GetWorld()->SpawnActor<AOneShotAnim>(ConfigData->VisualsConfig.MuzzleShot_Right, muzzleShotPos, defaultRotation, SpawnParams))
+				{
+
+				}
 				TimeSinceShoot_Right = 0;
 				break;
 			case EProjectileDirection::Up:
 				TimeSinceShoot_Up = 0;
+
+				muzzleShotPos.Z += 100.0f;
+				if (AOneShotAnim* impactAnim = GetWorld()->SpawnActor<AOneShotAnim>(ConfigData->VisualsConfig.MuzzleShot_Up, muzzleShotPos, defaultRotation, SpawnParams))
+				{
+
+				}
 				break;
 			case EProjectileDirection::Forward:
 				TimeSinceShoot_Forward = 0;
+
+				muzzleShotPos.Z += 100.0f;
+				if (AOneShotAnim* impactAnim = GetWorld()->SpawnActor<AOneShotAnim>(ConfigData->VisualsConfig.MuzzleShot_Forward, muzzleShotPos, defaultRotation, SpawnParams))
+				{
+
+				}
 				break;
 			}
 		}
