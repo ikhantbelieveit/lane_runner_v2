@@ -4,6 +4,7 @@
 #include "GI_LevelSystem.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "GameInit.h"
+#include "GroupOwnerComponent.h"
 
 ULocationManagerComponent::ULocationManagerComponent()
 {
@@ -196,6 +197,7 @@ void ULocationManagerComponent::Reset()
 	bScrollEnabled = bStartScrollActive;
 	bFollowEnabled = bStartFollowEnabled;
 	bAutoMoveEnabled = bStartAutoMoveEnabled;
+	bDespawnOnAutoMoveEnd = false;
 
 	SetAutoMoveSpeed(StartAutoMoveSpeed);
 	SetAutoMoveDirection(StartAutoMoveDirection);
@@ -321,7 +323,7 @@ void ULocationManagerComponent::SetAutoMoveDirection(EProjectileDirection newDir
 	CurrentAutoMoveDirection = newDirection;
 }
 
-void ULocationManagerComponent::StartAutoMove(EProjectileDirection direction, float Speed, bool bUseStop, FVector stopCoords)
+void ULocationManagerComponent::StartAutoMove(EProjectileDirection direction, float Speed, bool bUseStop, FVector stopCoords, bool despawnOnEnd)
 {
 
 	if (IsAutoMoving)
@@ -338,9 +340,9 @@ void ULocationManagerComponent::StartAutoMove(EProjectileDirection direction, fl
 	if (bUseStop)
 	{
 		AutoMoveStopCoords = stopCoords;
-		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Magenta, TEXT("should use stop"));
-		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Magenta, AutoMoveStopCoords.ToString());
 	}
+
+	bDespawnOnAutoMoveEnd = despawnOnEnd;
 
 	// Apply immediately
 	ApplyAutoMove();
@@ -361,7 +363,7 @@ void ULocationManagerComponent::StopAutoMove(bool clampToEnd)
 
 	if (clampToEnd)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, TEXT("stop and clamp to end"));
+		
 
 		FVector currentLoc = TargetActor->GetActorLocation();
 
@@ -379,6 +381,14 @@ void ULocationManagerComponent::StopAutoMove(bool clampToEnd)
 		case EProjectileDirection::Backward:
 			TargetActor->SetActorLocation(FVector(AutoMoveStopCoords.X, currentLoc.Y, currentLoc.Z));
 			break;
+		}
+	}
+
+	if (bDespawnOnAutoMoveEnd)
+	{
+		if (UGroupOwnerComponent* ownerComp = TargetActor->GetComponentByClass<UGroupOwnerComponent>())
+		{
+			ownerComp->DespawnGroupMembers();
 		}
 	}
 }

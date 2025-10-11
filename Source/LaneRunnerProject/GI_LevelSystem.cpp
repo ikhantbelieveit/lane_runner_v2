@@ -403,7 +403,22 @@ void UGI_LevelSystem::ExecuteSingleEvent(const FLevelEventData& Event)
 
             if (ULocationManagerComponent* LocationComp = Target->FindComponentByClass<ULocationManagerComponent>())
             {
-                LocationComp->StartAutoMove(Event.DirectionParam, Event.NumericParam, Event.BoolParam, Event.VectorParam);
+                LocationComp->StartAutoMove(Event.DirectionParam, Event.NumericParam, Event.BoolParam, Event.VectorParam, false);
+            }
+        }
+        break;
+    }
+
+    case ELevelEventType::MoveToDespawn:
+    {
+        for (TObjectPtr<AActor> TargetPtr : Event.TargetActors)
+        {
+            AActor* Target = TargetPtr.Get();
+            if (!IsValid(Target)) continue;
+
+            if (ULocationManagerComponent* LocationComp = Target->FindComponentByClass<ULocationManagerComponent>())
+            {
+                LocationComp->StartAutoMove(Event.DirectionParam, Event.NumericParam, Event.BoolParam, Event.VectorParam, true);
             }
         }
         break;
@@ -423,7 +438,7 @@ void UGI_LevelSystem::ExecuteSingleEvent(const FLevelEventData& Event)
             {
                 if (ULocationManagerComponent* LocationComp = child->FindComponentByClass<ULocationManagerComponent>())
                 {
-                    LocationComp->StartAutoMove(Event.DirectionParam, Event.NumericParam, Event.BoolParam, Event.VectorParam);
+                    LocationComp->StartAutoMove(Event.DirectionParam, Event.NumericParam, Event.BoolParam, Event.VectorParam, false);
                 }
                 else
                 {

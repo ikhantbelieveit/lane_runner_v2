@@ -106,7 +106,7 @@ public:
 	void ApplyAutoMove();
 	void SetAutoMoveSpeed(float newSpeed);
 	void SetAutoMoveDirection(EProjectileDirection newDirection);
-	void StartAutoMove(EProjectileDirection direction, float Speed, bool bUseStop, FVector stopCoords);
+	void StartAutoMove(EProjectileDirection direction, float Speed, bool bUseStop, FVector stopCoords, bool despawnOnEnd);
 	void StopAutoMove(bool clampToEnd);
 
 	void UpdateAutoMove(float DeltaTime);
@@ -134,4 +134,6 @@ private:
 	void UpdateGravity(float DeltaTime);
 
 	AActor* TargetActor;
+
+	bool bDespawnOnAutoMoveEnd = false;
 };
