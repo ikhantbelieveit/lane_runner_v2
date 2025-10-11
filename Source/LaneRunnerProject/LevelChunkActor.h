@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "ChunkSpawnEntry.h"
+#include "LevelChunkConfigData.h"
 #include "LevelChunkActor.generated.h"
 
 
