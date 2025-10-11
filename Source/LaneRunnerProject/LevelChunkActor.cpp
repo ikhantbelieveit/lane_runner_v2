@@ -105,7 +105,7 @@ void ALevelChunkActor::SpawnChunkElements()
     SpawnedActors.Empty();
 
 
-    for (const FChunkSpawnEntry& Entry : SpawnActorEntries)
+    for (const FChunkSpawnEntry& Entry : ConfigData->SpawnActorEntries)
     {
         if (!Entry.ActorClass) continue;
 

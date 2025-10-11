@@ -32,11 +32,11 @@ public:
 	UFUNCTION(BlueprintCallable)
 	AActor* GetChildActorByID(FName childID, bool& success);
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    TArray<FChunkSpawnEntry> SpawnActorEntries;
-
     UFUNCTION(BlueprintCallable)
     void SpawnChunkElements();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	ULevelChunkConfigData* ConfigData;
 
 protected:
 	TArray<AActor*> SpawnedActors;
