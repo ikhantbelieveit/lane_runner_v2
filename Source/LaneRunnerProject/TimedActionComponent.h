@@ -59,4 +59,13 @@ public:
     // Whether event starts immediately
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Timed Action")
     bool StartOnPlay;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Timed Action")
+    bool RandomStartDelay;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Timed Action")
+    float RandomStartDelayMin;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Timed Action")
+    float RandomStartDelayMax = 5.0f;
 };

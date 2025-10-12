@@ -15,6 +15,11 @@ void UTimedActionComponent::BeginPlay()
 {
     Super::BeginPlay();
 
+    if (RandomStartDelay)
+    {
+        StartDelay = FMath::RandRange(RandomStartDelayMin, RandomStartDelayMax);
+    }
+
     if (StartOnPlay)
     {
         StartAction();
