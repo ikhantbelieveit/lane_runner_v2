@@ -242,6 +242,7 @@ void UGI_LevelSystem::SaveLevelStats()
 
 void UGI_LevelSystem::ExecuteEvents(const TArray<FLevelEventData>& Events)
 {
+    
 	for (const FLevelEventData& Event : Events)
 	{
 		ExecuteSingleEvent(Event);

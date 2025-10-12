@@ -1004,7 +1004,7 @@ bool APlayerCharacter::SetLane(int laneIndex)
 	if (moveLeft)
 	{
 		FVector offset = FVector(0, -LaneDistance, 0);
-		AddActorWorldOffset(offset);
+		AddActorWorldOffset(offset, true);
 
 		CameraComponent->SetWorldLocation(FVector(
 			CameraComponent->GetComponentLocation().X,

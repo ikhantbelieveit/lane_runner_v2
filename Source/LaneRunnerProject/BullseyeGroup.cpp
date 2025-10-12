@@ -87,12 +87,7 @@ void ABullseyeGroup::InitializeFromChunkData_Implementation(const FChunkSpawnEnt
         {
             if (!child) continue;
 
-            if (ULocationManagerComponent* locManager = child->FindComponentByClass<ULocationManagerComponent>())
-            {
-                locManager->bStartScrollActive = bScrollEnabled;
-                locManager->bScrollEnabled = bScrollEnabled;
-                locManager->ScrollWithXPos = ScrollXPos;
-            }
+            
 
             if (USpawnComponent* spawnComp = child->FindComponentByClass<USpawnComponent>())
             {
@@ -110,6 +105,13 @@ void ABullseyeGroup::InitializeFromChunkData_Implementation(const FChunkSpawnEnt
                     detectComp->EventsToTrigger.Add(triggerScrollEvent);
                 }
             }
+        }
+
+        if (ULocationManagerComponent* locManager = FindComponentByClass<ULocationManagerComponent>())
+        {
+            locManager->bStartScrollActive = bScrollEnabled;
+            locManager->bScrollEnabled = bScrollEnabled;
+            locManager->ScrollWithXPos = ScrollXPos;
         }
     }
 }
