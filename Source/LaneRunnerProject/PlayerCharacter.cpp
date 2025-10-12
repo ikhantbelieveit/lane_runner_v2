@@ -135,6 +135,12 @@ void APlayerCharacter::Tick(float DeltaTime)
 
 			UpdateAnimation();
 
+			if (CurrentJumpState == EPlayerJumpState::Grounded)
+			{
+				
+				LaneMovementBlocked = false;
+			}
+
 			break;
 		case EGameState::Lose:
 			UpdateCameraPos();
@@ -1448,6 +1454,7 @@ void APlayerCharacter::UpdateCheckForPit()
 			// Check if actor has a specific tag
 			if (HitActor->ActorHasTag(FName("Pitfall")))
 			{
+				SetJumpState(EPlayerJumpState::Fall);
 				LaneMovementBlocked = true;
 			}
 		}
