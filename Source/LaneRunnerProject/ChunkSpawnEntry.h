@@ -21,6 +21,9 @@ struct FChunkSpawnEntry
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     FTransform RelativeTransform;
 
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    bool bSetScale;
+
     // Optional ID or name for reference (used by event binding, debugging, etc.)
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     FName ActorID;

@@ -111,7 +111,8 @@ void ALevelChunkActor::SpawnChunkElements()
     {
         if (!Entry.ActorClass) continue;
 
-        const FTransform SpawnTransform = Entry.RelativeTransform * GetActorTransform();
+        FTransform SpawnTransform = Entry.RelativeTransform * GetActorTransform();
+
         AActor* NewActor = World->SpawnActorDeferred<AActor>(
             Entry.ActorClass,
             SpawnTransform,
@@ -120,12 +121,27 @@ void ALevelChunkActor::SpawnChunkElements()
             ESpawnActorCollisionHandlingMethod::AlwaysSpawn
         );
 
+        
+
         if (NewActor)
         {
             // Assign tag or ID for lookups
             if (!Entry.ActorID.IsNone())
             {
                 NewActor->Tags.Add(Entry.ActorID);
+            }
+
+            if (!Entry.bSetScale)
+            {
+                // Get default blueprint scale from the class’ CDO (Class Default Object)
+                const AActor* DefaultActor = Cast<AActor>(Entry.ActorClass->GetDefaultObject());
+                if (DefaultActor)
+                {
+                    FVector DefaultScale = DefaultActor->GetActorScale3D();
+
+                    // Apply the default scale to the spawn transform
+                    SpawnTransform.SetScale3D(DefaultScale);
+                }
             }
 
             // Attach to chunk
