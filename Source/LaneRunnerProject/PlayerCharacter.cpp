@@ -1222,7 +1222,7 @@ void APlayerCharacter::Shoot(EProjectileDirection direction, bool holdNotTap)
 			case EProjectileDirection::Up:
 				TimeSinceShoot_Up = 0;
 
-				muzzleShotPos.Z += 75.0f;
+				muzzleShotPos.Z += 65.0f;
 				if (AOneShotAnim* impactAnim = GetWorld()->SpawnActor<AOneShotAnim>(ConfigData->VisualsConfig.MuzzleShot_Up, muzzleShotPos, defaultRotation, SpawnParams))
 				{
 

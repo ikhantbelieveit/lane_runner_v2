@@ -107,7 +107,7 @@ void ABaseCollectible::HandleBeginOverlap(
 		return;
 	}
 
-	FName PlayerName = "PlayerColl";
+	FName PlayerName = "PlayerCollect";
 	if (OtherComp->ComponentHasTag(PlayerName))
 	{
 		Collect();
