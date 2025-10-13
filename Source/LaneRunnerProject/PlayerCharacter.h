@@ -329,4 +329,7 @@ protected:
 
 	bool IsTouchingSolidFloor();
 	bool IsTouchingBlockJumpFloor();
+
+	bool SolidBlockingLeftLane();
+	bool SolidBlockingRightLane();
 };

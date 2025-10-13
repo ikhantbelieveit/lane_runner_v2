@@ -138,20 +138,19 @@ void APlayerCharacter::Tick(float DeltaTime)
 
 			if (CurrentJumpState == EPlayerJumpState::Grounded)
 			{
-				
 				LaneMovementBlocked = false;
-
-
 				if (TouchingBlockJumpSurface)
 				{
 					LastSurfaceWasBlockJump = true;
 				}
 				else
 				{
-					LastSurfaceWasBlockJump = false;
+					if (IsTouchingSolidFloor())
+					{
+						LastSurfaceWasBlockJump = false;
+					}
 				}
 			}
-
 			break;
 		case EGameState::Lose:
 			UpdateCameraPos();
@@ -586,12 +585,26 @@ void APlayerCharacter::UpdateLaneFromInput()
 
 	if (LeftInput_Pressed)
 	{
-		MoveLane_Left();
+		if (SolidBlockingLeftLane())
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("Erm, left movement denied?"));
+		}
+		else
+		{
+			MoveLane_Left();
+		}
 	}
 
 	if (RightInput_Pressed)
 	{
-		MoveLane_Right();
+		if (SolidBlockingRightLane())
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("Erm, right movement denied?"));
+		}
+		else
+		{
+			MoveLane_Right();
+		}
 	}
 }
 
@@ -1627,6 +1640,86 @@ bool APlayerCharacter::IsTouchingBlockJumpFloor()
 	}
 
 	return touchingBlockJump;
+}
+
+bool APlayerCharacter::SolidBlockingLeftLane()
+{
+	FVector Start = GetActorLocation();
+	FVector End = Start + FVector(0.0f, -LaneDistance, 0.0f); // cast right
+
+	FHitResult HitResult;
+	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(this);
+
+	bool bHit = GetWorld()->SweepSingleByChannel(
+		HitResult,
+		Start,
+		End,
+		FQuat::Identity,
+		ECC_WorldStatic, // Use your floor collision channel
+		FCollisionShape::MakeCapsule(
+			GetCapsuleComponent()->GetScaledCapsuleRadius(),
+			GetCapsuleComponent()->GetScaledCapsuleHalfHeight()
+		),
+		Params
+	);
+
+	if (bHit)
+	{
+		AActor* HitActor = HitResult.GetActor();
+		float Distance = (Start - HitResult.ImpactPoint).Size();
+
+		if (HitActor)
+		{
+			// Check if actor has a specific tag
+			if (HitActor->ActorHasTag(FName("Floor")))
+			{
+				return true;
+			}
+		}
+	}
+
+	return false; return false;
+}
+
+bool APlayerCharacter::SolidBlockingRightLane()
+{
+	FVector Start = GetActorLocation();
+	FVector End = Start + FVector(0.0f, LaneDistance, 0.0f); // cast right
+
+	FHitResult HitResult;
+	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(this);
+
+	bool bHit = GetWorld()->SweepSingleByChannel(
+		HitResult,
+		Start,
+		End,
+		FQuat::Identity,
+		ECC_WorldStatic, // Use your floor collision channel
+		FCollisionShape::MakeCapsule(
+			GetCapsuleComponent()->GetScaledCapsuleRadius(),
+			GetCapsuleComponent()->GetScaledCapsuleHalfHeight()
+		),
+		Params
+	);
+
+	if (bHit)
+	{
+		AActor* HitActor = HitResult.GetActor();
+		float Distance = (Start - HitResult.ImpactPoint).Size();
+
+		if (HitActor)
+		{
+			// Check if actor has a specific tag
+			if (HitActor->ActorHasTag(FName("Floor")))
+			{
+				return true;
+			}
+		}
+	}
+
+	return false;
 }
 
 bool APlayerCharacter::IsTouchingSolidFloor()
