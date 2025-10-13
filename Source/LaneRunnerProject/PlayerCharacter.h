@@ -290,7 +290,9 @@ protected:
 	void StartBoost(float boostSpeed, float timeToBoost);
 	void CancelBoost();
 
-	bool JumpBlocked;
+	bool TouchingBlockJumpSurface;
+	bool LastSurfaceWasBlockJump;
+	bool TriggeredPitfall;
 
 	ECharacterType CharacterType;
 
@@ -326,4 +328,8 @@ protected:
 	ECharacterAnimState CurrentAnimState;
 
 	void OnFlipbookFinish();
+
+	bool IsTouchingBlockJumpFloor();
+
+	UCapsuleComponent* SolidProxy;
 };

@@ -10,6 +10,7 @@
 #include "GameInit.h"
 #include "GI_ProjectileSystem.h"
 #include "GI_AudioSystem.h"
+#include "BlockJumpSurface.h"
 
 
 // Sets default values
@@ -98,6 +99,15 @@ void APlayerCharacter::BeginPlay()
 	{
 		flipbookComp->OnFinishedPlaying.AddDynamic(this, &APlayerCharacter::OnFlipbookFinish);
 	}
+
+	for (UActorComponent* Comp : GetComponents())
+	{
+		UCapsuleComponent* Capsule = Cast<UCapsuleComponent>(Comp);
+		if (Capsule && Capsule->ComponentHasTag(FName("SolidProxy")))
+		{
+			SolidProxy = Capsule;
+		}
+	}
 }
 
 // Called every frame
@@ -139,6 +149,16 @@ void APlayerCharacter::Tick(float DeltaTime)
 			{
 				
 				LaneMovementBlocked = false;
+
+
+				if (TouchingBlockJumpSurface)
+				{
+					LastSurfaceWasBlockJump = true;
+				}
+				else
+				{
+					LastSurfaceWasBlockJump = false;
+				}
 			}
 
 			break;
@@ -633,6 +653,11 @@ void APlayerCharacter::SetSpeedState(EPlayerSpeedState newState)
 
 void APlayerCharacter::SetJumpState(EPlayerJumpState newState)
 {
+	if (newState == CurrentJumpState)
+	{
+		return;
+	}
+
 	CurrentJumpState = newState;
 	TimeSinceJumpStateChange = 0.0f;
 	
@@ -641,21 +666,18 @@ void APlayerCharacter::SetJumpState(EPlayerJumpState newState)
 	switch (CurrentJumpState)
 	{
 	case EPlayerJumpState::Rise:
+		
 		characterMovement->GravityScale = JumpRiseGravity;
-		//SetFlipbookVisuals(Flipbook_Jump);
 		break;
 	case EPlayerJumpState::Apex:
 		CancelVerticalSpeed();
 		characterMovement->GravityScale = 0;
-		//SetFlipbookVisuals(Flipbook_Jump);
 		break;
 	case EPlayerJumpState::Fall:
 		characterMovement->GravityScale = JumpFallGravity;
-		//SetFlipbookVisuals(Flipbook_Jump);
 		break;
 	case EPlayerJumpState::Grounded:
 		characterMovement->GravityScale = JumpRiseGravity;
-		//SetFlipbookVisuals(Flipbook_Stand);
 		HasJumpAvailable = true;
 		TimeSinceLeftGround = 0.0f;
 		break;
@@ -704,9 +726,12 @@ void APlayerCharacter::ResetPlayer()
 
 	CancelBoost();
 
-	JumpBlocked = false;
+	TouchingBlockJumpSurface = false;
 	LaneMovementBlocked = false;
 	HasJumpAvailable = true;
+	TriggeredPitfall = false;
+	LastSurfaceWasBlockJump = false;
+
 
 	SetJumpState(EPlayerJumpState::Grounded);
 
@@ -886,12 +911,18 @@ void APlayerCharacter::OnTouchBoostPad(float boostSpeed, float boostTime)
 
 void APlayerCharacter::OnTouchBlockJump()
 {
-	JumpBlocked = true;
+	TouchingBlockJumpSurface = true;	
 }
 
 void APlayerCharacter::OnExitBlockJump()
 {
-	JumpBlocked = false;
+	if (TouchingBlockJumpSurface)
+	{
+		if (!IsTouchingBlockJumpFloor())
+		{
+			TouchingBlockJumpSurface = false;
+		}
+	}
 }
 
 void APlayerCharacter::SetCharacterType(ECharacterType type)
@@ -1076,11 +1107,13 @@ void APlayerCharacter::UpdateJumpFromInput()
 				break;
 			}
 
-			if (JumpBlocked ||
-				!HasJumpAvailable)
+			if (TouchingBlockJumpSurface ||
+				!HasJumpAvailable ||
+				LastSurfaceWasBlockJump)
 			{
 				jumpAllowed = false;
 			}
+
 
 			if (jumpAllowed)
 			{
@@ -1093,6 +1126,7 @@ void APlayerCharacter::UpdateJumpFromInput()
 				JumpedThisFrame = true;
 				LaneMovementBlocked = false;
 				HasJumpAvailable = false;
+				TriggeredPitfall = false;
 
 				auto* audioSystem = GetGameInstance()->GetSubsystem<UGI_AudioSystem>();
 				if (audioSystem)
@@ -1104,7 +1138,7 @@ void APlayerCharacter::UpdateJumpFromInput()
 
 		if (JumpInput_Released)
 		{
-			if (!JumpBlocked &&
+			if (!TouchingBlockJumpSurface &&
 				CurrentJumpState != EPlayerJumpState::Grounded)
 			{
 				bPressedJump = false;
@@ -1139,7 +1173,7 @@ void APlayerCharacter::UpdateJumpState(float DeltaTime)
 		}
 		break;
 	case EPlayerJumpState::Fall:
-		if (GetVelocity().Z == 0.0f)
+		if (GetVelocity().Z == 0 && !TriggeredPitfall)
 		{
 			SetJumpState(EPlayerJumpState::Grounded);
 		}
@@ -1456,6 +1490,7 @@ void APlayerCharacter::UpdateCheckForPit()
 			{
 				SetJumpState(EPlayerJumpState::Fall);
 				LaneMovementBlocked = true;
+				TriggeredPitfall = true;
 			}
 		}
 	}
@@ -1583,4 +1618,25 @@ void APlayerCharacter::OnFlipbookFinish()
 		SetAnimState(ECharacterAnimState::JumpLoop);
 		break;
 	}
+}
+
+bool APlayerCharacter::IsTouchingBlockJumpFloor()
+{
+	bool touchingBlockJump = false;
+
+	TArray<AActor*> OverlappingActors;
+	GetCapsuleComponent()->GetOverlappingActors(OverlappingActors, ABlockJumpSurface::StaticClass());
+
+	for (AActor* Actor : OverlappingActors)
+	{
+		if (!Actor)
+			continue;
+
+		if (Actor->IsA(ABlockJumpSurface::StaticClass()))
+		{
+			touchingBlockJump = true;
+		}
+	}
+
+	return touchingBlockJump;
 }
