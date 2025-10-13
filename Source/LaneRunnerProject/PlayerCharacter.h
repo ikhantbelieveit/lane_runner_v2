@@ -292,8 +292,6 @@ protected:
 
 	bool TouchingBlockJumpSurface;
 	bool LastSurfaceWasBlockJump;
-	bool TriggeredPitfall;
-
 	ECharacterType CharacterType;
 
 	UPaperFlipbook* Flipbook_Stand;
@@ -329,7 +327,6 @@ protected:
 
 	void OnFlipbookFinish();
 
+	bool IsTouchingSolidFloor();
 	bool IsTouchingBlockJumpFloor();
-
-	UCapsuleComponent* SolidProxy;
 };

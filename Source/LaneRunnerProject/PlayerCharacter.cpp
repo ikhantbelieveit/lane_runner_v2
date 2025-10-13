@@ -99,15 +99,6 @@ void APlayerCharacter::BeginPlay()
 	{
 		flipbookComp->OnFinishedPlaying.AddDynamic(this, &APlayerCharacter::OnFlipbookFinish);
 	}
-
-	for (UActorComponent* Comp : GetComponents())
-	{
-		UCapsuleComponent* Capsule = Cast<UCapsuleComponent>(Comp);
-		if (Capsule && Capsule->ComponentHasTag(FName("SolidProxy")))
-		{
-			SolidProxy = Capsule;
-		}
-	}
 }
 
 // Called every frame
@@ -729,7 +720,6 @@ void APlayerCharacter::ResetPlayer()
 	TouchingBlockJumpSurface = false;
 	LaneMovementBlocked = false;
 	HasJumpAvailable = true;
-	TriggeredPitfall = false;
 	LastSurfaceWasBlockJump = false;
 
 
@@ -1126,7 +1116,6 @@ void APlayerCharacter::UpdateJumpFromInput()
 				JumpedThisFrame = true;
 				LaneMovementBlocked = false;
 				HasJumpAvailable = false;
-				TriggeredPitfall = false;
 
 				auto* audioSystem = GetGameInstance()->GetSubsystem<UGI_AudioSystem>();
 				if (audioSystem)
@@ -1173,7 +1162,7 @@ void APlayerCharacter::UpdateJumpState(float DeltaTime)
 		}
 		break;
 	case EPlayerJumpState::Fall:
-		if (GetVelocity().Z == 0 && !TriggeredPitfall)
+		if (IsTouchingSolidFloor())
 		{
 			SetJumpState(EPlayerJumpState::Grounded);
 		}
@@ -1490,7 +1479,6 @@ void APlayerCharacter::UpdateCheckForPit()
 			{
 				SetJumpState(EPlayerJumpState::Fall);
 				LaneMovementBlocked = true;
-				TriggeredPitfall = true;
 			}
 		}
 	}
@@ -1639,4 +1627,35 @@ bool APlayerCharacter::IsTouchingBlockJumpFloor()
 	}
 
 	return touchingBlockJump;
+}
+
+bool APlayerCharacter::IsTouchingSolidFloor()
+{
+	//if (!SolidProxy) return false;
+
+	UWorld* World = GetWorld();
+	if (!World) return false;
+
+	FVector Start = GetActorLocation();
+	FVector End = Start - FVector(0.f, 0.f, 5.f); // small distance below capsule
+
+	FHitResult Hit;
+	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(this);
+
+	// Sweep a capsule downward
+	bool bHit = World->SweepSingleByChannel(
+		Hit,
+		Start,
+		End,
+		FQuat::Identity,
+		ECC_WorldStatic, // Use your floor collision channel
+		FCollisionShape::MakeCapsule(
+			GetCapsuleComponent()->GetScaledCapsuleRadius(),
+			GetCapsuleComponent()->GetScaledCapsuleHalfHeight()
+		),
+		Params
+	);
+
+	return bHit;
 }
