@@ -50,13 +50,13 @@ void ALevelChunkActor::BeginPlay()
 
 #if WITH_EDITOR
         // Optional sanity debug
-        if (GEngine)
+        /*if (GEngine)
         {
             FString DebugMsg = FString::Printf(TEXT("Resolved EventTrigger: %s in chunk %s"),
                 *EventTrigger->GetName(),
                 *GetName());
             GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, DebugMsg);
-        }
+        }*/
 #endif
     }
 }

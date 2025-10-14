@@ -7,6 +7,7 @@
 #include "EUIState.h"
 #include "BaseUIScreen.h"
 #include "GI_AudioSystem.h"
+#include "LevelChunkDefinitionAsset.h"
 #include "GI_ConfigData.generated.h"
 
 USTRUCT(BlueprintType)
@@ -20,6 +21,27 @@ public:
 	TMap<EUIState, TSubclassOf<UBaseUIScreen>> UIScreen_LUT;
 };
 
+USTRUCT(BlueprintType)
+struct FChunkDefLoadConfig
+{
+	GENERATED_BODY()
+
+public:
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TArray<ULevelChunkDefinitionAsset*> ChunkDefs;
+};
+
+UCLASS(BlueprintType)
+class LANERUNNERPROJECT_API UChunkDefLoadConfigAsset : public UDataAsset
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	FChunkDefLoadConfig ConfigData;
+};
+
 UCLASS()
 class LANERUNNERPROJECT_API UGI_ConfigData : public UDataAsset
 {
@@ -31,5 +53,8 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	UAudioConfigData* AudioConfig;
+
+	UPROPERTY(EditAnywhere)
+	UChunkDefLoadConfigAsset* ChunkLoadConfig;
 	
 };

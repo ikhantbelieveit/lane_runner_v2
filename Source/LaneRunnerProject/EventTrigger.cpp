@@ -128,7 +128,7 @@ void AEventTrigger::ResolveTargetActorIDs(ALevelChunkActor* parentChunk)
 			if (success && foundActor)
 			{
 				Event.TargetActors.Add(foundActor);
-				GEngine->AddOnScreenDebugMessage(
+				/*GEngine->AddOnScreenDebugMessage(
 					-1,
 					4.f,
 					FColor::Green,
@@ -136,7 +136,7 @@ void AEventTrigger::ResolveTargetActorIDs(ALevelChunkActor* parentChunk)
 						*foundActor->GetName(),
 						*ID.ToString(),
 						*parentChunk->GetName())
-				);
+				);*/
 			}
 			else
 			{
