@@ -5,6 +5,7 @@
 #include "EventTrigger.h"
 #include "Kismet/GameplayStatics.h"
 #include "ChunkInitializable.h"
+#include "FloorComponent.h"
 
 
 // Sets default values
@@ -20,6 +21,21 @@ void ALevelChunkActor::BeginPlay()
 {
 	Super::BeginPlay();
     SpawnChunkElements();
+
+    TArray<AActor*> ChildActors;
+    GetAllChildActors(ChildActors, true); // true = recursively include deeper children
+
+    for (AActor* Child : ChildActors)
+    {
+        if (!Child) continue;
+
+        // Try to find a FloorComponent on this child
+        UFloorComponent* FloorComp = Child->FindComponentByClass<UFloorComponent>();
+        if (FloorComp)
+        {
+            FloorComp->InitialiseFloor(ConfigData);
+        }
+    }
 
 
     for (AActor* Child : SpawnedActors)

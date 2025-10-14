@@ -18,4 +18,10 @@ class LANERUNNERPROJECT_API ULevelChunkConfigData : public UDataAsset
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<FChunkSpawnEntry> SpawnActorEntries;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Visuals")
+	UMaterialInterface* LaneMaterial_1;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Visuals")
+	UMaterialInterface* LaneMaterial_2;
 };
