@@ -180,3 +180,13 @@ void ALevelChunkActor::SpawnChunkElements()
     }
 }
 
+void ALevelChunkActor::Teardown()
+{
+    for (AActor* Child : SpawnedActors)
+    {
+        if (!Child)
+            continue;
+
+        Child->Destroy();
+    }
+}

@@ -89,6 +89,7 @@ void UGI_ChunkManagerSystem::ClearChunks()
 	{
 		if (ChunkActor)
 		{
+			ChunkActor->Teardown();
 			ChunkActor->Destroy();
 		}
 	}
