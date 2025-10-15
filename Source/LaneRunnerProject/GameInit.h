@@ -8,6 +8,7 @@
 #include "UIStateSystem.h"
 #include "GameInitConfigData.h"
 #include "BaseUIScreen.h"
+#include "LevelLayoutDataAsset.h"
 #include "GameInit.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FGameInitEvent);
@@ -44,4 +45,7 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Config")
 	ECharacterType InitCharacterType;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Testing")
+	ULevelLayoutDataAsset* PremadeLevelAsset;
 };

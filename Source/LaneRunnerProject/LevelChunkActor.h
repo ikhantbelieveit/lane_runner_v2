@@ -39,6 +39,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	ULevelChunkConfigData* ConfigData;
 
+
 protected:
 	TArray<AActor*> SpawnedActors;
 };

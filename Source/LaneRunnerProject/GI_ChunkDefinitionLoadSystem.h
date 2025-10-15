@@ -20,6 +20,20 @@ public:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 	virtual void Deinitialize() override;
 
+	UFUNCTION(BlueprintCallable)
+	bool GetChunkDefinition(FName ChunkID, FLevelChunkDefinition& OutDefinition) const
+	{
+		const FLevelChunkDefinition* FoundDef = ChunkDef_LUT.Find(ChunkID);
+		if (FoundDef)
+		{
+			OutDefinition = *FoundDef;
+			return true;
+		}
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("No chunk definition found for ID"));
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, ChunkID.ToString());
+		return false;
+	}
+
 protected:
 	bool HasInitialisedFromConfig;
 	FTimerHandle TickHandle;

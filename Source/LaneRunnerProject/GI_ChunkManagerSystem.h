@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Subsystems/GameInstanceSubsystem.h"
+#include "LevelLayoutData.h"
 #include "GI_ChunkManagerSystem.generated.h"
 
 /**
@@ -14,4 +15,18 @@ class LANERUNNERPROJECT_API UGI_ChunkManagerSystem : public UGameInstanceSubsyst
 {
 	GENERATED_BODY()
 	
+public:
+	UFUNCTION(BlueprintCallable)
+	void SpawnChunksFromLayoutData(FLevelLayoutData layoutData);
+
+	UFUNCTION(BlueprintCallable)
+	float GetChunkLength(ALevelChunkActor* chunkActor);
+
+	UFUNCTION(BlueprintCallable)
+	void ClearChunks();
+
+	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
+
+protected:
+	TArray<ALevelChunkActor*> ActiveChunkActors;
 };

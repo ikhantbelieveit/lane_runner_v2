@@ -36,13 +36,6 @@ void UDeathScreenUIWidget::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	/*ESlateVisibility respawnArrowVis = RespawnButton->HasKeyboardFocus() ? ESlateVisibility::Visible : ESlateVisibility::Hidden;
-	ESlateVisibility quitArrowVis = QuitButton->HasKeyboardFocus() ? ESlateVisibility::Visible : ESlateVisibility::Hidden;
-	ESlateVisibility menuArrowVis = MenuButton->HasKeyboardFocus() ? ESlateVisibility::Visible : ESlateVisibility::Hidden;
-
-	RespawnButtonArrow->SetVisibility(respawnArrowVis);
-	QuitButtonArrow->SetVisibility(quitArrowVis);
-	MenuButtonArrow->SetVisibility(menuArrowVis);*/
 }
 
 void UDeathScreenUIWidget::OnRespawnButtonPressed()
@@ -59,6 +52,12 @@ void UDeathScreenUIWidget::OnRespawnButtonPressed()
 
 void UDeathScreenUIWidget::OnMenuButtonPressed()
 {
+	auto* levelSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGI_LevelSystem>();
+	if (levelSystem)
+	{
+		levelSystem->ExitLevel();
+	}
+
 	auto* uiStateSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGI_UIStateSystem>();
 	if (uiStateSystem)
 	{

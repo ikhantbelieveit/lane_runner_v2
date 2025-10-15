@@ -11,6 +11,8 @@
 #include "Components/SplineComponent.h"
 #include "PlayerDetectComponent.h"
 #include "SpawnComponent.h"
+#include "GI_ChunkManagerSystem.h"
+#include "GameInit.h"
 
 void UGI_LevelSystem::OnGameOverDelayComplete()
 {
@@ -198,11 +200,33 @@ void UGI_LevelSystem::EnterLevel()
 		player->ResetPlayer();
 	}
 
+    FLevelLayoutData levelLayoutData;
+
+    if (auto* gameInit = Cast<AGameInit>(UGameplayStatics::GetActorOfClass(GetWorld(), AGameInit::StaticClass())))
+    {
+        levelLayoutData = gameInit->PremadeLevelAsset->Layout;
+    }
+
+    auto* chunkSystem = GetGameInstance()->GetSubsystem<UGI_ChunkManagerSystem>();
+    chunkSystem->ClearChunks();
+    chunkSystem->SpawnChunksFromLayoutData(levelLayoutData);
+
 	CleanupBeforeReset.Broadcast();
 
 	ResetLevel();
 
 	SetGameState(EGameState::Active);
+}
+
+void UGI_LevelSystem::ExitLevel()
+{
+    CleanupBeforeReset.Broadcast();
+
+    ResetLevel();
+
+    SetGameState(EGameState::Dormant);
+
+    OnLevelExit.Broadcast();
 }
 
 void UGI_LevelSystem::TriggerContinue()

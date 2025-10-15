@@ -129,4 +129,10 @@ public:
 
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FLevelSystemEvent OnUnpause;
+
+	UFUNCTION(BlueprintCallable)
+	void ExitLevel();
+
+	UPROPERTY(BlueprintAssignable, Category = "Events")
+	FLevelSystemEvent OnLevelExit;
 };
