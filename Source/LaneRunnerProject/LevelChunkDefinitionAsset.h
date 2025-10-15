@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
 #include "LevelChunkActor.h"
+#include "ELevelChunkType.h"
 #include "LevelChunkDefinitionAsset.generated.h"
 
 /**
@@ -23,6 +24,9 @@ struct FLevelChunkDefinition
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<ALevelChunkActor> ChunkActor;
+
+	UPROPERTY(EditAnywhere)
+	ELevelChunkType Type;
 };
 
 UCLASS()

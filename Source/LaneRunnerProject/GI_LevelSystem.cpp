@@ -12,6 +12,7 @@
 #include "PlayerDetectComponent.h"
 #include "SpawnComponent.h"
 #include "GI_ChunkManagerSystem.h"
+#include "GI_LevelGenerationSystem.h"
 #include "GameInit.h"
 
 void UGI_LevelSystem::OnGameOverDelayComplete()
@@ -204,7 +205,25 @@ void UGI_LevelSystem::EnterLevel()
 
     if (auto* gameInit = Cast<AGameInit>(UGameplayStatics::GetActorOfClass(GetWorld(), AGameInit::StaticClass())))
     {
-        levelLayoutData = gameInit->PremadeLevelAsset->Layout;
+        switch (gameInit->InitType)
+        {
+        case EInitLevelType::None:
+            GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("Level Init type set to None - returning!"));
+            return;
+        case EInitLevelType::UsePremadeLevel:
+            levelLayoutData = gameInit->PremadeLevelAsset->Layout;
+            break;
+        case EInitLevelType::GenerateFromSettings:
+            auto* generationSystem = GetGameInstance()->GetSubsystem<UGI_LevelGenerationSystem>();
+            int seed = gameInit->LevelGenSettingsAsset->GetSeed();
+            GEngine->AddOnScreenDebugMessage(-1,5.0f,FColor::Green, FString::Printf(TEXT("[LEVEL] Generating level with seed: %d"), seed));
+            FRandomStream random(seed);
+            if (!generationSystem->GenerateLevelLayout(gameInit->LevelGenSettingsAsset->Definition, random, levelLayoutData))
+            {
+                GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("failed to generate level - returning!"));
+            }
+        }
+        
     }
 
     auto* chunkSystem = GetGameInstance()->GetSubsystem<UGI_ChunkManagerSystem>();

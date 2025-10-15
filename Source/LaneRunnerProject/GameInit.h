@@ -9,7 +9,18 @@
 #include "GameInitConfigData.h"
 #include "BaseUIScreen.h"
 #include "LevelLayoutDataAsset.h"
+#include "LevelGenerationSettings.h"
 #include "GameInit.generated.h"
+
+
+
+UENUM(BlueprintType)
+enum class EInitLevelType : uint8
+{
+	None    UMETA(DisplayName = "None"),
+	UsePremadeLevel UMETA(DisplayName = "Use Premade Level"),
+	GenerateFromSettings UMETA(DisplayName = "Generate From Settings")
+};
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FGameInitEvent);
 
@@ -48,4 +59,12 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Testing")
 	ULevelLayoutDataAsset* PremadeLevelAsset;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Testing")
+	EInitLevelType InitType = EInitLevelType::GenerateFromSettings;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Testing")
+	ULevelGenerationSettingsAsset* LevelGenSettingsAsset;
+
+	
 };

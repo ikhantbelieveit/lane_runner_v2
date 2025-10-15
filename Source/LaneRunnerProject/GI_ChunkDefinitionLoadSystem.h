@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "LevelChunkDefinitionAsset.h"
+#include "ELevelChunkType.h"
 #include "GI_ChunkDefinitionLoadSystem.generated.h"
 
 /**
@@ -34,6 +35,22 @@ public:
 		return false;
 	}
 
+	UFUNCTION(BlueprintCallable)
+	bool GetRandomDefOfType(ELevelChunkType type, FRandomStream& random, FLevelChunkDefinition& OutDefinition) const
+	{
+		TArray<FLevelChunkDefinition> filteredChunks = GetAllDefsOfType(type);
+
+		if (filteredChunks.Num() == 0)
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("No chunks found matching given type"));
+			return false;
+		}
+
+		int randomInt = random.FRandRange(0, filteredChunks.Num() - 1);
+		OutDefinition = filteredChunks[randomInt];
+		return true;
+	}
+
 protected:
 	bool HasInitialisedFromConfig;
 	FTimerHandle TickHandle;
@@ -41,4 +58,20 @@ protected:
 	bool InitialiseFromConfig();
 
 	TMap<FName, FLevelChunkDefinition> ChunkDef_LUT;
+
+	TArray<FLevelChunkDefinition> GetAllDefsOfType(ELevelChunkType type) const {
+
+		TArray<FLevelChunkDefinition> returnArr;
+
+		for (const auto& pair : ChunkDef_LUT)
+		{
+			const FLevelChunkDefinition& def = pair.Value;
+			if (def.Type == type)
+			{
+				returnArr.Add(def);
+			}
+		}
+
+		return returnArr;
+	}
 };
