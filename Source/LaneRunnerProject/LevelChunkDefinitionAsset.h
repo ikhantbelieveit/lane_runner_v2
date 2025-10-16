@@ -27,6 +27,9 @@ struct FLevelChunkDefinition
 
 	UPROPERTY(EditAnywhere)
 	ELevelChunkType Type;
+
+public:
+	FORCEINLINE float GetWeight() const { return Weight; }
 };
 
 UCLASS()

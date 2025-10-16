@@ -6,6 +6,7 @@
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "LevelChunkDefinitionAsset.h"
 #include "ELevelChunkType.h"
+#include "GameUtility.h"
 #include "GI_ChunkDefinitionLoadSystem.generated.h"
 
 /**
@@ -46,8 +47,12 @@ public:
 			return false;
 		}
 
-		int randomInt = random.FRandRange(0, filteredChunks.Num() - 1);
-		OutDefinition = filteredChunks[randomInt];
+		if (!UGameUtility::GetWeightedRandomItem(filteredChunks, random, OutDefinition))
+		{
+			//complain here
+			return false;
+		}
+
 		return true;
 	}
 
