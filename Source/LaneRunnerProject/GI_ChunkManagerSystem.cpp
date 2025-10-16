@@ -62,13 +62,13 @@ void UGI_ChunkManagerSystem::SpawnChunksFromLayoutData(FLevelLayoutData layoutDa
 					chunkDef.ChunkActor.Get(),       // UClass*
 					SpawnTransform);
 
-				GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Magenta, FString::Printf(TEXT("start spawning chunk %s"), *Entry.ChunkID.ToString()));
+				//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Magenta, FString::Printf(TEXT("start spawning chunk %s"), *Entry.ChunkID.ToString()));
 
 				if (NewChunk)
 				{
 					// Finish spawning
 					UGameplayStatics::FinishSpawningActor(NewChunk, SpawnTransform);
-					GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Magenta, FString::Printf(TEXT("finish spawning chunk %s"), *Entry.ChunkID.ToString()));
+					//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Magenta, FString::Printf(TEXT("finish spawning chunk %s"), *Entry.ChunkID.ToString()));
 				}
 
 				SpawnCursor += FVector(GetChunkLength(NewChunk), 0.f, 0.f);
@@ -77,7 +77,7 @@ void UGI_ChunkManagerSystem::SpawnChunksFromLayoutData(FLevelLayoutData layoutDa
 			}
 			else
 			{
-				GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, FString::Printf(TEXT("NO ACTOR FOUND for chunk %s"), *Entry.ChunkID.ToString()));
+				//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, FString::Printf(TEXT("NO ACTOR FOUND for chunk %s"), *Entry.ChunkID.ToString()));
 			}
 		}
 	}
@@ -96,7 +96,7 @@ void UGI_ChunkManagerSystem::ClearChunks()
 
 	ActiveChunkActors.Empty();
 
-	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, TEXT("CLEAR THE CHUNKZ"));
+	//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, TEXT("CLEAR THE CHUNKZ"));
 }
 
 float UGI_ChunkManagerSystem::GetChunkLength(ALevelChunkActor* chunkActor)

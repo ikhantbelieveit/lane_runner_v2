@@ -111,7 +111,7 @@ public:
 	void SaveLevelStats();
 
 	UFUNCTION(BlueprintCallable)
-	void ResetLevel();
+	void ResetLevelStats();
 
 	UFUNCTION(BlueprintCallable)
 	void ExecuteEvents(const TArray<FLevelEventData>& Events);
@@ -135,4 +135,7 @@ public:
 
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FLevelSystemEvent OnLevelExit;
+
+	UFUNCTION(BlueprintCallable)
+	void RegenerateLevel();
 };

@@ -126,7 +126,7 @@ void UGI_LevelSystem::OnPlayerTouchHazard(bool oneHitKill, bool overrideInvincib
 	}
 }
 
-void UGI_LevelSystem::ResetLevel()
+void UGI_LevelSystem::ResetLevelStats()
 {
 	SetScore(0);
 	PointsUntilNextThreshold = PointsHealThreshold;
@@ -134,8 +134,11 @@ void UGI_LevelSystem::ResetLevel()
 
 void UGI_LevelSystem::ResetFromLose()
 {
-	CleanupBeforeReset.Broadcast();
-	ResetLevel();
+
+	ResetLevelStats();
+    RegenerateLevel();
+
+    CleanupBeforeReset.Broadcast();
 
 	SetGameState(EGameState::Active);
 }
@@ -195,44 +198,18 @@ int UGI_LevelSystem::GetScore()
 
 void UGI_LevelSystem::EnterLevel()
 {
+    
+
 	APlayerCharacter* player = Cast<APlayerCharacter>(UGameplayStatics::GetActorOfClass(GetWorld(), APlayerCharacter::StaticClass()));
 	if (player)
 	{
 		player->ResetPlayer();
 	}
 
-    FLevelLayoutData levelLayoutData;
+    RegenerateLevel();
+    CleanupBeforeReset.Broadcast();
 
-    if (auto* gameInit = Cast<AGameInit>(UGameplayStatics::GetActorOfClass(GetWorld(), AGameInit::StaticClass())))
-    {
-        switch (gameInit->InitType)
-        {
-        case EInitLevelType::None:
-            GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("Level Init type set to None - returning!"));
-            return;
-        case EInitLevelType::UsePremadeLevel:
-            levelLayoutData = gameInit->PremadeLevelAsset->Layout;
-            break;
-        case EInitLevelType::GenerateFromSettings:
-            auto* generationSystem = GetGameInstance()->GetSubsystem<UGI_LevelGenerationSystem>();
-            int seed = gameInit->LevelGenSettingsAsset->GetSeed();
-            GEngine->AddOnScreenDebugMessage(-1,5.0f,FColor::Green, FString::Printf(TEXT("[LEVEL] Generating level with seed: %d"), seed));
-            FRandomStream random(seed);
-            if (!generationSystem->GenerateLevelLayout(gameInit->LevelGenSettingsAsset->Definition, random, levelLayoutData))
-            {
-                GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("failed to generate level - returning!"));
-            }
-        }
-        
-    }
-
-    auto* chunkSystem = GetGameInstance()->GetSubsystem<UGI_ChunkManagerSystem>();
-    chunkSystem->ClearChunks();
-    chunkSystem->SpawnChunksFromLayoutData(levelLayoutData);
-
-	CleanupBeforeReset.Broadcast();
-
-	ResetLevel();
+	ResetLevelStats();
 
 	SetGameState(EGameState::Active);
 }
@@ -241,11 +218,46 @@ void UGI_LevelSystem::ExitLevel()
 {
     CleanupBeforeReset.Broadcast();
 
-    ResetLevel();
+    ResetLevelStats();
 
     SetGameState(EGameState::Dormant);
 
     OnLevelExit.Broadcast();
+}
+
+void UGI_LevelSystem::RegenerateLevel()
+{
+    auto* chunkSystem = GetGameInstance()->GetSubsystem<UGI_ChunkManagerSystem>();
+    chunkSystem->ClearChunks();
+
+
+    FLevelLayoutData levelLayoutData;
+
+    if (auto* gameInit = Cast<AGameInit>(UGameplayStatics::GetActorOfClass(GetWorld(), AGameInit::StaticClass())))
+    {
+        switch (gameInit->InitType)
+        {
+        case EInitLevelType::None:
+            GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("[LEVEL] Level Init type set to None - returning!"));
+            return;
+        case EInitLevelType::UsePremadeLevel:
+            levelLayoutData = gameInit->PremadeLevelAsset->Layout;
+            break;
+        case EInitLevelType::GenerateFromSettings:
+            auto* generationSystem = GetGameInstance()->GetSubsystem<UGI_LevelGenerationSystem>();
+            int seed = gameInit->LevelGenSettingsAsset->GetSeed();
+            GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, FString::Printf(TEXT("[LEVEL] Generating level with seed: %d"), seed));
+            FRandomStream random(seed);
+            if (!generationSystem->GenerateLevelLayout(gameInit->LevelGenSettingsAsset->Definition, random, levelLayoutData))
+            {
+                GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("[LEVEL] failed to generate level - returning!"));
+                return;
+            }
+        }
+
+    }
+
+    chunkSystem->SpawnChunksFromLayoutData(levelLayoutData);
 }
 
 void UGI_LevelSystem::TriggerContinue()

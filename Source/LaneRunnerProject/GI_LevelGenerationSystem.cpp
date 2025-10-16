@@ -42,5 +42,5 @@ bool UGI_LevelGenerationSystem::GenerateLevelLayout(FLevelGenerationSettings set
 		outLevel.Chunks.Add(generalChunk);
 	}
 
-	return false;
+	return true;
 }

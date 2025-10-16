@@ -49,6 +49,14 @@ void ULocationManagerComponent::TickComponent(float DeltaTime, ELevelTick TickTy
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 	if (!TargetActor) return;
 
+	if (bScrollInterp)
+	{
+		FVector CurrentLoc = TargetActor->GetActorLocation();
+		FVector TargetLoc = FVector(PlayerRef->GetActorLocation().X + ScrollWithXPos, CurrentLoc.Y, CurrentLoc.Z);
+		TargetActor->SetActorLocation(FMath::VInterpTo(CurrentLoc, TargetLoc, DeltaTime, 10.0f));
+		return;
+	}
+
 	FVector NewLoc = TargetActor->GetActorLocation();
 	FRotator NewRot = TargetActor->GetActorRotation();
 

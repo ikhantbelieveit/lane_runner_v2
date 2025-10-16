@@ -38,6 +38,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Scroll")
 	bool bStartScrollActive = false;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Scroll")
+	bool bScrollInterp = false;
+
 	/** === Path Follower Settings === */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Path")
 	AActor* SplineActor;
@@ -104,6 +107,9 @@ public:
 	// Call to apply auto-move settings
 	UFUNCTION(BlueprintCallable, Category = "AutoMove")
 	void ApplyAutoMove();
+
+	
+
 	void SetAutoMoveSpeed(float newSpeed);
 	void SetAutoMoveDirection(EProjectileDirection newDirection);
 	void StartAutoMove(EProjectileDirection direction, float Speed, bool bUseStop, FVector stopCoords, bool despawnOnEnd);
