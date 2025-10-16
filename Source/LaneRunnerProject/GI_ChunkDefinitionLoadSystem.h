@@ -37,9 +37,9 @@ public:
 	}
 
 	UFUNCTION(BlueprintCallable)
-	bool GetRandomDefOfType(ELevelChunkType type, FRandomStream& random, FLevelChunkDefinition& OutDefinition) const
+	bool GetRandomDefOfType(ELevelChunkType type, FRandomStream& random, TArray<FName> excludeIDs, FLevelChunkDefinition& OutDefinition) const
 	{
-		TArray<FLevelChunkDefinition> filteredChunks = GetAllDefsOfType(type);
+		TArray<FLevelChunkDefinition> filteredChunks = GetAllDefsOfType(type, excludeIDs);
 
 		if (filteredChunks.Num() == 0)
 		{
@@ -64,17 +64,25 @@ protected:
 
 	TMap<FName, FLevelChunkDefinition> ChunkDef_LUT;
 
-	TArray<FLevelChunkDefinition> GetAllDefsOfType(ELevelChunkType type) const {
+	TArray<FLevelChunkDefinition> GetAllDefsOfType(ELevelChunkType type, TArray<FName> excludeIDs) const {
 
 		TArray<FLevelChunkDefinition> returnArr;
 
 		for (const auto& pair : ChunkDef_LUT)
 		{
 			const FLevelChunkDefinition& def = pair.Value;
-			if (def.Type == type)
+
+			if (excludeIDs.Contains(def.ChunkID))
 			{
-				returnArr.Add(def);
+				continue;
 			}
+
+			if (def.Type != type)
+			{
+				continue;
+			}
+
+			returnArr.Add(def);
 		}
 
 		return returnArr;

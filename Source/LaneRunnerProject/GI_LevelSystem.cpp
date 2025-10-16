@@ -247,6 +247,7 @@ void UGI_LevelSystem::RegenerateLevel()
             auto* generationSystem = GetGameInstance()->GetSubsystem<UGI_LevelGenerationSystem>();
             int seed = gameInit->LevelGenSettingsAsset->GetSeed();
             GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, FString::Printf(TEXT("[LEVEL] Generating level with seed: %d"), seed));
+            UE_LOG(LogTemp, Log, TEXT("[LEVEL] Generating level with seed: %d"), seed);
             FRandomStream random(seed);
             if (!generationSystem->GenerateLevelLayout(gameInit->LevelGenSettingsAsset->Definition, random, levelLayoutData))
             {

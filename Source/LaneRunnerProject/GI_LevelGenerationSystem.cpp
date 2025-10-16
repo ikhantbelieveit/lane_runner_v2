@@ -11,9 +11,11 @@ bool UGI_LevelGenerationSystem::GenerateLevelLayout(FLevelGenerationSettings set
 	int totalChunkIndex = 0;
 
 	auto* chunkLoadSystem = GetGameInstance()->GetSubsystem<UGI_ChunkDefinitionLoadSystem>();
+
+	TArray<FName> excludeChunks;
 	
 	FLevelChunkDefinition startDef;
-	if (!chunkLoadSystem->GetRandomDefOfType(ELevelChunkType::Start, random, startDef))
+	if (!chunkLoadSystem->GetRandomDefOfType(ELevelChunkType::Start, random, excludeChunks, startDef))
 	{
 		//complain here
 		return false;
@@ -28,7 +30,7 @@ bool UGI_LevelGenerationSystem::GenerateLevelLayout(FLevelGenerationSettings set
 	for (int chunkIndex = 0; chunkIndex <= settings.GeneralChunkCount; ++chunkIndex)
 	{
 		FLevelChunkDefinition generalChunkDef;
-		if (!chunkLoadSystem->GetRandomDefOfType(ELevelChunkType::General, random, generalChunkDef))
+		if (!chunkLoadSystem->GetRandomDefOfType(ELevelChunkType::General, random, excludeChunks, generalChunkDef))
 		{
 			//complain here
 			return false;
@@ -38,6 +40,9 @@ bool UGI_LevelGenerationSystem::GenerateLevelLayout(FLevelGenerationSettings set
 		generalChunk.ChunkID = generalChunkDef.ChunkID;
 		generalChunk.Index = totalChunkIndex;
 		totalChunkIndex++;
+
+		excludeChunks.Empty();
+		excludeChunks.Add(generalChunkDef.ChunkID);	//prevent a chunk from appearing twice
 
 		outLevel.Chunks.Add(generalChunk);
 	}
