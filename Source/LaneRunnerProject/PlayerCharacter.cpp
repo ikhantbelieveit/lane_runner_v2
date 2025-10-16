@@ -758,6 +758,8 @@ void APlayerCharacter::SetAnimState(ECharacterAnimState newState)
 	case ECharacterAnimState::JumpStart:
 		SetFlipbookVisuals(Flipbook_JumpStart);
 		break;
+	case ECharacterAnimState::JumpLand:
+		SetFlipbookVisuals(Flipbook_JumpLand);
 	}
 }
 
@@ -937,10 +939,12 @@ void APlayerCharacter::SetCharacterType(ECharacterType type)
 		Flipbook_Stand = data->StandingFlipbook;
 		Flipbook_Jump = data->JumpingFlipbook;
 		Flipbook_JumpStart = data->JumpStartFlipbook;
+		Flipbook_JumpLand = data->JumpLandFlipbook;
 
 		CharacterType = type;
 
 		SetFlipbookVisuals(Flipbook_Stand);
+		RefreshVisualScale();
 	}
 }
 
@@ -952,42 +956,8 @@ void APlayerCharacter::SetFlipbookVisuals(UPaperFlipbook* flipbook)
 	FlipbookComp->SetFlipbook(flipbook);
 
 
-	FlipbookComp->SetLooping(flipbook != Flipbook_JumpStart);
+	FlipbookComp->SetLooping(flipbook != Flipbook_JumpStart && flipbook != Flipbook_JumpLand);
 	FlipbookComp->PlayFromStart();
-
-	//refresh flipbook to stand just above ground level
-
-	float LowestZ = 0.f;
-	bool bHasBounds = false;
-
-	for (int32 i = 0; i < flipbook->GetNumFrames(); ++i)
-	{
-		if (UPaperSprite* Sprite = flipbook->GetSpriteAtFrame(i))
-		{
-			FBoxSphereBounds Bounds = Sprite->GetRenderBounds();
-			const float SpriteMinZ = Bounds.Origin.Z - Bounds.BoxExtent.Z;
-			if (!bHasBounds || SpriteMinZ < LowestZ)
-			{
-				LowestZ = SpriteMinZ;
-				bHasBounds = true;
-			}
-		}
-	}
-
-	if (!bHasBounds) return;
-
-	const FVector Scale = FlipbookComp->GetRelativeScale3D();
-	const float ScaledLowestZ = LowestZ * Scale.Z;
-
-	float CapsuleHalfHeight = 0.f;
-	if (UCapsuleComponent* Capsule = GetCapsuleComponent())
-	{
-		CapsuleHalfHeight = Capsule->GetScaledCapsuleHalfHeight();
-	}
-
-	FVector RelLoc = FlipbookComp->GetRelativeLocation();
-	RelLoc.Z = -ScaledLowestZ - CapsuleHalfHeight + 5.0f;
-	FlipbookComp->SetRelativeLocation(RelLoc);
 }
 
 void APlayerCharacter::TryAddHealth(int addHealth)
@@ -1177,6 +1147,7 @@ void APlayerCharacter::UpdateJumpState(float DeltaTime)
 	case EPlayerJumpState::Fall:
 		if (IsTouchingSolidFloor())
 		{
+			SetAnimState(ECharacterAnimState::JumpLand);
 			SetJumpState(EPlayerJumpState::Grounded);
 		}
 		break;
@@ -1600,15 +1571,6 @@ void APlayerCharacter::UpdateAnimation()
 	{
 		SetAnimState(ECharacterAnimState::JumpStart);
 	}
-	else
-	{
-		switch (CurrentJumpState)
-		{
-		case EPlayerJumpState::Grounded:
-			SetAnimState(ECharacterAnimState::Grounded);
-			break;
-		}
-	}
 }
 
 void APlayerCharacter::OnFlipbookFinish()
@@ -1618,6 +1580,8 @@ void APlayerCharacter::OnFlipbookFinish()
 	case ECharacterAnimState::JumpStart:
 		SetAnimState(ECharacterAnimState::JumpLoop);
 		break;
+	case ECharacterAnimState::JumpLand:
+		SetAnimState(ECharacterAnimState::Grounded);
 	}
 }
 
@@ -1720,6 +1684,43 @@ bool APlayerCharacter::SolidBlockingRightLane()
 	}
 
 	return false;
+}
+
+void APlayerCharacter::RefreshVisualScale()
+{
+	UPaperFlipbookComponent* FlipbookComp = GetComponentByClass<UPaperFlipbookComponent>();
+
+	float LowestZ = 0.f;
+	bool bHasBounds = false;
+
+	for (int32 i = 0; i < Flipbook_Stand->GetNumFrames(); ++i)
+	{
+		if (UPaperSprite* Sprite = Flipbook_Stand->GetSpriteAtFrame(i))
+		{
+			FBoxSphereBounds Bounds = Sprite->GetRenderBounds();
+			const float SpriteMinZ = Bounds.Origin.Z - Bounds.BoxExtent.Z;
+			if (!bHasBounds || SpriteMinZ < LowestZ)
+			{
+				LowestZ = SpriteMinZ;
+				bHasBounds = true;
+			}
+		}
+	}
+
+	if (!bHasBounds) return;
+
+	const FVector Scale = FlipbookComp->GetRelativeScale3D();
+	const float ScaledLowestZ = LowestZ * Scale.Z;
+
+	float CapsuleHalfHeight = 0.f;
+	if (UCapsuleComponent* Capsule = GetCapsuleComponent())
+	{
+		CapsuleHalfHeight = Capsule->GetScaledCapsuleHalfHeight();
+	}
+
+	FVector RelLoc = FlipbookComp->GetRelativeLocation();
+	RelLoc.Z = -ScaledLowestZ - CapsuleHalfHeight + 5.0f;
+	FlipbookComp->SetRelativeLocation(RelLoc);
 }
 
 bool APlayerCharacter::IsTouchingSolidFloor()

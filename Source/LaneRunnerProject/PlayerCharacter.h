@@ -297,6 +297,7 @@ protected:
 	UPaperFlipbook* Flipbook_Stand;
 	UPaperFlipbook* Flipbook_Jump;
 	UPaperFlipbook* Flipbook_JumpStart;
+	UPaperFlipbook* Flipbook_JumpLand;
 
 	bool LaneMovementBlocked;
 
@@ -325,6 +326,7 @@ public:
 protected:
 	ECharacterAnimState CurrentAnimState;
 
+	UFUNCTION(BlueprintCallable)
 	void OnFlipbookFinish();
 
 	bool IsTouchingSolidFloor();
@@ -332,4 +334,6 @@ protected:
 
 	bool SolidBlockingLeftLane();
 	bool SolidBlockingRightLane();
+
+	void RefreshVisualScale();
 };

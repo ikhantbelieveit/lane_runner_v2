@@ -30,6 +30,9 @@ struct FPlayerCharacterDataItem
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	UPaperFlipbook* JumpStartFlipbook;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPaperFlipbook* JumpLandFlipbook;
 };
 
 USTRUCT(BlueprintType)

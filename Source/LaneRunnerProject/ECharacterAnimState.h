@@ -12,5 +12,6 @@ enum class ECharacterAnimState : uint8
 {
 	Grounded UMETA(DisplayName = "Grounded"),
 	JumpStart UMETA(DisplayName = "Jump Start"),
-	JumpLoop UMETA(DisplayName = "Jump Loop")
+	JumpLoop UMETA(DisplayName = "Jump Loop"),
+	JumpLand UMETA(DisplayName = "Jump Land")
 };
