@@ -1109,7 +1109,8 @@ void APlayerCharacter::UpdateJumpFromInput()
 				FActorSpawnParameters SpawnParams;
 				FRotator defaultRotation = FRotator(0.0f, 90.0f, 0.0f);
 
-				FVector vfxLoc = GetActorLocation();
+				UPaperFlipbookComponent* flipbookComp = GetComponentByClass<UPaperFlipbookComponent>();
+				FVector vfxLoc = flipbookComp->GetComponentLocation();
 
 				if (AOneShotAnim* impactAnim = GetWorld()->SpawnActor<AOneShotAnim>(ConfigData->VisualsConfig.JumpStartEffect, vfxLoc, defaultRotation, SpawnParams))
 				{
