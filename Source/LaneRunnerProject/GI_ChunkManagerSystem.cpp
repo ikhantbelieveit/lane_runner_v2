@@ -29,7 +29,7 @@ void UGI_ChunkManagerSystem::SpawnChunksFromLayoutData(FLevelLayoutData layoutDa
 		return;
 	}
 
-	const int32 RepeatCount = 3; // repeat this many times for now
+	const int32 RepeatCount = 1; // repeat this many times for now
 	FVector SpawnCursor = FVector::ZeroVector;
 
 	UWorld* World = GetWorld();
