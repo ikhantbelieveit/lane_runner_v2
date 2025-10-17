@@ -137,6 +137,12 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Visual", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<class AOneShotAnim> MuzzleShot_Forward;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Visual", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<class AOneShotAnim> JumpStartEffect;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Visual", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<class AOneShotAnim> LandImpactEffect;
 };
 
 USTRUCT(BlueprintType)

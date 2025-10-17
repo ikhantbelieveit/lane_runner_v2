@@ -1105,6 +1105,16 @@ void APlayerCharacter::UpdateJumpFromInput()
 				{
 					audioSystem->Play(EAudioKey::Jump);
 				}
+
+				FActorSpawnParameters SpawnParams;
+				FRotator defaultRotation = FRotator(0.0f, 90.0f, 0.0f);
+
+				FVector vfxLoc = GetActorLocation();
+
+				if (AOneShotAnim* impactAnim = GetWorld()->SpawnActor<AOneShotAnim>(ConfigData->VisualsConfig.JumpStartEffect, vfxLoc, defaultRotation, SpawnParams))
+				{
+
+				}
 			}
 		}
 
@@ -1149,6 +1159,17 @@ void APlayerCharacter::UpdateJumpState(float DeltaTime)
 		{
 			SetAnimState(ECharacterAnimState::JumpLand);
 			SetJumpState(EPlayerJumpState::Grounded);
+
+			FActorSpawnParameters SpawnParams;
+			FRotator defaultRotation = FRotator(0.0f, 90.0f, 0.0f);
+
+			UPaperFlipbookComponent* flipbook = GetComponentByClass<UPaperFlipbookComponent>();
+			FVector vfxLoc = flipbook->GetComponentLocation();
+
+			if (AOneShotAnim* impactAnim = GetWorld()->SpawnActor<AOneShotAnim>(ConfigData->VisualsConfig.LandImpactEffect, vfxLoc, defaultRotation, SpawnParams))
+			{
+
+			}
 		}
 		break;
 	case EPlayerJumpState::Apex:
@@ -1188,8 +1209,7 @@ void APlayerCharacter::Shoot(EProjectileDirection direction, bool holdNotTap)
 		requestData.Direction = direction;
 		requestData.ProjectileClass = ProjectileClass;
 
-		UPaperFlipbookComponent* FlipbookComp = GetComponentByClass<UPaperFlipbookComponent>();
-		requestData.ShootPos = FlipbookComp->GetComponentLocation();
+		requestData.ShootPos = GetActorLocation();
 
 		float shootPosOffset = 100.0f;
 
@@ -1688,7 +1708,7 @@ bool APlayerCharacter::SolidBlockingRightLane()
 
 void APlayerCharacter::RefreshVisualScale()
 {
-	UPaperFlipbookComponent* FlipbookComp = GetComponentByClass<UPaperFlipbookComponent>();
+	/*UPaperFlipbookComponent* FlipbookComp = GetComponentByClass<UPaperFlipbookComponent>();
 
 	float LowestZ = 0.f;
 	bool bHasBounds = false;
@@ -1720,7 +1740,7 @@ void APlayerCharacter::RefreshVisualScale()
 
 	FVector RelLoc = FlipbookComp->GetRelativeLocation();
 	RelLoc.Z = -ScaledLowestZ - CapsuleHalfHeight + 5.0f;
-	FlipbookComp->SetRelativeLocation(RelLoc);
+	FlipbookComp->SetRelativeLocation(RelLoc);*/
 }
 
 bool APlayerCharacter::IsTouchingSolidFloor()
