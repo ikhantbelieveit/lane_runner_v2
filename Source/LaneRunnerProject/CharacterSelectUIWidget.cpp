@@ -46,6 +46,14 @@ void UCharacterSelectUIWidget::SetupBeforeShow()
 	ToggleConfirmButton(false);
 
 	ShowPreviewImage(ECharacterType::Cowboy_Red);
+
+	
+}
+
+void UCharacterSelectUIWidget::OnScreenShown()
+{
+	DefaultSelection = CharacterButton1;
+	CharacterButton1->SetKeyboardFocus();
 }
 
 void UCharacterSelectUIWidget::Tick(float DeltaTime)

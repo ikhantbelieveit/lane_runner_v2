@@ -143,6 +143,17 @@ void UGI_LevelSystem::ResetFromLose()
 	SetGameState(EGameState::Active);
 }
 
+void UGI_LevelSystem::RestartLevel()
+{
+    OnLevelRestart.Broadcast();
+    ResetLevelStats();
+    RegenerateLevel();
+
+    CleanupBeforeReset.Broadcast();
+
+    SetGameState(EGameState::Active);
+}
+
 void UGI_LevelSystem::KillPlayer()
 {
 	SetGameState(EGameState::Lose);

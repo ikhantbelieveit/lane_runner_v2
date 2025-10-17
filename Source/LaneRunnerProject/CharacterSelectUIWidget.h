@@ -23,6 +23,7 @@ public:
 	virtual void Initialise() override;
 
 	virtual void SetupBeforeShow() override;
+	virtual void OnScreenShown() override;
 
 	virtual void Tick(float DeltaTime) override;
 

@@ -138,4 +138,10 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void RegenerateLevel();
+
+	UFUNCTION(BlueprintCallable)
+	void RestartLevel();
+
+	UPROPERTY(BlueprintAssignable, Category = "Events")
+	FLevelSystemEvent OnLevelRestart;
 };

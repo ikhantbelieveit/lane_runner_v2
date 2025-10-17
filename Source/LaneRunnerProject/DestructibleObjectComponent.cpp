@@ -92,7 +92,10 @@ void UDestructibleObjectComponent::DestroyFromComp()
 		auto* levelSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGI_LevelSystem>();
 		if (levelSystem)
 		{
-			levelSystem->AddToScore(PointsGivenOnDestroy);
+			if (levelSystem->GetGameState() == EGameState::Active)
+			{
+				levelSystem->AddToScore(PointsGivenOnDestroy);
+			}
 		}
 	}
 

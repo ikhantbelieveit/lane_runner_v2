@@ -61,7 +61,10 @@ void ABaseCollectible::Collect()
 		auto* levelSystem = GetGameInstance()->GetSubsystem<UGI_LevelSystem>();
 		if (levelSystem)
 		{
-			levelSystem->AddToScore(PointsValue);
+			if (levelSystem->GetGameState() == EGameState::Active)
+			{
+				levelSystem->AddToScore(PointsValue);
+			}
 		}
 	}
 

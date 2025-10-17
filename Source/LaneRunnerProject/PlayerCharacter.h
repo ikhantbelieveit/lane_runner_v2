@@ -336,4 +336,11 @@ protected:
 	bool SolidBlockingRightLane();
 
 	void RefreshVisualScale();
+
+public:
+	UFUNCTION(BlueprintCallable)
+	void OnLevelRestart();
+
+	UFUNCTION(BlueprintCallable)
+	void OnLevelExit();
 };

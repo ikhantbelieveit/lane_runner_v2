@@ -3,6 +3,7 @@
 
 #include "PauseUIWidget.h"
 #include "GI_LevelSystem.h"
+#include "GI_UIStateSystem.h"
 
 void UPauseUIWidget::Initialise()
 {
@@ -44,6 +45,10 @@ void UPauseUIWidget::OnResumeButtonPressed()
 void UPauseUIWidget::OnRestartButtonPressed()
 {
 	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("restart"));
+	if (auto* levelSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGI_LevelSystem>())
+	{
+		levelSystem->RestartLevel();
+	}
 }
 
 void UPauseUIWidget::OnSettingsButtonPressed()
@@ -54,9 +59,23 @@ void UPauseUIWidget::OnSettingsButtonPressed()
 void UPauseUIWidget::OnQuitToMenuButtonPressed()
 {
 	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("quit to menu"));
+	if (auto* levelSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGI_LevelSystem>())
+	{
+		levelSystem->TogglePause();
+		levelSystem->ExitLevel();
+	}
+
+	if (auto* uiSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGI_UIStateSystem>())
+	{
+		uiSystem->EnterScreen(EUIState::MainMenu);
+	}
 }
 
 void UPauseUIWidget::OnQuitToDesktopButtonPressed()
 {
 	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("quit to desktop"));
+	if (auto* uiSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGI_UIStateSystem>())
+	{
+		uiSystem->QuitGame();
+	}
 }
