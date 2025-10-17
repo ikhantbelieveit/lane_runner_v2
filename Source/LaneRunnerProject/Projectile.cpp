@@ -2,25 +2,12 @@
 
 
 #include "Projectile.h"
+#include "EmitterComponent.h"
 
 AProjectile::AProjectile()
 {
     PrimaryActorTick.bCanEverTick = true;
 
-    //BoxComponent = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxComponent"));
-    //RootComponent = BoxComponent;
-
-    //// Projectile movement
-    //ProjectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovement"));
-    //ProjectileMovement->bRotationFollowsVelocity = true;
-    //ProjectileMovement->bShouldBounce = false;
-
-    //ScrollWithPlayerComponent = CreateDefaultSubobject<UScrollWithPlayerComponent>(TEXT("ScrollWithPlayerComponent"));
-
-    ////PaperSprite Visuals
-    //SpriteComponent = CreateDefaultSubobject<UPaperSpriteComponent>(TEXT("Sprite"));
-    //SpriteComponent->SetupAttachment(GetRootComponent());
-    //SpriteComponent->SetRelativeLocation(FVector(0.0f, 0.0f, 0.0f));
 }
 
 void AProjectile::BeginPlay()
@@ -95,49 +82,66 @@ void AProjectile::SetupFromConfig()
 
 void AProjectile::Fire(EProjectileDirection Direction)
 {
-    UProjectileMovementComponent* projMoveComp = (UProjectileMovementComponent*)GetComponentByClass(UProjectileMovementComponent::StaticClass());
-    FVector directionVector = FVector(0.0f, 0.0f, 1.0f);
-    UPaperSpriteComponent* spriteComp = (UPaperSpriteComponent*)GetComponentByClass(UPaperSpriteComponent::StaticClass());
+    UProjectileMovementComponent* projMoveComp = Cast<UProjectileMovementComponent>(GetComponentByClass(UProjectileMovementComponent::StaticClass()));
+    UPaperSpriteComponent* spriteComp = Cast<UPaperSpriteComponent>(GetComponentByClass(UPaperSpriteComponent::StaticClass()));
+    UEmitterComponent* emitterComp = Cast<UEmitterComponent>(GetComponentByClass(UEmitterComponent::StaticClass()));
+
+    FVector directionVector = FVector::UpVector; // default
+
+    FRotator spriteRotation = FRotator::ZeroRotator;
 
     switch (Direction)
     {
     case EProjectileDirection::Left:
         directionVector = FVector(0, -1, 0);
-        if (spriteComp)
-        {
-            spriteComp->SetWorldRotation(FRotator(0.0f, -90.0f, 0.0f));
-        }
+        spriteRotation = FRotator(0.0f, -90.0f, 0.0f);
         break;
+
     case EProjectileDirection::Right:
         directionVector = FVector(0, 1, 0);
-        if (spriteComp)
-        {
-            spriteComp->SetWorldRotation(FRotator(0.0f, 90.0f, 0.0f));
-        }
+        spriteRotation = FRotator(0.0f, 90.0f, 0.0f);
         break;
+
     case EProjectileDirection::Up:
         directionVector = FVector(0, 0, 1);
-        if (spriteComp)
-        {
-            spriteComp->SetWorldRotation(FRotator(90.0f, 90.0f, 0.0f));
-        }
+        spriteRotation = FRotator(90.0f, 90.0f, 0.0f);
         break;
+
     case EProjectileDirection::Forward:
         directionVector = FVector(1, 0, 0);
-        ULocationManagerComponent* scrollComp = (ULocationManagerComponent*)GetComponentByClass(ULocationManagerComponent::StaticClass());
-        if (scrollComp)
+        spriteRotation = FRotator(0.0f, 0.0f, 90.0f);
+        if (ULocationManagerComponent* scrollComp = Cast<ULocationManagerComponent>(GetComponentByClass(ULocationManagerComponent::StaticClass())))
         {
             scrollComp->bScrollEnabled = false;
-        }
-        if (spriteComp)
-        {
-            spriteComp->SetWorldRotation(FRotator(0.0f, 0.0f, 90.0f));
         }
         break;
     }
 
-    if (!projMoveComp) return;
-    projMoveComp->Velocity = directionVector.GetSafeNormal() * projMoveComp->InitialSpeed;
+    // Apply sprite rotation
+    if (spriteComp)
+    {
+        spriteComp->SetWorldRotation(spriteRotation);
+    }
+
+    // Apply projectile velocity
+    if (projMoveComp)
+    {
+        projMoveComp->Velocity = directionVector.GetSafeNormal() * projMoveComp->InitialSpeed;
+    }
+
+    // Update emitter entries to match sprite rotation
+    if (emitterComp)
+    {
+        for (FSpawnEntry& Entry : emitterComp->SpawnEntries)
+        {
+            if (Entry.bInheritOwnerRotation)
+            {
+                // Make spawn rotation match current sprite rotation
+                Entry.RotationOffset = spriteRotation; // Reset so it inherits exactly
+                Entry.bScrollInstant = Direction != EProjectileDirection::Forward;
+            }
+        }
+    }
     
 }
 
