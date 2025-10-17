@@ -8,6 +8,8 @@
 #include "BaseCollectible.h"
 #include "DestructibleObjectComponent.generated.h"
 
+class ADeathDummy;
+
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class LANERUNNERPROJECT_API UDestructibleObjectComponent : public UActorComponent
@@ -72,4 +74,10 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float randomSpreadMax = 30.0f;
+
+	UPROPERTY(EditAnywhere, Category = "Destruction VFX")
+	bool bSpawnDeathDummy;
+
+	UPROPERTY(EditAnywhere, Category = "Destruction VFX")
+	TSubclassOf<class ADeathDummy> DeathDummyClass;
 };

@@ -13,6 +13,7 @@
 #include "SpawnComponent.h"
 #include "GI_AudioSystem.h"
 #include "GroupMember.h"
+#include "DeathDummy.h"
 
 
 // Sets default values for this component's properties
@@ -132,16 +133,27 @@ void UDestructibleObjectComponent::DestroyFromComp()
 					}
 				}
 
-				/*if (ULocationManagerComponent* locComp = GetOwner()->FindComponentByClass<ULocationManagerComponent>())
-				{
-					if (ULocationManagerComponent* itemLocComp = item->FindComponentByClass<ULocationManagerComponent>())
-					{
-						itemShouldScroll = locComp->bScrollEnabled && locComp->ScrollWithXPos == 0.0f;
-						itemLocComp->bScrollEnabled = itemShouldScroll;
-					}
-				}*/
-
 				itemSpawnComp->Spawn(true, itemShouldScroll, true);
+			}
+		}
+	}
+
+	if (bSpawnDeathDummy)
+	{
+		if (DeathDummyClass)
+		{
+			FActorSpawnParameters Params;
+			Params.Owner = GetOwner();
+			Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+			FVector SpawnLoc = GetOwner()->GetActorLocation();
+			FRotator SpawnRot = FRotator::ZeroRotator;
+
+			ADeathDummy* DeathDummy = GetWorld()->SpawnActor<ADeathDummy>(DeathDummyClass, SpawnLoc, SpawnRot, Params);
+			if (DeathDummy)
+			{
+				// Optionally, pass info to it — like what sprite to display
+				DeathDummy->InitFromActor(GetOwner());
 			}
 		}
 	}

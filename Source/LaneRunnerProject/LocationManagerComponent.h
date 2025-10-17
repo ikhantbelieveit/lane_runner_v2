@@ -108,8 +108,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "AutoMove")
 	void ApplyAutoMove();
 
-	
-
 	void SetAutoMoveSpeed(float newSpeed);
 	void SetAutoMoveDirection(EProjectileDirection newDirection);
 	void StartAutoMove(EProjectileDirection direction, float Speed, bool bUseStop, FVector stopCoords, bool despawnOnEnd);
