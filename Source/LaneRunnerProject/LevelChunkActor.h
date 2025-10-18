@@ -44,7 +44,7 @@ public:
 	void Teardown();
 
 	UFUNCTION(BlueprintCallable)
-	void RefreshForVariant();
+	void ApplyVariant();
 
 
 	void InitializeFromLayoutData(const FLevelChunkData& InChunkData);

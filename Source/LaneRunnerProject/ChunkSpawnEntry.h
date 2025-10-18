@@ -31,4 +31,10 @@ struct FChunkSpawnEntry
     // Optional JSON-style metadata for specialization
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     FString Metadata; // e.g. {"EnemyType":"Bullseye","Speed":300,"Scroll":true}
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variants")
+    FName VariantSet;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variants")
+    FName VariantOption;
 };

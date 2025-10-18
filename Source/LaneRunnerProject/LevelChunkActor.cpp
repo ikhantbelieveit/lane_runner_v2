@@ -23,7 +23,7 @@ void ALevelChunkActor::BeginPlay()
     
     if (ActiveVariants.Num() == 0 && ConfigData)
     {
-        SpawnChunkElements();
+        ApplyVariant();
     }
 
     // Apply to persistent actors in the scene (placed manually in the chunk blueprint)
@@ -45,15 +45,6 @@ void ALevelChunkActor::BeginPlay()
         if (UFloorComponent* FloorComp = Child->FindComponentByClass<UFloorComponent>())
         {
             FloorComp->InitialiseFloor(ConfigData);
-        }
-    }
-
-    // Resolve EventTriggers
-    for (AActor* Child : SpawnedActors)
-    {
-        if (AEventTrigger* EventTrigger = Cast<AEventTrigger>(Child))
-        {
-            EventTrigger->ResolveTargetActorIDs(this);
         }
     }
 }
@@ -110,7 +101,7 @@ void ALevelChunkActor::SpawnChunkElements()
     UWorld* World = GetWorld();
     if (!World || !ConfigData) return;
 
-    // Clean up any previous actors
+    // Cleanup
     for (AActor* OldActor : SpawnedActors)
     {
         if (OldActor)
@@ -122,6 +113,8 @@ void ALevelChunkActor::SpawnChunkElements()
     {
         if (!Entry.ActorClass) continue;
 
+        //GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("TRY SPAWN CHUNK ENTRY"));
+
         FTransform SpawnTransform = Entry.RelativeTransform * GetActorTransform();
 
         AActor* NewActor = World->SpawnActorDeferred<AActor>(
@@ -132,8 +125,16 @@ void ALevelChunkActor::SpawnChunkElements()
             ESpawnActorCollisionHandlingMethod::AlwaysSpawn
         );
 
-        if (!NewActor)
-            continue;
+        if (!NewActor) continue;
+
+        if (!Entry.VariantSet.IsNone() && !Entry.VariantOption.IsNone())
+        {
+            FName ActiveOption = ActiveVariants.FindRef(Entry.VariantSet);
+            if (ActiveOption.IsValid() && ActiveOption != Entry.VariantOption)
+            {
+                continue; // skip this spawn entirely
+            }
+        }
 
         // Assign ID tag
         if (!Entry.ActorID.IsNone())
@@ -141,10 +142,11 @@ void ALevelChunkActor::SpawnChunkElements()
             NewActor->Tags.Add(Entry.ActorID);
         }
 
-        // Respect variant selection
-        if (!IsActorVariantActive(NewActor))
+        // Assign variant tag if specified
+        if (!Entry.VariantSet.IsNone() && !Entry.VariantOption.IsNone())
         {
-            DeactivateActor(NewActor);
+            FString VariantTag = FString::Printf(TEXT("VAR_%s_%s"), *Entry.VariantSet.ToString(), *Entry.VariantOption.ToString());
+            NewActor->Tags.Add(FName(*VariantTag));
         }
 
         // Preserve default scale if not overridden
@@ -159,13 +161,20 @@ void ALevelChunkActor::SpawnChunkElements()
         NewActor->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
         UGameplayStatics::FinishSpawningActor(NewActor, SpawnTransform);
 
-        // Initialize via interface
         if (NewActor->GetClass()->ImplementsInterface(UChunkInitializable::StaticClass()))
         {
             IChunkInitializable::Execute_InitializeFromChunkData(NewActor, Entry);
         }
 
         SpawnedActors.Add(NewActor);
+    }
+
+    for (AActor* Child : SpawnedActors)
+    {
+        if (AEventTrigger* EventTrigger = Cast<AEventTrigger>(Child))
+        {
+            EventTrigger->ResolveTargetActorIDs(this);
+        }
     }
 }
 
@@ -226,7 +235,7 @@ void ALevelChunkActor::Teardown()
     }
 }
 
-void ALevelChunkActor::RefreshForVariant()
+void ALevelChunkActor::ApplyVariant()
 {
     TArray<AActor*> ChildActors;
     GetAllChildActors(ChildActors, true);
@@ -272,18 +281,5 @@ void ALevelChunkActor::InitializeFromLayoutData(const FLevelChunkData& InChunkDa
         ActiveVariants.Add(FName(Entry.SetID), FName(Entry.Variant));
     }
 
-    RefreshForVariant();
-
-    // Debug print
-    if (GEngine)
-    {
-        FString Msg = "[VARIANTS] ";
-        for (auto& Pair : ActiveVariants)
-        {
-            Msg += Pair.Key.ToString() + "->" + Pair.Value.ToString() + " ";
-        }
-        GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Cyan, Msg);
-    }
-
-    //SpawnChunkElements();
+    ApplyVariant();
 }

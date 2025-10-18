@@ -66,12 +66,6 @@ void UGI_LevelGenerationSystem::ResolveChunkVariants(const FLevelChunkDefinition
 		{
 			int32 Index = Random.RandRange(0, Set.PossibleVariants.Num() - 1);
 			ChosenVariant = Set.PossibleVariants[Index];
-			GEngine->AddOnScreenDebugMessage(
-				-1,
-				5.0f,
-				FColor::Magenta,
-				FString::Printf(TEXT("chosen variant: %s"), *ChosenVariant.ToString())
-			);
 		}
 		else
 		{
