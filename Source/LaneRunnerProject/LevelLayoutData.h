@@ -5,6 +5,18 @@
 #include "CoreMinimal.h"
 #include "LevelLayoutData.generated.h"
 
+USTRUCT(BlueprintType)
+struct FChunkVariantEntry
+{
+	GENERATED_BODY()
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	FName SetID;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	FName Variant;
+};
+
 
 USTRUCT(BlueprintType)
 struct FLevelChunkData
@@ -18,6 +30,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	int Index = -1;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<FChunkVariantEntry> ActiveVariants;
 };
 
 USTRUCT(BlueprintType)

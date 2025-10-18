@@ -33,6 +33,7 @@ bool UGI_LevelGenerationSystem::GenerateLevelLayout(FLevelGenerationSettings set
 		if (!chunkLoadSystem->GetRandomDefOfType(ELevelChunkType::General, random, excludeChunks, generalChunkDef))
 		{
 			//complain here
+
 			return false;
 		}
 
@@ -41,11 +42,50 @@ bool UGI_LevelGenerationSystem::GenerateLevelLayout(FLevelGenerationSettings set
 		generalChunk.Index = totalChunkIndex;
 		totalChunkIndex++;
 
-		excludeChunks.Empty();
-		excludeChunks.Add(generalChunkDef.ChunkID);	//prevent a chunk from appearing twice
+		ResolveChunkVariants(generalChunkDef, random, generalChunk);
 
 		outLevel.Chunks.Add(generalChunk);
+
+		excludeChunks.Empty();
+		excludeChunks.Add(generalChunkDef.ChunkID);	//prevent a chunk from appearing twice
 	}
 
 	return true;
+}
+
+void UGI_LevelGenerationSystem::ResolveChunkVariants(const FLevelChunkDefinition& Definition, FRandomStream& Random, FLevelChunkData& OutChunk)
+{
+	for (const FChunkVariationSet& Set : Definition.VariationSets)
+	{
+		if (Set.PossibleVariants.Num() == 0)
+			continue;
+
+		FName ChosenVariant = NAME_None;
+
+		if (Set.bUseRandom)
+		{
+			int32 Index = Random.RandRange(0, Set.PossibleVariants.Num() - 1);
+			ChosenVariant = Set.PossibleVariants[Index];
+			GEngine->AddOnScreenDebugMessage(
+				-1,
+				5.0f,
+				FColor::Magenta,
+				FString::Printf(TEXT("chosen variant: %s"), *ChosenVariant.ToString())
+			);
+		}
+		else
+		{
+			ChosenVariant = Set.PossibleVariants[0]; // deterministic fallback
+		}
+
+		if (!ChosenVariant.IsNone())
+		{
+			FChunkVariantEntry fallbackVar;
+
+			fallbackVar.SetID = Set.SetID;
+			fallbackVar.Variant = ChosenVariant;
+
+			OutChunk.ActiveVariants.Add(fallbackVar);
+		}
+	}
 }

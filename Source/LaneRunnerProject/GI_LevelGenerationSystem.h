@@ -6,6 +6,7 @@
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "LevelGenerationSettings.h"
 #include "LevelLayoutData.h"
+#include "LevelChunkDefinitionAsset.h"
 #include "GI_LevelGenerationSystem.generated.h"
 
 /**
@@ -19,4 +20,7 @@ class LANERUNNERPROJECT_API UGI_LevelGenerationSystem : public UGameInstanceSubs
 public:
 	UFUNCTION(BlueprintCallable)
 	bool GenerateLevelLayout(FLevelGenerationSettings settings, FRandomStream& random, FLevelLayoutData& outLevel);
+
+	UFUNCTION(BlueprintCallable)
+	void ResolveChunkVariants(const FLevelChunkDefinition& Definition, FRandomStream& Random, FLevelChunkData& OutChunk);
 };

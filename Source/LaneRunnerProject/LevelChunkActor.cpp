@@ -20,44 +20,41 @@ ALevelChunkActor::ALevelChunkActor()
 void ALevelChunkActor::BeginPlay()
 {
 	Super::BeginPlay();
-    SpawnChunkElements();
+    
+    if (ActiveVariants.Num() == 0 && ConfigData)
+    {
+        SpawnChunkElements();
+    }
 
+    // Apply to persistent actors in the scene (placed manually in the chunk blueprint)
     TArray<AActor*> ChildActors;
-    GetAllChildActors(ChildActors, true); // true = recursively include deeper children
+    GetAllChildActors(ChildActors, true);
 
     for (AActor* Child : ChildActors)
     {
         if (!Child) continue;
 
-        // Try to find a FloorComponent on this child
-        UFloorComponent* FloorComp = Child->FindComponentByClass<UFloorComponent>();
-        if (FloorComp)
+        // Deactivate if this actor doesn't match the selected variants
+        if (!IsActorVariantActive(Child))
+        {
+            DeactivateActor(Child);
+            continue;
+        }
+
+        // Initialize any floor components
+        if (UFloorComponent* FloorComp = Child->FindComponentByClass<UFloorComponent>())
         {
             FloorComp->InitialiseFloor(ConfigData);
         }
     }
 
-
+    // Resolve EventTriggers
     for (AActor* Child : SpawnedActors)
     {
-        // Only process if the child is (or inherits from) AEventTrigger
-        AEventTrigger* EventTrigger = Cast<AEventTrigger>(Child);
-        if (!EventTrigger)
-            continue;
-
-        // Resolve target actor references inside each EventTrigger
-        EventTrigger->ResolveTargetActorIDs(this);
-
-#if WITH_EDITOR
-        // Optional sanity debug
-        /*if (GEngine)
+        if (AEventTrigger* EventTrigger = Cast<AEventTrigger>(Child))
         {
-            FString DebugMsg = FString::Printf(TEXT("Resolved EventTrigger: %s in chunk %s"),
-                *EventTrigger->GetName(),
-                *GetName());
-            GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, DebugMsg);
-        }*/
-#endif
+            EventTrigger->ResolveTargetActorIDs(this);
+        }
     }
 }
 
@@ -111,17 +108,15 @@ AActor* ALevelChunkActor::GetChildActorByID(FName childID, bool& success)
 void ALevelChunkActor::SpawnChunkElements()
 {
     UWorld* World = GetWorld();
-    if (!World) return;
+    if (!World || !ConfigData) return;
 
-    if (!ConfigData) return;
-
-    for (AActor* oldActor : SpawnedActors)
+    // Clean up any previous actors
+    for (AActor* OldActor : SpawnedActors)
     {
-        oldActor->Destroy();
+        if (OldActor)
+            OldActor->Destroy();
     }
-
     SpawnedActors.Empty();
-
 
     for (const FChunkSpawnEntry& Entry : ConfigData->SpawnActorEntries)
     {
@@ -137,48 +132,88 @@ void ALevelChunkActor::SpawnChunkElements()
             ESpawnActorCollisionHandlingMethod::AlwaysSpawn
         );
 
-        
+        if (!NewActor)
+            continue;
 
-        if (NewActor)
+        // Assign ID tag
+        if (!Entry.ActorID.IsNone())
         {
-            // Assign tag or ID for lookups
-            if (!Entry.ActorID.IsNone())
-            {
-                NewActor->Tags.Add(Entry.ActorID);
-            }
-
-            if (!Entry.bSetScale)
-            {
-                // Get default blueprint scale from the class’ CDO (Class Default Object)
-                const AActor* DefaultActor = Cast<AActor>(Entry.ActorClass->GetDefaultObject());
-                if (DefaultActor)
-                {
-                    FVector DefaultScale = DefaultActor->GetActorScale3D();
-
-                    // Apply the default scale to the spawn transform
-                    SpawnTransform.SetScale3D(DefaultScale);
-                }
-            }
-
-            // Attach to chunk
-            NewActor->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
-
-            UGameplayStatics::FinishSpawningActor(NewActor, SpawnTransform);
-
-            // Optional: let actor read metadata
-            if (NewActor->GetClass()->ImplementsInterface(UChunkInitializable::StaticClass()))
-            {
-                IChunkInitializable::Execute_InitializeFromChunkData(NewActor, Entry);
-            }
-            else
-            {
-
-            }
-
-            SpawnedActors.Add(NewActor);
+            NewActor->Tags.Add(Entry.ActorID);
         }
+
+        // Respect variant selection
+        if (!IsActorVariantActive(NewActor))
+        {
+            DeactivateActor(NewActor);
+        }
+
+        // Preserve default scale if not overridden
+        if (!Entry.bSetScale)
+        {
+            if (const AActor* DefaultActor = Cast<AActor>(Entry.ActorClass->GetDefaultObject()))
+            {
+                SpawnTransform.SetScale3D(DefaultActor->GetActorScale3D());
+            }
+        }
+
+        NewActor->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
+        UGameplayStatics::FinishSpawningActor(NewActor, SpawnTransform);
+
+        // Initialize via interface
+        if (NewActor->GetClass()->ImplementsInterface(UChunkInitializable::StaticClass()))
+        {
+            IChunkInitializable::Execute_InitializeFromChunkData(NewActor, Entry);
+        }
+
+        SpawnedActors.Add(NewActor);
     }
 }
+
+bool ALevelChunkActor::IsActorVariantActive(const AActor* Actor) const
+{
+    if (!Actor) return true; // fail-safe
+
+    for (const FName& Tag : Actor->Tags)
+    {
+        FString TagStr = Tag.ToString();
+
+        if (TagStr.StartsWith("VAR_"))
+        {
+            // Remove VAR_ prefix
+            FString Remainder = TagStr.RightChop(4); // 4 = length of "VAR_"
+
+            FString SetName, OptionName;
+            if (!Remainder.Split(TEXT("_"), &SetName, &OptionName))
+            {
+                UE_LOG(LogTemp, Warning, TEXT("Malformed variant tag: %s"), *TagStr);
+                continue;
+            }
+
+            const FName* ActiveValue = ActiveVariants.Find(FName(*SetName));
+            if (!ActiveValue)
+            {
+                UE_LOG(LogTemp, Warning, TEXT("No active variant entry for set: %s"), *SetName);
+                return false;
+            }
+
+            if (*ActiveValue != FName(*OptionName))
+            {
+                return false; // this variant is not active
+            }
+        }
+    }
+
+    return true; // active if no VAR_ tag or matching variant
+}
+
+void ALevelChunkActor::DeactivateActor(AActor* Actor) const
+{
+    if (!Actor) return;
+    Actor->SetActorHiddenInGame(true);
+    Actor->SetActorEnableCollision(false);
+    Actor->SetActorTickEnabled(false);
+}
+
 
 void ALevelChunkActor::Teardown()
 {
@@ -189,4 +224,66 @@ void ALevelChunkActor::Teardown()
 
         Child->Destroy();
     }
+}
+
+void ALevelChunkActor::RefreshForVariant()
+{
+    TArray<AActor*> ChildActors;
+    GetAllChildActors(ChildActors, true);
+
+    for (AActor* Child : ChildActors)
+    {
+        if (!Child) continue;
+
+        // Skip if this is already in SpawnedActors (avoid double processing)
+        if (SpawnedActors.Contains(Child)) continue;
+
+        if (IsActorVariantActive(Child))
+        {
+            // Reactivate
+            Child->SetActorHiddenInGame(false);
+            Child->SetActorEnableCollision(true);
+            Child->SetActorTickEnabled(true);
+
+            // Initialize floor components
+            if (UFloorComponent* FloorComp = Child->FindComponentByClass<UFloorComponent>())
+            {
+                FloorComp->InitialiseFloor(ConfigData);
+            }
+        }
+        else
+        {
+            DeactivateActor(Child);
+        }
+    }
+
+
+    SpawnChunkElements();
+}
+
+
+void ALevelChunkActor::InitializeFromLayoutData(const FLevelChunkData& InChunkData)
+{
+    ActiveVariants.Empty();
+    
+
+    for (const FChunkVariantEntry& Entry : InChunkData.ActiveVariants)
+    {
+        ActiveVariants.Add(FName(Entry.SetID), FName(Entry.Variant));
+    }
+
+    RefreshForVariant();
+
+    // Debug print
+    if (GEngine)
+    {
+        FString Msg = "[VARIANTS] ";
+        for (auto& Pair : ActiveVariants)
+        {
+            Msg += Pair.Key.ToString() + "->" + Pair.Value.ToString() + " ";
+        }
+        GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Cyan, Msg);
+    }
+
+    //SpawnChunkElements();
 }

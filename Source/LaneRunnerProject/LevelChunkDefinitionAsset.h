@@ -8,9 +8,21 @@
 #include "ELevelChunkType.h"
 #include "LevelChunkDefinitionAsset.generated.h"
 
-/**
- * 
- */
+USTRUCT(BlueprintType)
+struct FChunkVariationSet
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FName SetID; // e.g. "Geometry", "Enemies"
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<FName> PossibleVariants;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bUseRandom = true;
+};
+
 USTRUCT(BlueprintType)
 struct FLevelChunkDefinition
 {
@@ -27,6 +39,9 @@ struct FLevelChunkDefinition
 
 	UPROPERTY(EditAnywhere)
 	ELevelChunkType Type;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<FChunkVariationSet> VariationSets;
 
 public:
 	FORCEINLINE float GetWeight() const { return Weight; }

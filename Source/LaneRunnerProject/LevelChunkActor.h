@@ -6,6 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "ChunkSpawnEntry.h"
 #include "LevelChunkConfigData.h"
+#include "LevelLayoutData.h"
 #include "LevelChunkActor.generated.h"
 
 
@@ -42,7 +43,17 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void Teardown();
 
+	UFUNCTION(BlueprintCallable)
+	void RefreshForVariant();
+
+
+	void InitializeFromLayoutData(const FLevelChunkData& InChunkData);
+
 
 protected:
 	TArray<AActor*> SpawnedActors;
+
+	TMap<FName, FName> ActiveVariants;
+	bool IsActorVariantActive(const AActor* Actor) const;
+	void DeactivateActor(AActor* Actor) const;
 };

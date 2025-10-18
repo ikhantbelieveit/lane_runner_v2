@@ -68,12 +68,15 @@ void UGI_ChunkManagerSystem::SpawnChunksFromLayoutData(FLevelLayoutData layoutDa
 				{
 					// Finish spawning
 					UGameplayStatics::FinishSpawningActor(NewChunk, SpawnTransform);
+					NewChunk->InitializeFromLayoutData(Entry);
+
+					SpawnCursor += FVector(GetChunkLength(NewChunk), 0.f, 0.f);
+
+					ActiveChunkActors.Add(NewChunk);
 					//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Magenta, FString::Printf(TEXT("finish spawning chunk %s"), *Entry.ChunkID.ToString()));
 				}
 
-				SpawnCursor += FVector(GetChunkLength(NewChunk), 0.f, 0.f);
-
-				ActiveChunkActors.Add(NewChunk);
+				
 			}
 			else
 			{

@@ -7,9 +7,7 @@
 #include "ChunkSpawnEntry.h"
 #include "LevelChunkConfigData.generated.h"
 
-/**
- * 
- */
+
 UCLASS()
 class LANERUNNERPROJECT_API ULevelChunkConfigData : public UDataAsset
 {
