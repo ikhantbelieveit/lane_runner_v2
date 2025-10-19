@@ -27,7 +27,8 @@ public:
 	UPROPERTY(EditAnywhere)
 	int OverrideSeed;
 
-	
+	UPROPERTY(EditAnywhere)
+	bool NoRepeatChunks = true;	//chunks are prevented from appearing twice in a row
 };
 
 UCLASS()

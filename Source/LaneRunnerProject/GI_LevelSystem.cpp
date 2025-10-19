@@ -252,7 +252,15 @@ void UGI_LevelSystem::RegenerateLevel()
             GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("[LEVEL] Level Init type set to None - returning!"));
             return;
         case EInitLevelType::UsePremadeLevel:
+        {
             levelLayoutData = gameInit->PremadeLevelAsset->Layout;
+            auto* generationSystem = GetGameInstance()->GetSubsystem<UGI_LevelGenerationSystem>();
+            int seed = gameInit->LevelGenSettingsAsset->GetSeed();
+            GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, FString::Printf(TEXT("[LEVEL] Applying random elements to premade level with seed: %d"), seed));
+            FRandomStream random(seed);
+            generationSystem->ResolveMissingChunkVariants(random, levelLayoutData);
+        }
+            
             break;
         case EInitLevelType::GenerateFromSettings:
             auto* generationSystem = GetGameInstance()->GetSubsystem<UGI_LevelGenerationSystem>();

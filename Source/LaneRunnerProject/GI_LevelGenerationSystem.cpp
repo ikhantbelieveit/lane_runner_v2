@@ -47,7 +47,11 @@ bool UGI_LevelGenerationSystem::GenerateLevelLayout(FLevelGenerationSettings set
 		outLevel.Chunks.Add(generalChunk);
 
 		excludeChunks.Empty();
-		excludeChunks.Add(generalChunkDef.ChunkID);	//prevent a chunk from appearing twice
+
+		if (settings.NoRepeatChunks)
+		{
+			excludeChunks.Add(generalChunkDef.ChunkID);	//prevent a chunk from appearing twice
+		}
 	}
 
 	return true;
@@ -80,6 +84,56 @@ void UGI_LevelGenerationSystem::ResolveChunkVariants(const FLevelChunkDefinition
 			fallbackVar.Variant = ChosenVariant;
 
 			OutChunk.ActiveVariants.Add(fallbackVar);
+		}
+	}
+}
+
+void UGI_LevelGenerationSystem::ResolveMissingChunkVariants(FRandomStream& Random, FLevelLayoutData& InOutLayout)
+{
+	auto* chunkDefSystem = GetGameInstance()->GetSubsystem<UGI_ChunkDefinitionLoadSystem>();
+
+	for (FLevelChunkData& Chunk : InOutLayout.Chunks)
+	{
+
+
+		// Find the chunk definition this layout entry refers to
+		FLevelChunkDefinition ChunkDef;
+		if (!chunkDefSystem->GetChunkDefinition(Chunk.ChunkID, ChunkDef)) continue;
+
+		// Reuse existing method for variant resolution
+		for (const FChunkVariationSet& Set : ChunkDef.VariationSets)
+		{
+			// Skip if already defined in layout
+			bool bAlreadyHasSet = false;
+			for (const FChunkVariantEntry& Entry : Chunk.ActiveVariants)
+			{
+				if (Entry.SetID == Set.SetID)
+				{
+					bAlreadyHasSet = true;
+					break;
+				}
+			}
+			if (bAlreadyHasSet)
+				continue;
+
+			// Otherwise, pick one randomly
+			FChunkVariantEntry NewEntry;
+			NewEntry.SetID = Set.SetID;
+
+			if (Set.PossibleVariants.Num() > 0)
+			{
+				if (Set.bUseRandom)
+				{
+					int32 Index = Random.RandRange(0, Set.PossibleVariants.Num() - 1);
+					NewEntry.Variant = Set.PossibleVariants[Index];
+				}
+				else
+				{
+					NewEntry.Variant = Set.PossibleVariants[0];
+				}
+
+				Chunk.ActiveVariants.Add(NewEntry);
+			}
 		}
 	}
 }

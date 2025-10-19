@@ -33,6 +33,12 @@ void UReactToProjComponent::BeginPlay()
 	{
 		BoxComponent->OnComponentBeginOverlap.AddDynamic(this, &UReactToProjComponent::HandleBeginOverlap);
 	}
+
+	UStaticMeshComponent* meshComp = GetOwner()->FindComponentByClass<UStaticMeshComponent>();
+	if (meshComp)
+	{
+		meshComp->OnComponentHit.AddDynamic(this, &UReactToProjComponent::HandleHit);
+	}
 }
 
 
@@ -53,6 +59,19 @@ void UReactToProjComponent::HandleBeginOverlap(
 	const FHitResult& SweepResult)
 {
 
+	if (!OtherActor || OtherActor == GetOwner())
+	{
+		return;
+	}
+
+	if (OtherComp->ComponentHasTag(ProjTag))
+	{
+		HitByProjectile(OtherActor);
+	}
+}
+
+void UReactToProjComponent::HandleHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
+{
 	if (!OtherActor || OtherActor == GetOwner())
 	{
 		return;

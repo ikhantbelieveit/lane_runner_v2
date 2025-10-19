@@ -23,4 +23,7 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void ResolveChunkVariants(const FLevelChunkDefinition& Definition, FRandomStream& Random, FLevelChunkData& OutChunk);
+
+	UFUNCTION(BlueprintCallable)
+	void ResolveMissingChunkVariants(FRandomStream& Random, FLevelLayoutData& InOutLayout);
 };
