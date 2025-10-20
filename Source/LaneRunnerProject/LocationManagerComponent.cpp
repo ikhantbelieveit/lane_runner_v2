@@ -318,6 +318,9 @@ void ULocationManagerComponent::ApplyAutoMove()
 		ProjMove->Activate(true);
 
 		IsAutoMoving = true;
+
+		//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, TEXT("APPLY AUTO MOVE"));
+		//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, FString::Printf(TEXT("AUTO MOVE SPEED: %s"), *ProjMove->Velocity.ToString()));
 	}
 }
 
@@ -358,6 +361,8 @@ void ULocationManagerComponent::StartAutoMove(EProjectileDirection direction, fl
 
 void ULocationManagerComponent::StopAutoMove(bool clampToEnd)
 {
+	//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Magenta, TEXT("STOP AUTO MOVE"));
+
 	UProjectileMovementComponent* projMoveComp = (UProjectileMovementComponent*)TargetActor->GetComponentByClass(UProjectileMovementComponent::StaticClass());
 	if (projMoveComp)
 	{
