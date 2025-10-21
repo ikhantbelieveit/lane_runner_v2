@@ -162,6 +162,8 @@ void UDestructibleObjectComponent::DestroyFromComp()
 	}
 	
 	Destroyed = true;
+
+	OnDestroyed.Broadcast();
 }
 
 void UDestructibleObjectComponent::ResetDestroy()

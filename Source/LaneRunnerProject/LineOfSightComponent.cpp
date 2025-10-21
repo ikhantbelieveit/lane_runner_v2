@@ -3,8 +3,7 @@
 
 #include "LineOfSightComponent.h"
 #include "Components/BoxComponent.h"
-#include "LocationManagerComponent.h"
-#include "Projectile.h"
+
 
 // Sets default values for this component's properties
 ULineOfSightComponent::ULineOfSightComponent()
@@ -74,10 +73,5 @@ void ULineOfSightComponent::OnDetect()
 {
 	OnDetectPlayer.Broadcast();
 
-	ULocationManagerComponent* locManager = GetOwner()->GetComponentByClass<ULocationManagerComponent>();
-
-	if (locManager)
-	{
-		locManager->StartAutoMove(EProjectileDirection::Backward, 500.0f, false, FVector::Zero(), false);
-	}
+	
 }

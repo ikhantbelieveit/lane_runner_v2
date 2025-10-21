@@ -10,7 +10,7 @@
 
 class ADeathDummy;
 
-
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FDestructibleEvent);
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class LANERUNNERPROJECT_API UDestructibleObjectComponent : public UActorComponent
 {
@@ -80,4 +80,7 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = "Destruction VFX")
 	TSubclassOf<class ADeathDummy> DeathDummyClass;
+
+	UPROPERTY(BlueprintAssignable)
+	FDestructibleEvent OnDestroyed;
 };

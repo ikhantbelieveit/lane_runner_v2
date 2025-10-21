@@ -4,7 +4,18 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "PaperFlipbookComponent.h"
+#include "PaperSprite.h"
+#include "PaperSpriteComponent.h"
 #include "BaseEnemy.generated.h"
+
+UENUM(BlueprintType)
+enum class EEnemyDetectBehaviour : uint8
+{
+	None UMETA(DisplayName = "None"),
+	StraightAdvance UMETA(DisplayName = "Straight Advance"),
+	Shoot UMETA(DisplayName = "Shoot")
+};
 
 UCLASS()
 class LANERUNNERPROJECT_API ABaseEnemy : public AActor
@@ -19,8 +30,26 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	UPaperSpriteComponent* AlertSprite;
+
+	bool IsAlive;
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	EEnemyDetectBehaviour DetectBehaviour;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float AdvanceSpeed;
+
+	UFUNCTION()
+	void OnDetectPlayer();
+
+	UFUNCTION(BlueprintCallable)
+	bool IsEnemyAlive();
+
+	UFUNCTION(BlueprintCallable)
+	void OnKilled();
 };
