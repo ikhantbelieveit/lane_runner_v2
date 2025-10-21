@@ -1784,5 +1784,18 @@ bool APlayerCharacter::IsTouchingSolidFloor()
 		Params
 	);
 
-	return bHit;
+	if (bHit)
+	{
+		// Check the tag on either the component or actor
+		if (Hit.GetComponent() && Hit.GetComponent()->ComponentHasTag(TEXT("Floor")))
+		{
+			return true;
+		}
+		else if (Hit.GetActor() && Hit.GetActor()->ActorHasTag(TEXT("Floor")))
+		{
+			return true;
+		}
+	}
+
+	return false;
 }
