@@ -4,9 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "Components/BoxComponent.h"
 #include "LineOfSightComponent.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerDetect);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerLoseSight);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class LANERUNNERPROJECT_API ULineOfSightComponent : public UActorComponent
@@ -20,8 +22,15 @@ public:
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	bool DetectsPlayer = false;
+
+	bool PlayerInSightBox = false;
+
+	FVector SightRayOrigin;
+
+	UBoxComponent* LineOfSightBox;
 
 public:	
 
@@ -35,7 +44,17 @@ public:
 		const FHitResult& SweepResult
 	);
 
+	UFUNCTION()
+	void HandleEndOverlap(
+		UPrimitiveComponent* OverlappedComp,
+		AActor* OtherActor,
+		UPrimitiveComponent* OtherComp,
+		int32 OtherBodyIndex
+	);
+
 	void OnDetect();
+
+	void LoseSightOfPlayer();
 
 	bool GetDetectsPlayer() const {
 		return DetectsPlayer;
@@ -43,4 +62,10 @@ public:
 
 	UPROPERTY(BlueprintAssignable)
 	FOnPlayerDetect OnDetectPlayer;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnPlayerLoseSight OnLosePlayer;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float SightRayLength = 500.0f;
 };

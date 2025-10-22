@@ -62,10 +62,26 @@ void USpawnComponent::Spawn(bool drop, bool scrollInstant, bool scrollOnReach)
 		mesh->SetVisibility(true);
 	}
 
-	UBoxComponent* box = Cast<UBoxComponent>(GetOwner()->GetComponentByClass(UBoxComponent::StaticClass()));
-	if (box)
+	TArray<UBoxComponent*> Boxes;
+	GetOwner()->GetComponents<UBoxComponent>(Boxes);
+
+	for (UBoxComponent* box : Boxes)
 	{
-		box->SetCollisionProfileName(SpawnedCollisionTag);
+		if (!box) continue;
+
+		if (box->ComponentHasTag("LineOfSight"))
+		{
+			continue;
+		}
+
+		if (box->ComponentHasTag("SightBlocker"))
+		{
+			box->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+		}
+		else
+		{
+			box->SetCollisionProfileName(SpawnedCollisionTag);
+		}
 	}
 
 	UPaperSpriteComponent* sprite = Cast<UPaperSpriteComponent>(GetOwner()->GetComponentByClass(UPaperSpriteComponent::StaticClass()));
@@ -120,9 +136,13 @@ void USpawnComponent::Despawn()
 	}
 
 
-	UBoxComponent* box = Cast<UBoxComponent>(GetOwner()->GetComponentByClass(UBoxComponent::StaticClass()));
-	if (box)
+	TArray<UBoxComponent*> Boxes;
+	GetOwner()->GetComponents<UBoxComponent>(Boxes);
+
+	for (UBoxComponent* box : Boxes)
 	{
+		if (!box) continue;
+
 		box->SetCollisionProfileName(DespawnedCollisionTag);
 	}
 
