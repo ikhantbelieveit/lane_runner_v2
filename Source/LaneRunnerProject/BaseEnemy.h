@@ -30,7 +30,8 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	UPaperSpriteComponent* AlertSprite;
+	UPaperSpriteComponent* AlertVFX;
+	UPaperSpriteComponent* MainVisuals;
 
 	bool IsAlive;
 
@@ -52,4 +53,10 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void OnKilled();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPaperSprite* IdleSprite;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPaperSprite* AlertSprite;
 };

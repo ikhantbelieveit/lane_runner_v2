@@ -34,7 +34,8 @@ enum class EAudioKey : uint8
     CoinGet UMETA(DisplayName = "Coin Get"),
     ShotByPlayer_Default UMETA(DisplayName = "Shot By Player"),
     HealPlayer UMETA(DisplayName = "Heal Player"),
-    DestroyedByPlayer_Default UMETA(DisplayName = "Destroyed By Player")
+    DestroyedByPlayer_Default UMETA(DisplayName = "Destroyed By Player"),
+    EnemyAlert UMETA(DisplayName = "Enemy Alert")
 };
 
 USTRUCT(BlueprintType)

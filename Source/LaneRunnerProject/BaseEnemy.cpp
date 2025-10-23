@@ -5,6 +5,7 @@
 #include "LineOfSightComponent.h"
 #include "LocationManagerComponent.h"
 #include "DestructibleObjectComponent.h"
+#include "GI_AudioSystem.h"
 
 // Sets default values
 ABaseEnemy::ABaseEnemy()
@@ -27,6 +28,7 @@ void ABaseEnemy::BeginPlay()
 	}
 
 	UPaperSpriteComponent* foundAlertSprite = nullptr;
+	UPaperSpriteComponent* foundMainVisuals = nullptr;
 
 	TArray<UPaperSpriteComponent*> spriteComps;
 
@@ -42,14 +44,24 @@ void ABaseEnemy::BeginPlay()
 		if (sprite->ComponentHasTag("AlertSprite"))
 		{
 			foundAlertSprite = sprite;
-			break;
+		}
+
+		if (sprite->ComponentHasTag("MainVisuals"))
+		{
+			foundMainVisuals = sprite;
 		}
 	}
 
 	if (foundAlertSprite)
 	{
-		AlertSprite = foundAlertSprite;
-		AlertSprite->SetVisibility(false);
+		AlertVFX = foundAlertSprite;
+		AlertVFX->SetVisibility(false);
+	}
+
+	if (foundMainVisuals)
+	{
+		MainVisuals = foundMainVisuals;
+		MainVisuals->SetSprite(IdleSprite);
 	}
 
 	UDestructibleObjectComponent* foundDestructible = nullptr;
@@ -101,13 +113,24 @@ void ABaseEnemy::OnDetectPlayer()
 				locManager->StartAutoMove(EProjectileDirection::Backward, AdvanceSpeed, false, FVector::Zero(), false);
 			}
 
-			if (AlertSprite)
+			if (AlertVFX)
 			{
-				AlertSprite->SetVisibility(true);
+				AlertVFX->SetVisibility(true);
+			}
+
+			if (MainVisuals)
+			{
+				MainVisuals->SetSprite(AlertSprite);
 			}
 		}
 		
 		break;
+	}
+
+	if (DetectBehaviour != EEnemyDetectBehaviour::None)
+	{
+		auto* audioSystem = GetGameInstance()->GetSubsystem<UGI_AudioSystem>();
+		audioSystem->Play(EAudioKey::EnemyAlert);
 	}
 }
 
@@ -120,8 +143,8 @@ void ABaseEnemy::OnKilled()
 {
 	IsAlive = false;
 
-	if (AlertSprite)
+	if (AlertVFX)
 	{
-		AlertSprite->SetVisibility(false);
+		AlertVFX->SetVisibility(false);
 	}
 }
