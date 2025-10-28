@@ -124,6 +124,7 @@ public:
 
 	int HoldShoot_MaxProjectiles = 1;
 	float ShootHoldInputDelay = 0.5f;
+	float ShootTapInputDelay = 0.25f;
 
 
 	// Called every frame
@@ -177,7 +178,7 @@ public:
 
 	void Shoot(EProjectileDirection direction, bool holdNotTap);
 	bool CanShootInDirection(EProjectileDirection direction, bool holdNotTap);
-	bool DelayPreventsShootInDirection(EProjectileDirection direction);
+	bool DelayPreventsShootInDirection(EProjectileDirection direction, bool holdNotTap);
 	bool ExceededProjCountForDirection(EProjectileDirection direction);
 
 	float TimeSinceShoot_Left;

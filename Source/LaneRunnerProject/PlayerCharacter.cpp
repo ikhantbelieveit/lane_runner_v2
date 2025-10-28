@@ -260,6 +260,7 @@ void APlayerCharacter::BeginPlay_SetupFromConfig()
 		CameraFOV = ConfigData->MiscConfig.CameraFOV;
 
 		ShootHoldInputDelay = ConfigData->ShootConfig.ShootHoldInputDelay;
+		ShootTapInputDelay = ConfigData->ShootConfig.ShootTapInputDelay;
 		HoldShoot_MaxProjectiles = ConfigData->ShootConfig.HoldShoot_MaxProjectiles;
 
 		ProjectileClass = ConfigData->ShootConfig.ProjectileClass;
@@ -1317,14 +1318,9 @@ void APlayerCharacter::Shoot(EProjectileDirection direction, bool holdNotTap)
 
 bool APlayerCharacter::CanShootInDirection(EProjectileDirection direction, bool holdNotTap)
 {
-	bool bypassDelay = !holdNotTap;
-
-	if (!bypassDelay)
+	if (DelayPreventsShootInDirection(direction, holdNotTap))
 	{
-		if (DelayPreventsShootInDirection(direction))
-		{
-			return false;
-		}
+		return false;
 	}
 
 	if (holdNotTap)
@@ -1338,22 +1334,46 @@ bool APlayerCharacter::CanShootInDirection(EProjectileDirection direction, bool 
 	return true;
 }
 
-bool APlayerCharacter::DelayPreventsShootInDirection(EProjectileDirection direction)
+bool APlayerCharacter::DelayPreventsShootInDirection(EProjectileDirection direction, bool holdNotTap)
 {
-	switch (direction)
+	if (holdNotTap)
 	{
-	case EProjectileDirection::Forward:
-		return TimeSinceShoot_Forward < ShootHoldInputDelay;
-		break;
-	case EProjectileDirection::Up:
-		return TimeSinceShoot_Up < ShootHoldInputDelay;
-		break;
-	case EProjectileDirection::Left:
-		return TimeSinceShoot_Left < ShootHoldInputDelay;
-		break;
-	case EProjectileDirection::Right:
-		return TimeSinceShoot_Right < ShootHoldInputDelay;
-		break;
+		
+
+		switch (direction)
+		{
+		case EProjectileDirection::Forward:
+			return TimeSinceShoot_Forward < ShootHoldInputDelay;
+			break;
+		case EProjectileDirection::Up:
+			return TimeSinceShoot_Up < ShootHoldInputDelay;
+			break;
+		case EProjectileDirection::Left:
+			return TimeSinceShoot_Left < ShootHoldInputDelay;
+			break;
+		case EProjectileDirection::Right:
+			return TimeSinceShoot_Right < ShootHoldInputDelay;
+			break;
+		}
+	}
+	
+	else
+	{
+		switch (direction)
+		{
+		case EProjectileDirection::Forward:
+			return TimeSinceShoot_Forward < ShootTapInputDelay;
+			break;
+		case EProjectileDirection::Up:
+			return TimeSinceShoot_Up < ShootTapInputDelay;
+			break;
+		case EProjectileDirection::Left:
+			return TimeSinceShoot_Left < ShootTapInputDelay;
+			break;
+		case EProjectileDirection::Right:
+			return TimeSinceShoot_Right < ShootTapInputDelay;
+			break;
+		}
 	}
 
 	return false;

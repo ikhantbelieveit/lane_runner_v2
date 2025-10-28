@@ -218,6 +218,9 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class AProjectile> ProjectileClass;
+
+	UPROPERTY(EditAnywhere)
+	float ShootTapInputDelay = 0.25f;
 };
 
 
