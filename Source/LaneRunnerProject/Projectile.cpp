@@ -115,6 +115,17 @@ void AProjectile::Fire(EProjectileDirection Direction)
             scrollComp->bScrollEnabled = false;
         }
         break;
+
+    case EProjectileDirection::Backward:
+        directionVector = FVector(-1, 0, 0);
+        projRotation = FRotator(0.0f, 0.0f, -90.0f);
+
+        if (ULocationManagerComponent* scrollComp = Cast<ULocationManagerComponent>(
+            GetComponentByClass(ULocationManagerComponent::StaticClass())))
+        {
+            scrollComp->bScrollEnabled = false;
+        }
+        break;
     }
 
     SetActorRotation(projRotation);
@@ -131,18 +142,18 @@ void AProjectile::Fire(EProjectileDirection Direction)
             if (Entry.bInheritOwnerRotation)
             {
                 Entry.RotationOffset = FRotator::ZeroRotator; // now inherits from SetActorRotation
-                Entry.bScrollInstant = (Direction != EProjectileDirection::Forward);
+                Entry.bScrollInstant = ((Direction != EProjectileDirection::Forward) && (Direction != EProjectileDirection::Backward));
             }
         }
     }
 
-    if (Direction == EProjectileDirection::Forward)
+    /*if (Direction == EProjectileDirection::Forward)
     {
         if (ULocationManagerComponent* scrollComp = FindComponentByClass<ULocationManagerComponent>())
         {
             scrollComp->bScrollEnabled = false;
         }
-    }
+    }*/
 
     FiringDirection = Direction;
     

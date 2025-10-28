@@ -31,6 +31,7 @@ struct FProjectileRequestData
 	GENERATED_BODY()
 
 public:
+	UPROPERTY(EditAnywhere)
 	TArray<FShootItem> Items;
 };
 

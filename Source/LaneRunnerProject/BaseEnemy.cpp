@@ -6,6 +6,8 @@
 #include "LocationManagerComponent.h"
 #include "DestructibleObjectComponent.h"
 #include "GI_AudioSystem.h"
+#include "GI_ProjectileSystem.h"
+#include "GI_LevelSystem.h"
 
 // Sets default values
 ABaseEnemy::ABaseEnemy()
@@ -90,6 +92,12 @@ void ABaseEnemy::BeginPlay()
 	}
 
 	IsAlive = true;
+
+	auto* levelSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGI_LevelSystem>();
+	if (levelSystem)
+	{
+		levelSystem->CleanupBeforeReset.AddDynamic(this, &ABaseEnemy::OnLevelReset);
+	}
 }
 
 // Called every frame
@@ -99,28 +107,57 @@ void ABaseEnemy::Tick(float DeltaTime)
 
 }
 
+void ABaseEnemy::OnLevelReset()
+{
+	PerformedOneOffShoot = false;
+
+	if (AlertVFX)
+	{
+		AlertVFX->SetVisibility(false);
+	}
+
+	if (MainVisuals)
+	{
+		MainVisuals->SetSprite(IdleSprite);
+	}
+}
+
 void ABaseEnemy::OnDetectPlayer()
 {
+	if (!IsAlive)
+	{
+		return;
+	}
+
+	ULocationManagerComponent* locManager = GetComponentByClass<ULocationManagerComponent>();
+
 	switch (DetectBehaviour)
 	{
 	case EEnemyDetectBehaviour::StraightAdvance:
-		if (IsAlive)
+		if (locManager)
 		{
-			ULocationManagerComponent* locManager = GetComponentByClass<ULocationManagerComponent>();
+			locManager->StartAutoMove(EProjectileDirection::Backward, AdvanceSpeed, false, FVector::Zero(), false);
+		}
+		break;
+	case EEnemyDetectBehaviour::Shoot_OneOff:
+		if (!PerformedOneOffShoot)
+		{
+			auto* projSystem = GetGameInstance()->GetSubsystem<UGI_ProjectileSystem>();
 
-			if (locManager)
+			FProjectileRequestData projRequest = ProjectileData;
+			for (FShootItem& item : projRequest.Items)
 			{
-				locManager->StartAutoMove(EProjectileDirection::Backward, AdvanceSpeed, false, FVector::Zero(), false);
+				FVector shootPos = GetActorLocation();
+				item.ShootPos = shootPos;
 			}
 
-			if (AlertVFX)
+			if (!projSystem->ProcessProjectileRequest(projRequest))
 			{
-				AlertVFX->SetVisibility(true);
+				//complain here
 			}
-
-			if (MainVisuals)
+			else
 			{
-				MainVisuals->SetSprite(AlertSprite);
+				PerformedOneOffShoot = true;
 			}
 		}
 		
@@ -131,6 +168,16 @@ void ABaseEnemy::OnDetectPlayer()
 	{
 		auto* audioSystem = GetGameInstance()->GetSubsystem<UGI_AudioSystem>();
 		audioSystem->Play(EAudioKey::EnemyAlert);
+
+		if (AlertVFX)
+		{
+			AlertVFX->SetVisibility(true);
+		}
+
+		if (MainVisuals)
+		{
+			MainVisuals->SetSprite(AlertSprite);
+		}
 	}
 }
 

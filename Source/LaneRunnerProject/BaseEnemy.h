@@ -7,6 +7,7 @@
 #include "PaperFlipbookComponent.h"
 #include "PaperSprite.h"
 #include "PaperSpriteComponent.h"
+#include "ProjectileRequestData.h"
 #include "BaseEnemy.generated.h"
 
 UENUM(BlueprintType)
@@ -35,6 +36,8 @@ protected:
 
 	bool IsAlive;
 
+	bool PerformedOneOffShoot;
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -59,4 +62,10 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UPaperSprite* AlertSprite;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FProjectileRequestData ProjectileData;
+
+	UFUNCTION()
+	void OnLevelReset();
 };
