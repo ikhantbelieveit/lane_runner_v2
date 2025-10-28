@@ -8,6 +8,7 @@
 #include "BaseUIScreen.h"
 #include "GI_AudioSystem.h"
 #include "LevelChunkDefinitionAsset.h"
+#include "Projectile.h"
 #include "GI_ConfigData.generated.h"
 
 USTRUCT(BlueprintType)
@@ -42,6 +43,15 @@ public:
 	FChunkDefLoadConfig ConfigData;
 };
 
+UCLASS(BlueprintType)
+class LANERUNNERPROJECT_API UProjectileSystemConfigData : public UDataAsset
+{
+	GENERATED_BODY()
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TMap<EProjectileType, TSubclassOf<class AProjectile>> ProjectileClass_LUT;
+};
+
 UCLASS()
 class LANERUNNERPROJECT_API UGI_ConfigData : public UDataAsset
 {
@@ -56,5 +66,8 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	UChunkDefLoadConfigAsset* ChunkLoadConfig;
+
+	UPROPERTY(EditAnywhere)
+	UProjectileSystemConfigData* ProjectileSystemConfig;
 	
 };

@@ -1243,35 +1243,48 @@ void APlayerCharacter::Shoot(EProjectileDirection direction, bool holdNotTap)
 	if (projectileSystem)
 	{
 		FProjectileRequestData requestData = FProjectileRequestData();
-		requestData.Direction = direction;
-		requestData.ProjectileClass = ProjectileClass;
 
-		requestData.ShootPos = GetActorLocation();
+		FShootItem shootItem = FShootItem();
+
+		shootItem.Direction = direction;
+		shootItem.Type = EProjectileType::PlayerBullet;
+		//shootItem.ShootPos = GetActorLocation();
+
+		FVector shootPos = GetActorLocation();
+
+		/*requestData.Direction = direction;
+		requestData.ProjectileClass = ProjectileClass;*/
+
+		//shootItem.ShootPos = GetActorLocation();
 
 		float shootPosOffset = 100.0f;
 
 		switch (direction)
 		{
 		case EProjectileDirection::Left:
-			requestData.ShootPos += FVector::LeftVector * shootPosOffset;
+			shootPos += FVector::LeftVector * shootPosOffset;
 			break;
 		case EProjectileDirection::Right:
-			requestData.ShootPos += FVector::RightVector * shootPosOffset;
+			shootPos += FVector::RightVector * shootPosOffset;
 			break;
 		case EProjectileDirection::Up:
-			requestData.ShootPos += FVector::UpVector * shootPosOffset;
+			shootPos += FVector::UpVector * shootPosOffset;
 			break;
 		case EProjectileDirection::Forward:
-			requestData.ShootPos += FVector::ForwardVector * shootPosOffset;
+			shootPos += FVector::ForwardVector * shootPosOffset;
 			break;
 		}
 
-		if (projectileSystem->ShootPlayerProjectile(requestData))
+		shootItem.ShootPos = shootPos;
+
+		requestData.Items.Add(shootItem);
+
+		if (projectileSystem->ProcessProjectileRequest(requestData))
 		{
 			FActorSpawnParameters SpawnParams;
 			FRotator defaultRotation = FRotator(0.0f, 90.0f, 0.0f);
 
-			FVector muzzleShotPos = requestData.ShootPos;
+			FVector muzzleShotPos = shootItem.ShootPos;
 
 			switch (direction)
 			{

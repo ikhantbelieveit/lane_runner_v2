@@ -12,6 +12,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "OneShotAnim.h"
+#include "EProjectileType.h"
 #include "Projectile.generated.h"
 
 UCLASS()
@@ -28,6 +29,7 @@ public:
     void Fire(EProjectileDirection Direction);
     EProjectileDirection GetFiringDirection();
     void SetFiringDirection(EProjectileDirection Direction);
+    void SetProjectileType(EProjectileType Type);
 
     void OnDestroy(bool impactScroll, float scrollWithPlayerOffset);
 
@@ -35,6 +37,7 @@ protected:
     virtual void BeginPlay() override;
 
     EProjectileDirection FiringDirection;
+    EProjectileType ProjectileType;
 
 private:
     FVector Velocity;

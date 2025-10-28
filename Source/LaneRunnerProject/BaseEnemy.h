@@ -14,7 +14,7 @@ enum class EEnemyDetectBehaviour : uint8
 {
 	None UMETA(DisplayName = "None"),
 	StraightAdvance UMETA(DisplayName = "Straight Advance"),
-	Shoot UMETA(DisplayName = "Shoot")
+	Shoot_OneOff UMETA(DisplayName = "Shoot (One-Off)")
 };
 
 UCLASS()

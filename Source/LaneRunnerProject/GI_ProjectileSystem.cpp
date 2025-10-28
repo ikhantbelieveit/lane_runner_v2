@@ -4,6 +4,8 @@
 #include "GI_ProjectileSystem.h"
 #include "GI_LevelSystem.h"
 #include "EngineUtils.h"
+#include "MyGameInstance.h"
+#include "GI_ConfigData.h"
 
 void UGI_ProjectileSystem::Initialize(FSubsystemCollectionBase& Collection)
 {
@@ -17,30 +19,89 @@ void UGI_ProjectileSystem::Initialize(FSubsystemCollectionBase& Collection)
 		levelSystem->CleanupBeforeReset.AddDynamic(this, &UGI_ProjectileSystem::OnLevelReset);
 	}
 
-	UE_LOG(LogTemp, Log, TEXT("UI Manager Subsystem initialized after LevelSystemSubsystem"));
+	if (UWorld* World = GetWorld())
+	{
+		World->GetTimerManager().SetTimer(
+			TickHandle,
+			[this]()
+			{
+				TickSubsystem(0.016f); // Approx 60 FPS
+			},
+			0.016f,
+			true
+		);
+	}
 }
 
-bool UGI_ProjectileSystem::ShootPlayerProjectile(FProjectileRequestData request)
+void UGI_ProjectileSystem::Deinitialize()
 {
-	bool success = false;
+	if (UWorld* World = GetWorld())
+	{
+		World->GetTimerManager().ClearTimer(TickHandle);
+	}
+	Super::Deinitialize();
+}
+
+void UGI_ProjectileSystem::TickSubsystem(float DeltaTime)
+{
+	if (!HasInitialisedFromConfig)
+	{
+		if (InitialiseFromConfig())
+		{
+			HasInitialisedFromConfig = true;
+		}
+	}
+
+}
+
+bool UGI_ProjectileSystem::InitialiseFromConfig()
+{
+	UMyGameInstance* GI = Cast<UMyGameInstance>(GetGameInstance());
+	if (GI)
+	{
+		UProjectileSystemConfigData* configData = GI->ConfigData->ProjectileSystemConfig;
+		ProjectileClass_LUT.Empty();
+
+		for (const TPair<EProjectileType, TSubclassOf<AProjectile>> pair : configData->ProjectileClass_LUT)
+		{
+			ProjectileClass_LUT.Add(pair);
+		}
+
+		return true;
+	}
+
+	return false;
+}
+
+bool UGI_ProjectileSystem::ProcessProjectileRequest(FProjectileRequestData request)
+{
+	bool success = true;
 
 	UWorld* World = GetWorld();
 	if (World)
 	{
-		FActorSpawnParameters SpawnParams;
-
-		FVector shootPos = request.ShootPos;
-		FRotator defaultRotation = FRotator();
-
-		AProjectile* Projectile = World->SpawnActor<AProjectile>(request.ProjectileClass, shootPos, defaultRotation, SpawnParams);
-		if (Projectile)
+		for (const FShootItem shootItem : request.Items)
 		{
-			Projectile->SetFiringDirection(request.Direction);
-			Projectile->SetupFromConfig();
-			Projectile->Fire(request.Direction);
+			FActorSpawnParameters SpawnParams;
+			FVector shootPos = shootItem.ShootPos;
+			FRotator defaultRotation = FRotator();
 
-			success = true;
+			TSubclassOf<class AProjectile>* projClass = ProjectileClass_LUT.Find(shootItem.Type);
+			if (projClass)
+			{
+				AProjectile* Projectile = World->SpawnActor<AProjectile>(*projClass, shootPos, defaultRotation, SpawnParams);
+				if (Projectile)
+				{
+					Projectile->SetFiringDirection(shootItem.Direction);
+					Projectile->SetupFromConfig();
+					Projectile->Fire(shootItem.Direction);
 
+				}
+			}
+			else
+			{
+				success = false;
+			}
 		}
 	}
 
@@ -63,3 +124,5 @@ void UGI_ProjectileSystem::OnLevelReset()
 {
 	ClearAllProjectiles();
 }
+
+

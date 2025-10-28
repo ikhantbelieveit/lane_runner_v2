@@ -6,18 +6,8 @@
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "EProjectileDirection.h"
 #include "Projectile.h"
+#include "ProjectileRequestData.h"
 #include "GI_ProjectileSystem.generated.h"
-
-USTRUCT(BlueprintType)
-struct FProjectileRequestData
-{
-	GENERATED_BODY()
-
-public:
-	EProjectileDirection Direction;
-	TSubclassOf<AProjectile> ProjectileClass;
-	FVector ShootPos;
-};
 
 UCLASS()
 class LANERUNNERPROJECT_API UGI_ProjectileSystem : public UGameInstanceSubsystem
@@ -26,11 +16,22 @@ class LANERUNNERPROJECT_API UGI_ProjectileSystem : public UGameInstanceSubsystem
 
 public:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
-
-	bool ShootPlayerProjectile(FProjectileRequestData request);
+	virtual void Deinitialize() override;
 
 	void ClearAllProjectiles();
 
 	UFUNCTION()
 	void OnLevelReset();
+
+	UFUNCTION(BlueprintCallable)
+	bool ProcessProjectileRequest(FProjectileRequestData request);
+
+protected:
+	bool HasInitialisedFromConfig;
+	FTimerHandle TickHandle;
+	void TickSubsystem(float DeltaTime);
+	bool InitialiseFromConfig();
+
+	TMap<EProjectileType, TSubclassOf<class AProjectile>> ProjectileClass_LUT;
+
 };

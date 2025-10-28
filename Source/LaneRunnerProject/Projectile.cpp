@@ -155,6 +155,11 @@ void AProjectile::SetFiringDirection(EProjectileDirection Direction)
     FiringDirection = Direction;
 }
 
+void AProjectile::SetProjectileType(EProjectileType Type)
+{
+    ProjectileType = Type;
+}
+
 void AProjectile::OnDestroy(bool impactScroll, float scrollWithPlayerOffset)
 {
     if (ConfigData->ImpactAnimClass)
