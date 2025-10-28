@@ -337,6 +337,10 @@ protected:
 
 	void RefreshVisualScale();
 
+	float MercyInvincibleFlickerRate = 0.05f; // seconds per flicker
+	float MercyInvincibleFlickerTimer = 0.0f;
+	bool bMercyFlickerVisible = true;
+
 public:
 	UFUNCTION(BlueprintCallable)
 	void OnLevelRestart();

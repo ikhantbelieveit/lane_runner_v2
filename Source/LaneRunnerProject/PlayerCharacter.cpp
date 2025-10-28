@@ -859,20 +859,18 @@ void APlayerCharacter::StopHorizontalMovement()
 void APlayerCharacter::StartMercyInvincibility()
 {
 	if (MercyInvincibleActive)
-	{
 		return;
-	}
 
 	MercyInvincibleTimeLeft = MercyInvincibleTimeMax;
-
 	MercyInvincibleActive = true;
 
-	//SpriteToggle->SetSpriteEnabled(FString("Sprite Ghost"));
-	UPaperFlipbookComponent* flipbookComp = GetComponentByClass<UPaperFlipbookComponent>();
-	if (flipbookComp)
+	MercyInvincibleFlickerTimer = 0.0f;
+	bMercyFlickerVisible = true;
+
+	if (UPaperFlipbookComponent* flipbookComp = GetComponentByClass<UPaperFlipbookComponent>())
 	{
-		flipbookComp->SetMaterial(0, ConfigData->VisualsConfig.SpriteGhostMaterial);
-		flipbookComp->SetSpriteColor(FLinearColor(1.0f, 1.0f, 1.0f, 0.75f));
+		flipbookComp->SetMaterial(0, ConfigData->VisualsConfig.SpriteDefaultMaterial);
+		flipbookComp->SetVisibility(true);
 	}
 }
 
@@ -881,12 +879,10 @@ void APlayerCharacter::CancelMercyInvincibility()
 	MercyInvincibleTimeLeft = 0.0f;
 	MercyInvincibleActive = false;
 
-	//SpriteToggle->SetSpriteEnabled(FString("Sprite Base"));
-	UPaperFlipbookComponent* flipbookComp = GetComponentByClass<UPaperFlipbookComponent>();
-	if (flipbookComp)
+	if (UPaperFlipbookComponent* flipbookComp = GetComponentByClass<UPaperFlipbookComponent>())
 	{
 		flipbookComp->SetMaterial(0, ConfigData->VisualsConfig.SpriteDefaultMaterial);
-		flipbookComp->SetSpriteColor(FLinearColor(1.0f, 1.0f, 1.0f, 1.0f));
+		flipbookComp->SetVisibility(true);
 	}
 }
 
@@ -1530,12 +1526,26 @@ void APlayerCharacter::UpdateCheckForPit()
 
 void APlayerCharacter::UpdateMercyInvincibility(float DeltaTime)
 {
-	if (MercyInvincibleActive)
+	if (!MercyInvincibleActive)
+		return;
+
+	MercyInvincibleTimeLeft -= DeltaTime;
+	MercyInvincibleFlickerTimer += DeltaTime;
+
+	if (MercyInvincibleTimeLeft <= 0.0f)
 	{
-		MercyInvincibleTimeLeft -= DeltaTime;
-		if (MercyInvincibleTimeLeft <= 0)
+		CancelMercyInvincibility();
+		return;
+	}
+
+	if (MercyInvincibleFlickerTimer >= MercyInvincibleFlickerRate)
+	{
+		MercyInvincibleFlickerTimer = 0.0f;
+		bMercyFlickerVisible = !bMercyFlickerVisible;
+
+		if (UPaperFlipbookComponent* flipbookComp = GetComponentByClass<UPaperFlipbookComponent>())
 		{
-			CancelMercyInvincibility();
+			flipbookComp->SetVisibility(bMercyFlickerVisible, true);
 		}
 	}
 }
