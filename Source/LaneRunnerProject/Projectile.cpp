@@ -118,7 +118,7 @@ void AProjectile::Fire(EProjectileDirection Direction)
 
     case EProjectileDirection::Backward:
         directionVector = FVector(-1, 0, 0);
-        projRotation = FRotator(0.0f, 0.0f, -90.0f);
+        projRotation = FRotator(180.0f, 0.0f, -90.0f);
 
         if (ULocationManagerComponent* scrollComp = Cast<ULocationManagerComponent>(
             GetComponentByClass(ULocationManagerComponent::StaticClass())))
