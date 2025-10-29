@@ -281,5 +281,37 @@ void ALevelChunkActor::InitializeFromLayoutData(const FLevelChunkData& InChunkDa
         ActiveVariants.Add(FName(Entry.SetID), FName(Entry.Variant));
     }
 
+    //debug logs below
+    /*if (ActiveVariants.Num() == 0)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("Chunk '%s' has no active variants."), *GetName());
+
+        if (GEngine)
+            GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow,
+                FString::Printf(TEXT("Chunk '%s' has no active variants!"), *GetName()));
+    }
+    else
+    {
+        UE_LOG(LogTemp, Log, TEXT("=== Active Variants for Chunk: %s ==="), *GetName());
+
+        if (GEngine)
+            GEngine->AddOnScreenDebugMessage(-1, 6.f, FColor::Cyan,
+                FString::Printf(TEXT("Active Variants for %s:"), *GetName()));
+
+        for (const TPair<FName, FName>& Pair : ActiveVariants)
+        {
+            const FString SetName = Pair.Key.ToString();
+            const FString VariantValue = Pair.Value.ToString();
+
+            UE_LOG(LogTemp, Log, TEXT("  [%s] = %s"), *SetName, *VariantValue);
+
+            if (GEngine)
+                GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green,
+                    FString::Printf(TEXT("  %s = %s"), *SetName, *VariantValue));
+        }
+
+        UE_LOG(LogTemp, Log, TEXT("====================================="));
+    }*/
+
     ApplyVariant();
 }
