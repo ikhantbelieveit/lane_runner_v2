@@ -37,6 +37,9 @@ protected:
 	bool IsAlive;
 
 	bool PerformedOneOffShoot;
+	bool PerformedAdvance;
+
+	bool HasPerformedDetectAction();
 
 public:	
 	// Called every frame
@@ -68,4 +71,7 @@ public:
 
 	UFUNCTION()
 	void OnLevelReset();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool ShowAlertVFX = true;
 };
