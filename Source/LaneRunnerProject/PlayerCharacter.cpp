@@ -1336,12 +1336,9 @@ bool APlayerCharacter::CanShootInDirection(EProjectileDirection direction, bool 
 		return false;
 	}
 
-	if (holdNotTap)
+	if (ExceededProjCountForDirection(direction))
 	{
-		if (ExceededProjCountForDirection(direction))
-		{
-			return false;
-		}
+		return false;
 	}
 
 	return true;
