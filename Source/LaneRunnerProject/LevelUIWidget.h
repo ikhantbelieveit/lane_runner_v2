@@ -25,11 +25,17 @@ public:
 	UPROPERTY(meta = (BindWidget))
 	UTextBlock* HealthText;
 
+	UPROPERTY(meta = (BindWidget))
+	UTextBlock* DistanceValueText;
+
 	UFUNCTION()
 	void OnScoreUpdate();
 
 	UFUNCTION()
 	void OnHealthUpdate();
+
+	UFUNCTION()
+	void OnDistanceUpdate();
 
 	UPROPERTY(meta = (BindWidget))
 	UPauseUIWidget* PauseUIOverlay;

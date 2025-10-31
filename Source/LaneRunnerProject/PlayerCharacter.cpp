@@ -116,6 +116,7 @@ void APlayerCharacter::Tick(float DeltaTime)
 		case EGameState::Active:
 
 			UpdateLaneScroll();
+			UpdateDistanceTravelled();
 			UpdateSpeedFromInput();
 
 			UpdateLaneFromInput();
@@ -742,6 +743,9 @@ void APlayerCharacter::ResetPlayer()
 	SetJumpState(EPlayerJumpState::Grounded);
 
 	SetAnimState(ECharacterAnimState::Grounded);
+
+	DistanceTravelled = 0.0f;
+	LastFramePos = SpawnPos;
 }
 
 void APlayerCharacter::SetAnimState(ECharacterAnimState newState)
@@ -1673,6 +1677,22 @@ void APlayerCharacter::UpdateAnimation()
 	}
 }
 
+void APlayerCharacter::UpdateDistanceTravelled()
+{
+	FVector CurrentPos = GetActorLocation();
+	float Delta = CurrentPos.X - LastFramePos.X; // assuming X is forward
+
+	// Only add positive movement (ignore knockbacks or backwards motion)
+	if (Delta > 0)
+	{
+		DistanceTravelled += Delta;
+	}
+
+	LastFramePos = CurrentPos;
+
+	OnDistanceSet.Broadcast();
+}
+
 void APlayerCharacter::OnFlipbookFinish()
 {
 	switch (CurrentAnimState)
@@ -1794,6 +1814,16 @@ void APlayerCharacter::OnLevelRestart()
 void APlayerCharacter::OnLevelExit()
 {
 	ResetPlayer();
+}
+
+float APlayerCharacter::GetDistanceTravelled_PureUnits()
+{
+	return DistanceTravelled;
+}
+
+float APlayerCharacter::GetDistanceTravelled_Meters()
+{
+	return DistanceTravelled / 100.f;
 }
 
 bool APlayerCharacter::IsTouchingSolidFloor()

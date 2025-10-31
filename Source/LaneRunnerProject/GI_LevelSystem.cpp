@@ -45,12 +45,13 @@ void UGI_LevelSystem::SetGameState(EGameState newState)
         break;
 	case EGameState::Lose:
 
+        CalculateScoreResult(ScoreResult);
         
         if (saveSystem)
         {
             if (saveSystem->HasExistingSave())
             {
-                HighScoreAtTimeOfDeath = saveSystem->CurrentSave->StatsData.HighScore;
+                PrevSaveStatsCache = saveSystem->CurrentSave->StatsData;
             }
         }
 
@@ -291,26 +292,34 @@ void UGI_LevelSystem::TriggerContinue()
 void UGI_LevelSystem::SaveLevelStats()
 {
 	int highScore = 0;
+    int highestDistance = 0;
+
+    int oldHighScore = 0;
+    int oldHighestDistance = 0;
+
+    int currentScore = ScoreResult.TotalScore;
+    int currentDistance = ScoreResult.DistanceBonus.BonusValue;
 
 	auto* saveSystem = GetGameInstance()->GetSubsystem<UGI_SaveSystem>();
 	if (saveSystem)
 	{
 		if (saveSystem->HasExistingSave())
 		{
-			highScore = saveSystem->CurrentSave->StatsData.HighScore;
+            oldHighScore = saveSystem->CurrentSave->StatsData.HighScore;
+            oldHighestDistance = saveSystem->CurrentSave->StatsData.HighestDistance;
 		}
 	}
 
-	if (GetScore() > highScore)
-	{
-		highScore = GetScore();
-	}
+    highScore = (currentScore > oldHighScore) ? currentScore : oldHighScore;
+    highestDistance = (currentDistance > oldHighestDistance) ? currentDistance : oldHighestDistance;
+
 	if (saveSystem)
 	{
 		UMySaveGame* saveObject = Cast<UMySaveGame>(
 			UGameplayStatics::CreateSaveGameObject(UMySaveGame::StaticClass()));
 
 		saveObject->StatsData.HighScore = highScore;
+        saveObject->StatsData.HighestDistance = highestDistance;
 		saveSystem->SaveGame(saveObject);
 	};
 }
@@ -682,4 +691,32 @@ void UGI_LevelSystem::ExecuteSingleEvent(const FLevelEventData& Event)
     default:
         break;
     }
+}
+
+void UGI_LevelSystem::CalculateScoreResult(FLevelScoreResult& result)
+{
+    result.BasePoints = GetScore();
+
+    APlayerCharacter* playerRef = nullptr;
+
+    TArray<AActor*> FoundActors;
+    UGameplayStatics::GetAllActorsOfClass(GetWorld(), APlayerCharacter::StaticClass(), FoundActors);
+
+    if (FoundActors.Num() > 0)
+    {
+        AActor* foundActor = FoundActors[0];
+        playerRef = Cast<APlayerCharacter>(foundActor);
+    }
+
+    result.DistanceBonus = FLevelScoreBonus();
+
+    if (playerRef)
+    {
+        result.DistanceBonus.BonusValue = playerRef->GetDistanceTravelled_Meters();
+    }
+
+    result.DistanceBonus.Multiplier = 0.2f;
+    result.DistanceBonus.TotalBonus = result.DistanceBonus.BonusValue * result.DistanceBonus.Multiplier;
+
+    result.TotalScore = result.BasePoints + result.DistanceBonus.TotalBonus;
 }

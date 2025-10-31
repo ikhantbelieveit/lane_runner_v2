@@ -25,6 +25,9 @@ struct FStatsData
 public:
 	UPROPERTY(BlueprintReadWrite)
 	int32 HighScore;
+
+	UPROPERTY(BlueprintReadWrite)
+	int32 HighestDistance;
 };
 
 UCLASS()

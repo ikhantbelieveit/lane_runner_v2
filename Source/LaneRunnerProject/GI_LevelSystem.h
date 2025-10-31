@@ -7,7 +7,37 @@
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "ELevelEventType.h"
 #include "EProjectileDirection.h"
+#include "MySaveGame.h"
 #include "GI_LevelSystem.generated.h"
+
+USTRUCT(BlueprintType)
+struct FLevelScoreBonus
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere)
+	int BonusValue;
+
+	UPROPERTY(EditAnywhere)
+	float Multiplier;
+
+	int TotalBonus;
+};
+
+USTRUCT(BlueprintType)
+struct FLevelScoreResult
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere)
+	int BasePoints;
+
+	UPROPERTY(EditAnywhere)
+	FLevelScoreBonus DistanceBonus;
+
+	UPROPERTY(EditAnywhere)
+	int TotalScore;
+};
 
 
 USTRUCT(BlueprintType)
@@ -73,9 +103,16 @@ protected:
 
 	void ExecuteSingleEvent(const FLevelEventData& Event);
 
+	FLevelScoreResult ScoreResult;
+
+	void CalculateScoreResult(FLevelScoreResult& result);
 	
 
 public:
+	FLevelScoreResult GetScoreResult() const {
+		return ScoreResult;
+	}
+
 	void SetGameState(EGameState newState);
 	EGameState GetGameState();
 
@@ -119,7 +156,8 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FLevelSystemEvent OnPlayerLose;
 
-	int HighScoreAtTimeOfDeath;
+	FStatsData PrevSaveStatsCache;
+	//int HighScoreAtTimeOfDeath;
 
 	UFUNCTION(BlueprintCallable)
 	void TogglePause();

@@ -208,6 +208,7 @@ public:
 	void UpdateCoyoteTime(float DeltaTime);
 	void UpdateDropShadow();
 	void UpdateAnimation();
+	void UpdateDistanceTravelled();
 
 	//lane
 	bool MoveLane_Left();
@@ -262,6 +263,9 @@ public:
 
 	UPROPERTY(BlueprintAssignable)
 	FPlayerCharacterEvent OnHealthSet;
+
+	UPROPERTY(BlueprintAssignable)
+	FPlayerCharacterEvent OnDistanceSet;
 
 public:
 	bool GetMercyInvincibleActive();
@@ -342,10 +346,17 @@ protected:
 	float MercyInvincibleFlickerTimer = 0.0f;
 	bool bMercyFlickerVisible = true;
 
+	float DistanceTravelled = 0.0f;
+	FVector LastFramePos = FVector::ZeroVector;
+
 public:
 	UFUNCTION(BlueprintCallable)
 	void OnLevelRestart();
 
 	UFUNCTION(BlueprintCallable)
 	void OnLevelExit();
+
+	float GetDistanceTravelled_PureUnits();
+
+	float GetDistanceTravelled_Meters();
 };

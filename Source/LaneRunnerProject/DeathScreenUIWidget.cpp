@@ -67,25 +67,37 @@ void UDeathScreenUIWidget::OnMenuButtonPressed()
 
 void UDeathScreenUIWidget::SetupOnPlayerDeath()
 {
-	int currentScore = 0;
+	FLevelScoreResult scoreResult;
+
+	int basePoints = 0;
+	int totalScore = 0;
+	int distanceTravelled = 0;
+	int distanceBonus = 0;
 	int highScore = 0;
 	bool newHighScore = false;
 
 	auto* levelSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGI_LevelSystem>();
 	if (levelSystem)
 	{
-		currentScore = levelSystem->GetScore();
-		highScore = levelSystem->HighScoreAtTimeOfDeath;
+		scoreResult = levelSystem->GetScoreResult();
+		basePoints = scoreResult.BasePoints;
+		totalScore = scoreResult.TotalScore;
+		distanceTravelled = scoreResult.DistanceBonus.BonusValue;
+		distanceBonus = scoreResult.DistanceBonus.TotalBonus;
+		highScore = levelSystem->PrevSaveStatsCache.HighScore;
 	}
 
-	newHighScore = currentScore > highScore;
+	newHighScore = totalScore > highScore;
 
 	if (newHighScore)
 	{
-		highScore = currentScore;
+		highScore = totalScore;
 	}
 
-	SetScoreText(currentScore);
+	SetBasePointsText(basePoints);
+	SetDistanceValueText(distanceTravelled);
+	SetDistanceBonusText(distanceBonus);
+	SetScoreTotalText(totalScore);
 	SetHighScoreText(highScore);
 	SetMessageActive(newHighScore);
 }
@@ -120,10 +132,28 @@ void UDeathScreenUIWidget::OnScreenHidden()
 	Super::OnScreenHidden();
 }
 
-void UDeathScreenUIWidget::SetScoreText(int newScore)
+void UDeathScreenUIWidget::SetBasePointsText(int basePoints)
 {
-	FText text = FText::FromString(FString::FromInt(newScore));
-	ScoreText->SetText(text);
+	FText text = FText::FromString(FString::FromInt(basePoints));
+	BaseScoreText->SetText(text);
+}
+
+void UDeathScreenUIWidget::SetDistanceValueText(int distance)
+{
+	FText text = FText::FromString(FString::FromInt(distance) + "M");
+	DistanceValueText->SetText(text);
+}
+
+void UDeathScreenUIWidget::SetDistanceBonusText(int bonusVal)
+{
+	FText text = FText::FromString(FString::FromInt(bonusVal));
+	DistanceBonusText->SetText(text);
+}
+
+void UDeathScreenUIWidget::SetScoreTotalText(int pointsTotal)
+{
+	FText text = FText::FromString(FString::FromInt(pointsTotal));
+	TotalScoreText->SetText(text);
 }
 
 void UDeathScreenUIWidget::SetHighScoreText(int newHighScore)

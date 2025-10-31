@@ -17,6 +17,7 @@ void ULevelUIWidget::Initialise()
 		AActor* foundActor = FoundActors[0];
 		APlayerCharacter* player = Cast<APlayerCharacter>(foundActor);
 		player->OnHealthSet.AddDynamic(this, &ULevelUIWidget::OnHealthUpdate);
+		player->OnDistanceSet.AddDynamic(this, &ULevelUIWidget::OnDistanceUpdate);
 	}
 
 	auto* levelSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGI_LevelSystem>();
@@ -71,6 +72,29 @@ void ULevelUIWidget::OnHealthUpdate()
 		FString healthString = FString::FromInt(health);
 		FText text = FText::FromString(healthString);
 		HealthText->SetText(text);
+	}
+}
+
+void ULevelUIWidget::OnDistanceUpdate()
+{
+	float distance = 0.0f;
+
+	TArray<AActor*> FoundActors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), APlayerCharacter::StaticClass(), FoundActors);
+
+	if (FoundActors.Num() > 0)
+	{
+		AActor* foundActor = FoundActors[0];
+		APlayerCharacter* player = Cast<APlayerCharacter>(foundActor);
+		distance = player->GetDistanceTravelled_Meters();
+		distance = FMath::RoundToInt(distance);
+
+		if (DistanceValueText)
+		{
+			FString distanceString = FString::FromInt(distance);
+			FText text = FText::FromString(distanceString);
+			DistanceValueText->SetText(text);
+		}
 	}
 }
 

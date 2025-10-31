@@ -39,7 +39,16 @@ public:
 	virtual void OnScreenHidden() override;
 
 	UPROPERTY(meta = (BindWidget))
-	UTextBlock* ScoreText;
+	UTextBlock* BaseScoreText;
+
+	UPROPERTY(meta = (BindWidget))
+	UTextBlock* DistanceValueText;
+
+	UPROPERTY(meta = (BindWidget))
+	UTextBlock* DistanceBonusText;
+
+	UPROPERTY(meta = (BindWidget))
+	UTextBlock* TotalScoreText;
 
 	UPROPERTY(meta = (BindWidget))
 	UTextBlock* HighScoreText;
@@ -47,7 +56,10 @@ public:
 	UPROPERTY(meta = (BindWidget))
 	UTextBlock* NewHighScoreMessageText;
 
-	void SetScoreText(int newScore);
+	void SetBasePointsText(int basePoints);
+	void SetDistanceValueText(int distance);
+	void SetDistanceBonusText(int bonusVal);
+	void SetScoreTotalText(int pointsTotal);
 
 	void SetHighScoreText(int newHighScore);
 
