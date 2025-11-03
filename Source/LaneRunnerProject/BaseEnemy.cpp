@@ -32,9 +32,13 @@ void ABaseEnemy::BeginPlay()
 	UPaperSpriteComponent* foundAlertSprite = nullptr;
 	UPaperSpriteComponent* foundMainVisuals = nullptr;
 
+	UPaperFlipbookComponent* foundMainVisualsFlipbook = nullptr;
+
 	TArray<UPaperSpriteComponent*> spriteComps;
+	TArray<UPaperFlipbookComponent*> flipbookComps;
 
 	GetComponents<UPaperSpriteComponent>(spriteComps);
+	GetComponents<UPaperFlipbookComponent>(flipbookComps);
 
 	for (UPaperSpriteComponent* sprite : spriteComps)
 	{
@@ -54,6 +58,19 @@ void ABaseEnemy::BeginPlay()
 		}
 	}
 
+	for (UPaperFlipbookComponent* flipbook : flipbookComps)
+	{
+		if (!flipbook)
+		{
+			continue;
+		}
+
+		if (flipbook->ComponentHasTag("MainVisuals"))
+		{
+			foundMainVisualsFlipbook = flipbook;
+		}
+	}
+
 	if (foundAlertSprite)
 	{
 		AlertVFX = foundAlertSprite;
@@ -64,6 +81,12 @@ void ABaseEnemy::BeginPlay()
 	{
 		MainVisuals = foundMainVisuals;
 		MainVisuals->SetSprite(IdleSprite);
+	}
+
+	if (foundMainVisualsFlipbook)
+	{
+		MainVisualsFlipbook = foundMainVisualsFlipbook;
+		MainVisualsFlipbook->SetFlipbook(IdleFlipbook);
 	}
 
 	UDestructibleObjectComponent* foundDestructible = nullptr;
@@ -133,6 +156,11 @@ void ABaseEnemy::OnLevelReset()
 	{
 		MainVisuals->SetSprite(IdleSprite);
 	}
+
+	if (MainVisualsFlipbook)
+	{
+		MainVisualsFlipbook->SetFlipbook(IdleFlipbook);
+	}
 }
 
 void ABaseEnemy::OnDetectPlayer()
@@ -196,6 +224,11 @@ void ABaseEnemy::OnDetectPlayer()
 	if (MainVisuals)
 	{
 		MainVisuals->SetSprite(AlertSprite);
+	}
+
+	if (MainVisualsFlipbook)
+	{
+		MainVisualsFlipbook->SetFlipbook(AlertFlipbook);
 	}
 }
 

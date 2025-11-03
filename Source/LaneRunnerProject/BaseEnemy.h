@@ -34,6 +34,8 @@ protected:
 	UPaperSpriteComponent* AlertVFX;
 	UPaperSpriteComponent* MainVisuals;
 
+	UPaperFlipbookComponent* MainVisualsFlipbook;
+
 	bool IsAlive;
 
 	bool PerformedOneOffShoot;
@@ -68,6 +70,12 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FProjectileRequestData ProjectileData;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPaperFlipbook* IdleFlipbook;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPaperFlipbook* AlertFlipbook;
 
 	UFUNCTION()
 	void OnLevelReset();

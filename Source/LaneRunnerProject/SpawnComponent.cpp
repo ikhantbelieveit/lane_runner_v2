@@ -4,6 +4,7 @@
 #include "SpawnComponent.h"
 #include "GI_LevelSystem.h"
 #include "GI_AudioSystem.h"
+#include "PaperFlipbookComponent.h"
 #include "PaperSpriteComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "PlayerDetectComponent.h"
@@ -90,6 +91,12 @@ void USpawnComponent::Spawn(bool drop, bool scrollInstant, bool scrollOnReach)
 		sprite->SetVisibility(true);
 	}
 
+	UPaperFlipbookComponent* flipbook = Cast<UPaperFlipbookComponent>(GetOwner()->GetComponentByClass(UPaperFlipbookComponent::StaticClass()));
+	if (flipbook)
+	{
+		flipbook->SetVisibility(true);
+	}
+
 	if (drop)
 	{
 		ULocationManagerComponent* locManager = Cast<ULocationManagerComponent>(GetOwner()->GetComponentByClass(ULocationManagerComponent::StaticClass()));
@@ -150,5 +157,11 @@ void USpawnComponent::Despawn()
 	if (sprite)
 	{
 		sprite->SetVisibility(false);
+	}
+
+	UPaperFlipbookComponent* flipbook = Cast<UPaperFlipbookComponent>(GetOwner()->GetComponentByClass(UPaperFlipbookComponent::StaticClass()));
+	if (flipbook)
+	{
+		flipbook->SetVisibility(false);
 	}
 }
