@@ -16,4 +16,8 @@ enum class ECharacterType : uint8
 	Cowboy_Purple UMETA(DisplayName = "Purple Cowboy"),
 	Scrooge UMETA(DisplayName = "Scrooge"),
 	Cow UMETA(DisplayName = "Cow"),
+	Egg UMETA(DisplayName = "Egg Person"),
+	Postman UMETA(DisplayName = "Postman"),
+	Rat UMETA(DisplayName = "Rat"),
+	Wonka UMETA(DisplayName = "Wonka")
 };
