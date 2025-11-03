@@ -715,7 +715,7 @@ void UGI_LevelSystem::CalculateScoreResult(FLevelScoreResult& result)
         result.DistanceBonus.BonusValue = playerRef->GetDistanceTravelled_Meters();
     }
 
-    result.DistanceBonus.Multiplier = 0.2f;
+    result.DistanceBonus.Multiplier = 0.45f;
     result.DistanceBonus.TotalBonus = result.DistanceBonus.BonusValue * result.DistanceBonus.Multiplier;
 
     result.TotalScore = result.BasePoints + result.DistanceBonus.TotalBonus;
