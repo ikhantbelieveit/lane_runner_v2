@@ -1,5 +1,6 @@
 #include "DamageFlashComponent.h"
 #include "PaperSpriteComponent.h"
+#include "PaperFlipbookComponent.h"
 #include "TimerManager.h"
 
 UDamageFlashComponent::UDamageFlashComponent()
@@ -11,15 +12,91 @@ void UDamageFlashComponent::BeginPlay()
 {
     Super::BeginPlay();
 
-    // Get the sprite's dynamic material
-    UPaperSpriteComponent* SpriteComp = GetOwner()->FindComponentByClass<UPaperSpriteComponent>();
-    if (SpriteComp && SpriteComp->GetMaterial(0))
+    UPaperSpriteComponent* foundMainVisualsSprite = nullptr;
+
+    UPaperFlipbookComponent* foundMainVisualsFlipbook = nullptr;
+
+    TArray<UPaperSpriteComponent*> spriteComps;
+    TArray<UPaperFlipbookComponent*> flipbookComps;
+
+    GetOwner()->GetComponents<UPaperSpriteComponent>(spriteComps);
+    GetOwner()->GetComponents<UPaperFlipbookComponent>(flipbookComps);
+
+    for (UPaperSpriteComponent* sprite : spriteComps)
     {
-        DynamicMaterial = SpriteComp->CreateDynamicMaterialInstance(0);
-        if (DynamicMaterial)
+        if (!sprite)
         {
-            DynamicMaterial->SetScalarParameterValue("FlashAmount", 0.0f);
-            DynamicMaterial->SetVectorParameterValue("FlashColor", FlashColor);
+            continue;
+        }
+
+        if (sprite->ComponentHasTag("MainVisuals"))
+        {
+            foundMainVisualsSprite = sprite;
+        }
+    }
+
+    for (UPaperFlipbookComponent* flipbook : flipbookComps)
+    {
+        if (!flipbook)
+        {
+            continue;
+        }
+
+        if (flipbook->ComponentHasTag("MainVisuals"))
+        {
+            foundMainVisualsFlipbook = flipbook;
+        }
+    }
+
+    UActorComponent* VisualComp = nullptr;
+
+    if (foundMainVisualsFlipbook)
+    {
+        VisualComp = foundMainVisualsFlipbook;
+    }
+
+    else
+    {
+        if (foundMainVisualsSprite)
+        {
+            VisualComp = foundMainVisualsSprite;
+        }
+    }
+
+    // Check for tagged flipbook
+    //for (UPaperFlipbookComponent* FlipbookComp : GetOwner()->GetComponentsByClass<UPaperFlipbookComponent>())
+    //{
+    //    if (FlipbookComp && FlipbookComp->ComponentHasTag("MainVisuals"))
+    //    {
+    //        VisualComp = FlipbookComp;
+    //        break;
+    //    }
+    //}
+
+    //// If no tagged flipbook found, check for tagged sprite
+    //if (!VisualComp)
+    //{
+    //    for (UPaperSpriteComponent* SpriteComp : GetOwner()->GetComponentsByClass<UPaperSpriteComponent>())
+    //    {
+    //        if (SpriteComp && SpriteComp->ComponentHasTag("MainVisuals"))
+    //        {
+    //            VisualComp = SpriteComp;
+    //            break;
+    //        }
+    //    }
+    //}
+
+    if (VisualComp)
+    {
+        UMeshComponent* MeshComp = Cast<UMeshComponent>(VisualComp);
+        if (MeshComp && MeshComp->GetMaterial(0))
+        {
+            DynamicMaterial = MeshComp->CreateDynamicMaterialInstance(0);
+            if (DynamicMaterial)
+            {
+                DynamicMaterial->SetScalarParameterValue("FlashAmount", 0.0f);
+                DynamicMaterial->SetVectorParameterValue("FlashColor", FlashColor);
+            }
         }
     }
 }
