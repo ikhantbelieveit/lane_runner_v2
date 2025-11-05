@@ -70,6 +70,12 @@ public:
 	void OnCharacterButton5Pressed();
 
 	UPROPERTY(meta = (BindWidget))
+	UUIButtonWidget* CharacterButton6;
+
+	UFUNCTION()
+	void OnCharacterButton6Pressed();
+
+	UPROPERTY(meta = (BindWidget))
 	UImage* Character1PreviewImage;
 
 	UPROPERTY(meta = (BindWidget))
@@ -83,6 +89,9 @@ public:
 
 	UPROPERTY(meta = (BindWidget))
 	UImage* Character5PreviewImage;
+
+	UPROPERTY(meta = (BindWidget))
+	UImage* Character6PreviewImage;
 
 	void ShowPreviewImage(ECharacterType characterType);
 
