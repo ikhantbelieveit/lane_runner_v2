@@ -23,8 +23,9 @@ void ULineOfSightComponent::BeginPlay()
 
 	// ...
 
-	UBoxComponent* foundLineOfSight = nullptr;
+	//UBoxComponent* foundLineOfSight = nullptr;
 
+	TArray<UBoxComponent*> foundSightBoxes;
 	TArray<UBoxComponent*> boxComps;
 
 	GetOwner()->GetComponents<UBoxComponent>(boxComps);
@@ -38,18 +39,22 @@ void ULineOfSightComponent::BeginPlay()
 
 		if (box->ComponentHasTag("LineOfSight"))
 		{
-			foundLineOfSight = box;
-			break;
+			foundSightBoxes.Add(box);
 		}
 	}
 	
+	for (UBoxComponent* box : boxComps)
+	{
+		box->OnComponentBeginOverlap.AddDynamic(this, &ULineOfSightComponent::HandleBeginOverlap);
+		box->OnComponentEndOverlap.AddDynamic(this, &ULineOfSightComponent::HandleEndOverlap);
+	}
 
-	if (foundLineOfSight)
+	/*if (foundLineOfSight)
 	{
 		LineOfSightBox = foundLineOfSight;
 		LineOfSightBox->OnComponentBeginOverlap.AddDynamic(this, &ULineOfSightComponent::HandleBeginOverlap);
 		LineOfSightBox->OnComponentEndOverlap.AddDynamic(this, &ULineOfSightComponent::HandleEndOverlap);
-	}
+	}*/
 
 	TArray<USceneComponent*> sceneComps;
 
@@ -84,7 +89,7 @@ void ULineOfSightComponent::TickComponent(float DeltaTime, ELevelTick TickType, 
 	// Direction: use owner's forward vector (world space)
 	FVector Forward = GetOwner()->GetActorForwardVector();
 
-	float boxLength = LineOfSightBox->GetScaledBoxExtent().X * 2.0f;
+	float boxLength = CurrentOccupiedSightBox->GetScaledBoxExtent().X * 2.0f;
 	FVector End = Start - Forward * boxLength;
 
 	// Trace
@@ -128,6 +133,7 @@ void ULineOfSightComponent::HandleBeginOverlap(UPrimitiveComponent* OverlappedCo
 	if (OtherComp->ComponentHasTag("PlayerColl"))
 	{
 		PlayerInSightBox = true;
+		CurrentOccupiedSightBox = Cast<UBoxComponent>(OverlappedComp);
 		//OnDetect();
 	}
 }
@@ -147,6 +153,7 @@ void ULineOfSightComponent::HandleEndOverlap(
 	if (OtherComp->ComponentHasTag("PlayerColl"))
 	{
 		PlayerInSightBox = false;
+		CurrentOccupiedSightBox = nullptr;
 		LoseSightOfPlayer();
 	}
 }

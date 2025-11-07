@@ -43,6 +43,8 @@ protected:
 
 	bool HasPerformedDetectAction();
 
+	TMap<FName, USceneComponent*> ProjectileOrigins;
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

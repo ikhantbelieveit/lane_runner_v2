@@ -30,7 +30,7 @@ protected:
 
 	FVector SightRayOrigin;
 
-	UBoxComponent* LineOfSightBox;
+	UBoxComponent* CurrentOccupiedSightBox;
 
 public:	
 

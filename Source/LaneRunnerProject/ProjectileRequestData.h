@@ -23,6 +23,9 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	FVector ShootPos;
+
+	UPROPERTY(EditAnywhere)
+	FName ShootOriginName;
 };
 
 USTRUCT(BlueprintType)

@@ -121,6 +121,26 @@ void ABaseEnemy::BeginPlay()
 	{
 		levelSystem->CleanupBeforeReset.AddDynamic(this, &ABaseEnemy::OnLevelReset);
 	}
+
+	TArray<USceneComponent*> sceneComponents;
+	GetComponents<USceneComponent>(sceneComponents);
+
+	for (USceneComponent* comp : sceneComponents)
+	{
+		if (!comp) continue;
+
+		for (const FName& tag : comp->ComponentTags)
+		{
+			FString tagStr = tag.ToString();
+			if (tagStr.StartsWith(TEXT("PROJ_")))
+			{
+				// Strip prefix to get clean key name
+				FString originName = tagStr.Mid(5);
+				ProjectileOrigins.Add(FName(*originName), comp);
+				break;
+			}
+		}
+	}
 }
 
 bool ABaseEnemy::HasPerformedDetectAction()
@@ -198,6 +218,18 @@ void ABaseEnemy::OnDetectPlayer()
 		for (FShootItem& item : projRequest.Items)
 		{
 			FVector shootPos = GetActorLocation();
+
+			if (item.ShootOriginName != NAME_None)
+			{
+				if (USceneComponent** foundComp = ProjectileOrigins.Find(item.ShootOriginName))
+				{
+					if (*foundComp)
+					{
+						shootPos = (*foundComp)->GetComponentLocation();
+					}
+				}
+			}
+
 			item.ShootPos = shootPos;
 		}
 
