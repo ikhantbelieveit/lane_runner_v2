@@ -54,7 +54,7 @@ bool UGI_ChunkDefinitionLoadSystem::InitialiseFromConfig()
         for (const ULevelChunkDefinitionAsset* Entry : configData.ChunkDefs)
         {
             ChunkDef_LUT.Add(Entry->Definition.ChunkID, Entry->Definition);
-            GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, (TEXT("Added chunk %s to Lookup Table."), *Entry->Definition.ChunkID.ToString()));
+            //GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, (TEXT("Added chunk %s to Lookup Table."), *Entry->Definition.ChunkID.ToString()));
         }
         return true;
     }
