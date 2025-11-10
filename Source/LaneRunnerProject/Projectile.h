@@ -26,7 +26,7 @@ public:
     virtual void Tick(float DeltaTime) override;
 
     void SetupFromConfig();
-    void Fire(EProjectileDirection Direction);
+    void Fire(EProjectileDirection Direction, bool ScrollWithPlayer);
     EProjectileDirection GetFiringDirection();
     void SetFiringDirection(EProjectileDirection Direction);
     void SetProjectileType(EProjectileType Type);

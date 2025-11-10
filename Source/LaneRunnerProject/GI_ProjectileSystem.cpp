@@ -94,7 +94,7 @@ bool UGI_ProjectileSystem::ProcessProjectileRequest(FProjectileRequestData reque
 				{
 					Projectile->SetFiringDirection(shootItem.Direction);
 					Projectile->SetupFromConfig();
-					Projectile->Fire(shootItem.Direction);
+					Projectile->Fire(shootItem.Direction, shootItem.ScrollWithPlayer);
 
 				}
 			}

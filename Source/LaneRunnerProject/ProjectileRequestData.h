@@ -26,6 +26,9 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	FName ShootOriginName;
+
+	UPROPERTY(EditAnywhere)
+	bool ScrollWithPlayer;
 };
 
 USTRUCT(BlueprintType)
@@ -34,6 +37,22 @@ struct FProjectileRequestData
 	GENERATED_BODY()
 
 public:
+	UPROPERTY(EditAnywhere)
+	TArray<FShootItem> Items;
+};
+
+USTRUCT(BlueprintType)
+struct FEnemyProjectileRequestData
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(EditAnywhere)
+	bool bSightBoxDependent;
+
+	UPROPERTY(EditAnywhere)
+	TArray<FName> ValidSightBoxNames;
+
 	UPROPERTY(EditAnywhere)
 	TArray<FShootItem> Items;
 };

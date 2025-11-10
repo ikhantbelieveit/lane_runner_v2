@@ -25,6 +25,9 @@ struct FSightZone
 
 	UPROPERTY(EditAnywhere)
 	EProjectileDirection DirectionEnum = EProjectileDirection::None;
+
+	UPROPERTY(EditAnywhere)
+	TArray<FName> ShootProjNames;
 };
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerDetect);
@@ -98,4 +101,7 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TMap<FName, FSightZone> SightZones;
+
+	UFUNCTION(BlueprintCallable)
+	TArray<FName> GetSightZoneProjNames() const;
 };

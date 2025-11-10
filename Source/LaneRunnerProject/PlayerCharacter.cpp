@@ -1267,15 +1267,19 @@ void APlayerCharacter::Shoot(EProjectileDirection direction, bool holdNotTap)
 		{
 		case EProjectileDirection::Left:
 			shootPos += FVector::LeftVector * shootPosOffset;
+			shootItem.ScrollWithPlayer = true;
 			break;
 		case EProjectileDirection::Right:
 			shootPos += FVector::RightVector * shootPosOffset;
+			shootItem.ScrollWithPlayer = true;
 			break;
 		case EProjectileDirection::Up:
 			shootPos += FVector::UpVector * shootPosOffset;
+			shootItem.ScrollWithPlayer = true;
 			break;
 		case EProjectileDirection::Forward:
 			shootPos += FVector::ForwardVector * shootPosOffset;
+			shootItem.ScrollWithPlayer = false;
 			break;
 		}
 

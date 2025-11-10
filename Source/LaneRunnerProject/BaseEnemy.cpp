@@ -201,6 +201,7 @@ void ABaseEnemy::OnDetectPlayer()
 	}
 
 	ULocationManagerComponent* locManager = GetComponentByClass<ULocationManagerComponent>();
+	ULineOfSightComponent* lineOfSight = GetComponentByClass<ULineOfSightComponent>();
 
 	switch (DetectBehaviour)
 	{
@@ -214,33 +215,43 @@ void ABaseEnemy::OnDetectPlayer()
 	case EEnemyDetectBehaviour::Shoot_OneOff:
 		auto* projSystem = GetGameInstance()->GetSubsystem<UGI_ProjectileSystem>();
 
-		FProjectileRequestData projRequest = ProjectileData;
-		for (FShootItem& item : projRequest.Items)
+		if (lineOfSight)
 		{
-			FVector shootPos = GetActorLocation();
+			TArray<FName> shootProjNames = lineOfSight->GetSightZoneProjNames();
 
-			if (item.ShootOriginName != NAME_None)
+			for (FName projName : shootProjNames)
 			{
-				if (USceneComponent** foundComp = ProjectileOrigins.Find(item.ShootOriginName))
+				FProjectileRequestData* projRequest = ProjectileDataMap.Find(projName);
+				for (FShootItem& item : projRequest->Items)
 				{
-					if (*foundComp)
+					FVector shootPos = GetActorLocation();
+
+					if (item.ShootOriginName != NAME_None)
 					{
-						shootPos = (*foundComp)->GetComponentLocation();
+						if (USceneComponent** foundComp = ProjectileOrigins.Find(item.ShootOriginName))
+						{
+							if (*foundComp)
+							{
+								shootPos = (*foundComp)->GetComponentLocation();
+							}
+						}
 					}
+
+					item.ShootPos = shootPos;
+				}
+
+				if (!projSystem->ProcessProjectileRequest(*projRequest))
+				{
+					//complain here
+				}
+				else
+				{
+					PerformedOneOffShoot = true;
 				}
 			}
-
-			item.ShootPos = shootPos;
 		}
 
-		if (!projSystem->ProcessProjectileRequest(projRequest))
-		{
-			//complain here
-		}
-		else
-		{
-			PerformedOneOffShoot = true;
-		}
+		
 		
 		break;
 	}

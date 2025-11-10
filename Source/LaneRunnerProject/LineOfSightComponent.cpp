@@ -70,20 +70,9 @@ void ULineOfSightComponent::BeginPlay()
 
 void ULineOfSightComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
-	if (PlayerInSightBox && (!CurrentZone || !CurrentZone->SightBox))
-	{
-		GEngine->AddOnScreenDebugMessage(
-			-1,
-			5.0f,
-			FColor::Magenta,
-			TEXT("NO VALID SIGHT BOX")
-		);
-	}
 
 	if (!CurrentZone || !CurrentZone->SightBox || !PlayerInSightBox)
 	{
-		
-
 		return;
 	}
 		
@@ -100,12 +89,6 @@ void ULineOfSightComponent::TickComponent(float DeltaTime, ELevelTick TickType, 
 	float boxLength = CurrentZone->SightBox->GetScaledBoxExtent().X * 2.0f;
 	FVector End = Start + Forward * boxLength;
 
-	GEngine->AddOnScreenDebugMessage(
-		-1,
-		5.0f,
-		FColor::Cyan,
-		FString::Printf(TEXT("Sight box length: %s"), *FString::SanitizeFloat(boxLength))
-	);
 
 	FHitResult Hit;
 	FCollisionQueryParams Params;
@@ -114,7 +97,7 @@ void ULineOfSightComponent::TickComponent(float DeltaTime, ELevelTick TickType, 
 
 	bool bHit = World->LineTraceSingleByChannel(Hit, Start, End, ECC_Camera, Params);
 
-	DrawDebugLine(World, Start, End, FColor::Green, false, 0.0f, 0, 2.0f);
+	//DrawDebugLine(World, Start, End, FColor::Green, false, 0.0f, 0, 2.0f);
 
 	if (bHit)
 	{
@@ -152,12 +135,7 @@ void ULineOfSightComponent::HandleBeginOverlap(UPrimitiveComponent* OverlappedCo
 				CurrentZone = &Pair.Value;
 				PlayerInSightBox = true;
 
-				GEngine->AddOnScreenDebugMessage(
-					-1,
-					5.0f,
-					FColor::Cyan,
-					FString::Printf(TEXT("Player in sight box: %s"), *Pair.Key.ToString())
-				);
+				
 				break;
 			}
 		}
@@ -223,4 +201,16 @@ FName ULineOfSightComponent::GetActiveSightZoneName() const
 	}
 
 	return NAME_None;
+}
+
+TArray<FName> ULineOfSightComponent::GetSightZoneProjNames() const
+{
+	TArray<FName> returnList = TArray<FName>();
+
+	if (CurrentZone)
+	{
+		returnList = CurrentZone->ShootProjNames;
+	}
+
+	return returnList;
 }

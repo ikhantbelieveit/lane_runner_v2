@@ -80,10 +80,17 @@ void AProjectile::SetupFromConfig()
     }
 }
 
-void AProjectile::Fire(EProjectileDirection Direction)
+void AProjectile::Fire(EProjectileDirection Direction, bool ScrollWithPlayer)
 {
     UProjectileMovementComponent* projMoveComp = FindComponentByClass<UProjectileMovementComponent>();
     UEmitterComponent* emitterComp = FindComponentByClass<UEmitterComponent>();
+
+    ULocationManagerComponent* locManager = FindComponentByClass<ULocationManagerComponent>();
+
+    if (locManager)
+    {
+        locManager->bScrollEnabled = ScrollWithPlayer;
+    }
 
     FRotator projRotation = FRotator::ZeroRotator;
     FVector directionVector = FVector::ZeroVector;
@@ -108,23 +115,11 @@ void AProjectile::Fire(EProjectileDirection Direction)
     case EProjectileDirection::Forward:
         directionVector = FVector(1, 0, 0);
         projRotation = FRotator(0.0f, 0.0f, 90.0f);
-
-        if (ULocationManagerComponent* scrollComp = Cast<ULocationManagerComponent>(
-            GetComponentByClass(ULocationManagerComponent::StaticClass())))
-        {
-            scrollComp->bScrollEnabled = false;
-        }
         break;
 
     case EProjectileDirection::Backward:
         directionVector = FVector(-1, 0, 0);
         projRotation = FRotator(180.0f, 0.0f, -90.0f);
-
-        if (ULocationManagerComponent* scrollComp = Cast<ULocationManagerComponent>(
-            GetComponentByClass(ULocationManagerComponent::StaticClass())))
-        {
-            scrollComp->bScrollEnabled = false;
-        }
         break;
     }
 

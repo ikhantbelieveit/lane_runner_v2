@@ -71,7 +71,7 @@ public:
 	UPaperSprite* AlertSprite;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FProjectileRequestData ProjectileData;
+	TMap<FName, FProjectileRequestData> ProjectileDataMap;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UPaperFlipbook* IdleFlipbook;
