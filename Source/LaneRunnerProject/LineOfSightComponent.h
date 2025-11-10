@@ -5,7 +5,27 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "Components/BoxComponent.h"
+#include "EProjectileDirection.h"
 #include "LineOfSightComponent.generated.h"
+
+USTRUCT(BlueprintType)
+struct FSightZone
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere)
+	FName ZoneName;
+
+	UBoxComponent* SightBox = nullptr;
+
+	USceneComponent* RayOrigin = nullptr;
+
+	UPROPERTY(EditAnywhere)
+	FVector DirectionVector = FVector::ForwardVector;
+
+	UPROPERTY(EditAnywhere)
+	EProjectileDirection DirectionEnum = EProjectileDirection::None;
+};
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerDetect);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerLoseSight);
@@ -31,6 +51,10 @@ protected:
 	FVector SightRayOrigin;
 
 	UBoxComponent* CurrentOccupiedSightBox;
+
+	
+
+	FSightZone* CurrentZone = nullptr;
 
 public:	
 
@@ -68,4 +92,10 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float SightRayLength = 500.0f;
+
+	UFUNCTION(BlueprintCallable)
+	FName GetActiveSightZoneName() const;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TMap<FName, FSightZone> SightZones;
 };

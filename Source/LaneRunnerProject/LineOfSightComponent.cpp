@@ -21,99 +21,115 @@ void ULineOfSightComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// ...
-
-	//UBoxComponent* foundLineOfSight = nullptr;
-
-	TArray<UBoxComponent*> foundSightBoxes;
 	TArray<UBoxComponent*> boxComps;
-
 	GetOwner()->GetComponents<UBoxComponent>(boxComps);
 
-	for (UBoxComponent* box : boxComps)
-	{
-		if (!box)
-		{
-			continue;
-		}
-
-		if (box->ComponentHasTag("LineOfSight"))
-		{
-			foundSightBoxes.Add(box);
-		}
-	}
-	
-	for (UBoxComponent* box : boxComps)
-	{
-		box->OnComponentBeginOverlap.AddDynamic(this, &ULineOfSightComponent::HandleBeginOverlap);
-		box->OnComponentEndOverlap.AddDynamic(this, &ULineOfSightComponent::HandleEndOverlap);
-	}
-
-	/*if (foundLineOfSight)
-	{
-		LineOfSightBox = foundLineOfSight;
-		LineOfSightBox->OnComponentBeginOverlap.AddDynamic(this, &ULineOfSightComponent::HandleBeginOverlap);
-		LineOfSightBox->OnComponentEndOverlap.AddDynamic(this, &ULineOfSightComponent::HandleEndOverlap);
-	}*/
-
 	TArray<USceneComponent*> sceneComps;
-
 	GetOwner()->GetComponents<USceneComponent>(sceneComps);
 
+	// Build zones from tags
+	for (UBoxComponent* box : boxComps)
+	{
+		if (!box) continue;
+
+		for (const FName& tag : box->ComponentTags)
+		{
+			FString tagStr = tag.ToString();
+			if (tagStr.StartsWith(TEXT("SightBox_")))
+			{
+				FString zoneName = tagStr.Mid(9); // after SightBox_
+				FSightZone& zone = SightZones.FindOrAdd(FName(*zoneName));
+				zone.SightBox = box;
+
+				// Connect overlap events
+				box->OnComponentBeginOverlap.AddDynamic(this, &ULineOfSightComponent::HandleBeginOverlap);
+				box->OnComponentEndOverlap.AddDynamic(this, &ULineOfSightComponent::HandleEndOverlap);
+			}
+		}
+	}
+
+	// Match ray origins to zones
 	for (USceneComponent* comp : sceneComps)
 	{
-		if (!comp)
-		{
-			continue;
-		}
+		if (!comp) continue;
 
-		if (comp->ComponentHasTag("SightRayOrigin"))
+		for (const FName& tag : comp->ComponentTags)
 		{
-			SightRayOrigin = comp->GetComponentTransform().GetLocation();
-			break;
+			FString tagStr = tag.ToString();
+			if (tagStr.StartsWith(TEXT("SightRayOrigin_")))
+			{
+				FString zoneName = tagStr.Mid(15); // after SightRayOrigin_
+				if (FSightZone* zone = SightZones.Find(FName(*zoneName)))
+				{
+					zone->RayOrigin = comp;
+				}
+			}
 		}
 	}
 }
 
 void ULineOfSightComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
-	if (!PlayerInSightBox)
+	if (PlayerInSightBox && (!CurrentZone || !CurrentZone->SightBox))
+	{
+		GEngine->AddOnScreenDebugMessage(
+			-1,
+			5.0f,
+			FColor::Magenta,
+			TEXT("NO VALID SIGHT BOX")
+		);
+	}
+
+	if (!CurrentZone || !CurrentZone->SightBox || !PlayerInSightBox)
+	{
+		
+
 		return;
+	}
+		
 
 	UWorld* World = GetWorld();
 	if (!World) return;
 
-	// Start is the stored sight origin location (captured in BeginPlay)
-	FVector Start = SightRayOrigin;
+	FVector Start = CurrentZone->RayOrigin
+		? CurrentZone->RayOrigin->GetComponentLocation()
+		: GetOwner()->GetActorLocation();
 
-	// Direction: use owner's forward vector (world space)
-	FVector Forward = GetOwner()->GetActorForwardVector();
+	FVector Forward = CurrentZone->DirectionVector;
 
-	float boxLength = CurrentOccupiedSightBox->GetScaledBoxExtent().X * 2.0f;
-	FVector End = Start - Forward * boxLength;
+	float boxLength = CurrentZone->SightBox->GetScaledBoxExtent().X * 2.0f;
+	FVector End = Start + Forward * boxLength;
 
-	// Trace
+	GEngine->AddOnScreenDebugMessage(
+		-1,
+		5.0f,
+		FColor::Cyan,
+		FString::Printf(TEXT("Sight box length: %s"), *FString::SanitizeFloat(boxLength))
+	);
+
 	FHitResult Hit;
 	FCollisionQueryParams Params;
-	Params.AddIgnoredActor(GetOwner()); // ignore the enemy itself
+	Params.AddIgnoredActor(GetOwner());
 	Params.bTraceComplex = false;
 
 	bool bHit = World->LineTraceSingleByChannel(Hit, Start, End, ECC_Camera, Params);
 
-	/*FColor LineColor = bHit ? FColor::Green : FColor::Red;
-	DrawDebugLine(World, Start, End, LineColor, false, 0.1f, 0, 1.5f);*/
+	DrawDebugLine(World, Start, End, FColor::Green, false, 0.0f, 0, 2.0f);
 
-	// Print what we hit
 	if (bHit)
 	{
 		AActor* HitActor = Hit.GetActor();
-		if (HitActor->ActorHasTag("Player"))
+		if (HitActor && HitActor->ActorHasTag("Player"))
 		{
 			OnDetect();
+
+			/*GEngine->AddOnScreenDebugMessage(
+				-1,
+				5.0f,
+				FColor::Magenta,
+				TEXT("PLAYER DETECT")
+			);*/
 		}
-		/*FString HitName = HitActor ? HitActor->GetName() : TEXT("ComponentOnlyHit");
-		GEngine->AddOnScreenDebugMessage(-1, 0.1f, FColor::Cyan,
-			FString::Printf(TEXT("SightRay Hit: %s"), *HitName));*/
 	}
 }
 
@@ -125,36 +141,44 @@ void ULineOfSightComponent::HandleBeginOverlap(UPrimitiveComponent* OverlappedCo
 	bool bFromSweep,
 	const FHitResult& SweepResult)
 {
-	if (!OtherActor || OtherActor == GetOwner())
-	{
-		return;
-	}
+	if (!OtherActor || OtherActor == GetOwner()) return;
 
 	if (OtherComp->ComponentHasTag("PlayerColl"))
 	{
-		PlayerInSightBox = true;
-		CurrentOccupiedSightBox = Cast<UBoxComponent>(OverlappedComp);
-		//OnDetect();
+		for (auto& Pair : SightZones)
+		{
+			if (Pair.Value.SightBox == OverlappedComp)
+			{
+				CurrentZone = &Pair.Value;
+				PlayerInSightBox = true;
+
+				GEngine->AddOnScreenDebugMessage(
+					-1,
+					5.0f,
+					FColor::Cyan,
+					FString::Printf(TEXT("Player in sight box: %s"), *Pair.Key.ToString())
+				);
+				break;
+			}
+		}
 	}
 }
 
-void ULineOfSightComponent::HandleEndOverlap(
-	UPrimitiveComponent* OverlappedComp,
+void ULineOfSightComponent::HandleEndOverlap(UPrimitiveComponent* OverlappedComp,
 	AActor* OtherActor,
 	UPrimitiveComponent* OtherComp,
-	int32 OtherBodyIndex
-)
+	int32 OtherBodyIndex)
 {
-	if (!OtherActor || OtherActor == GetOwner())
-	{
-		return;
-	}
+	if (!OtherActor || OtherActor == GetOwner()) return;
 
 	if (OtherComp->ComponentHasTag("PlayerColl"))
 	{
-		PlayerInSightBox = false;
-		CurrentOccupiedSightBox = nullptr;
-		LoseSightOfPlayer();
+		if (CurrentZone && CurrentZone->SightBox == OverlappedComp)
+		{
+			PlayerInSightBox = false;
+			CurrentZone = nullptr;
+			LoseSightOfPlayer();
+		}
 	}
 }
 
@@ -180,4 +204,23 @@ void ULineOfSightComponent::LoseSightOfPlayer()
 	OnLosePlayer.Broadcast();
 
 	DetectsPlayer = false;
+}
+
+FName ULineOfSightComponent::GetActiveSightZoneName() const
+{
+	if (!CurrentZone)
+	{
+		return NAME_None;
+	}
+
+	// Find which map entry matches CurrentZone
+	for (const TPair<FName, FSightZone>& Pair : SightZones)
+	{
+		if (&Pair.Value == CurrentZone)
+		{
+			return Pair.Key;
+		}
+	}
+
+	return NAME_None;
 }
