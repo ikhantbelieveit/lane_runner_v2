@@ -28,6 +28,12 @@ struct FSightZone
 
 	UPROPERTY(EditAnywhere)
 	TArray<FName> ShootProjNames;
+
+	UPROPERTY(EditAnywhere)
+	bool bSetAnim;
+
+	UPROPERTY(EditAnywhere)
+	FName SetAnimName;
 };
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerDetect);
@@ -104,4 +110,7 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	TArray<FName> GetSightZoneProjNames() const;
+
+	UFUNCTION(BlueprintCallable)
+	bool GetSetAnimName(FName &name) const;
 };

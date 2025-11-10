@@ -86,7 +86,7 @@ void ABaseEnemy::BeginPlay()
 	if (foundMainVisualsFlipbook)
 	{
 		MainVisualsFlipbook = foundMainVisualsFlipbook;
-		MainVisualsFlipbook->SetFlipbook(IdleFlipbook);
+		MainVisualsFlipbook->SetFlipbook(DefaultFlipbook);
 	}
 
 	UDestructibleObjectComponent* foundDestructible = nullptr;
@@ -179,7 +179,16 @@ void ABaseEnemy::OnLevelReset()
 
 	if (MainVisualsFlipbook)
 	{
-		MainVisualsFlipbook->SetFlipbook(IdleFlipbook);
+		MainVisualsFlipbook->SetFlipbook(DefaultFlipbook);
+	}
+}
+
+void ABaseEnemy::SetAnim(FString animName)
+{
+	UPaperFlipbook** foundAnim = FlipbookMap.Find(FName(animName));
+	if (foundAnim)
+	{
+		MainVisualsFlipbook->SetFlipbook(*foundAnim);
 	}
 }
 
@@ -269,9 +278,11 @@ void ABaseEnemy::OnDetectPlayer()
 		MainVisuals->SetSprite(AlertSprite);
 	}
 
-	if (MainVisualsFlipbook)
+	FName setAnimName = NAME_None;
+
+	if (lineOfSight->GetSetAnimName(setAnimName) && setAnimName != NAME_None)
 	{
-		MainVisualsFlipbook->SetFlipbook(AlertFlipbook);
+		SetAnim(setAnimName.ToString());
 	}
 }
 

@@ -74,14 +74,17 @@ public:
 	TMap<FName, FProjectileRequestData> ProjectileDataMap;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UPaperFlipbook* IdleFlipbook;
+	TMap<FName, UPaperFlipbook*> FlipbookMap;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UPaperFlipbook* AlertFlipbook;
+	UPaperFlipbook* DefaultFlipbook;
 
 	UFUNCTION()
 	void OnLevelReset();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool ShowAlertVFX = true;
+
+	UFUNCTION()
+	void SetAnim(FString animName);
 };

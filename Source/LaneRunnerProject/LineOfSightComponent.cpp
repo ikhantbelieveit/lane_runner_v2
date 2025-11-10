@@ -214,3 +214,18 @@ TArray<FName> ULineOfSightComponent::GetSightZoneProjNames() const
 
 	return returnList;
 }
+
+bool ULineOfSightComponent::GetSetAnimName(FName &name) const
+{
+	if (CurrentZone)
+	{
+		if (CurrentZone->bSetAnim)
+		{
+			name = CurrentZone->SetAnimName;
+			return true;
+		}
+	}
+
+	name = NAME_None;
+	return false;
+}
