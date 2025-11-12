@@ -124,6 +124,54 @@ void UDestructibleObjectComponent::DestroyFromComp()
 
 				bool itemShouldScroll = false;
 
+				ULocationManagerComponent* sourceLocManager = nullptr;
+				AActor* owningActor = GetOwner();
+
+				// --- Step 1: If THIS actor implements GroupMemberInterface ---
+				if (GetClass()->ImplementsInterface(UGroupMemberInterface::StaticClass()))
+				{
+					sourceLocManager = IGroupMemberInterface::Execute_GetGroupManager(owningActor);
+				}
+
+				// --- Step 2: If owner implements GroupMemberInterface ---
+				if (!sourceLocManager && owningActor && owningActor->GetClass()->ImplementsInterface(UGroupMemberInterface::StaticClass()))
+				{
+					sourceLocManager = IGroupMemberInterface::Execute_GetGroupManager(owningActor);
+				}
+
+				// --- Step 3: Fallback — look directly for a LocationManagerComponent on this actor ---
+				if (!sourceLocManager)
+				{
+					sourceLocManager = owningActor->FindComponentByClass<ULocationManagerComponent>();
+				}
+
+				// --- Apply scroll settings if a location manager was found ---
+				if (sourceLocManager)
+				{
+					if (ULocationManagerComponent* itemLocComp = item->FindComponentByClass<ULocationManagerComponent>())
+					{
+						itemShouldScroll = sourceLocManager->bScrollEnabled && sourceLocManager->ScrollWithXPos == 0.0f;
+						itemLocComp->bScrollEnabled = itemShouldScroll;
+					}
+				}
+				else
+				{
+					// No valid location manager found — spawn item without scrolling
+					// UE_LOG(LogTemp, Verbose, TEXT("No location manager found for %s or its owner"), *GetName());
+				}
+
+				itemSpawnComp->Spawn(true, itemShouldScroll, true);
+			}
+		}
+
+		/*if (ABaseCollectible* item = GetWorld()->SpawnActor<ABaseCollectible>(SpawnCollectibleClass, spawnLoc, defaultRotation, SpawnParams))
+		{
+			if (USpawnComponent* itemSpawnComp = item->FindComponentByClass<USpawnComponent>())
+			{
+				itemSpawnComp->ResetAsSpawned = false;
+
+				bool itemShouldScroll = false;
+
 				if (GetOwner()->GetClass()->ImplementsInterface(UGroupMemberInterface::StaticClass()))
 				{
 					if (ULocationManagerComponent* locComp = IGroupMemberInterface::Execute_GetGroupManager(GetOwner()))
@@ -138,7 +186,7 @@ void UDestructibleObjectComponent::DestroyFromComp()
 
 				itemSpawnComp->Spawn(true, itemShouldScroll, true);
 			}
-		}
+		}*/
 	}
 
 	if (bSpawnDeathDummy)

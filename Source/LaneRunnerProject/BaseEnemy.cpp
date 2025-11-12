@@ -3,7 +3,6 @@
 
 #include "BaseEnemy.h"
 #include "LineOfSightComponent.h"
-#include "LocationManagerComponent.h"
 #include "DestructibleObjectComponent.h"
 #include "GI_AudioSystem.h"
 #include "GI_ProjectileSystem.h"
@@ -217,7 +216,7 @@ void ABaseEnemy::OnDetectPlayer()
 	case EEnemyDetectBehaviour::StraightAdvance:
 		if (locManager)
 		{
-			locManager->StartAutoMove(EProjectileDirection::Backward, AdvanceSpeed, false, FVector::Zero(), false);
+			locManager->StartAutoMove(AdvanceDirection, AdvanceSpeed, false, FVector::Zero(), false);
 			PerformedAdvance = true;
 		}
 		break;
@@ -284,6 +283,14 @@ void ABaseEnemy::OnDetectPlayer()
 	{
 		SetAnim(setAnimName.ToString());
 	}
+
+	if (bScrollOnPlayerDetect)
+	{
+		if (locManager)
+		{
+			locManager->bScrollEnabled = true;
+		}
+	}
 }
 
 bool ABaseEnemy::IsEnemyAlive()
@@ -299,4 +306,19 @@ void ABaseEnemy::OnKilled()
 	{
 		AlertVFX->SetVisibility(false);
 	}
+}
+
+void ABaseEnemy::OnAddedToGroup_Implementation(AActor* InGroupActor, ULocationManagerComponent* Manager)
+{
+	GroupActorRef = InGroupActor;
+	GroupManagerRef = Manager;
+
+	UE_LOG(LogTemp, Log, TEXT("%s added to group %s"), *GetName(), *InGroupActor->GetName());
+}
+
+void ABaseEnemy::OnRemovedFromGroup_Implementation()
+{
+	UE_LOG(LogTemp, Log, TEXT("%s removed from group"), *GetName());
+	GroupActorRef = nullptr;
+	GroupManagerRef = nullptr;
 }

@@ -8,6 +8,8 @@
 #include "PaperSprite.h"
 #include "PaperSpriteComponent.h"
 #include "ProjectileRequestData.h"
+#include "GroupMember.h"
+#include "LocationManagerComponent.h"
 #include "BaseEnemy.generated.h"
 
 UENUM(BlueprintType)
@@ -19,7 +21,7 @@ enum class EEnemyDetectBehaviour : uint8
 };
 
 UCLASS()
-class LANERUNNERPROJECT_API ABaseEnemy : public AActor
+class LANERUNNERPROJECT_API ABaseEnemy : public AActor, public IGroupMemberInterface
 {
 	GENERATED_BODY()
 	
@@ -55,6 +57,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float AdvanceSpeed;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	EProjectileDirection AdvanceDirection = EProjectileDirection::Backward;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bScrollOnPlayerDetect;
+
 	UFUNCTION()
 	void OnDetectPlayer();
 
@@ -87,4 +95,18 @@ public:
 
 	UFUNCTION()
 	void SetAnim(FString animName);
+
+protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Group")
+	TObjectPtr<ULocationManagerComponent> GroupManagerRef;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Group")
+	TObjectPtr<AActor> GroupActorRef;
+
+public:
+	// IGroupMemberInterface overrides
+	virtual void OnAddedToGroup_Implementation(AActor* InGroupActor, ULocationManagerComponent* Manager) override;
+	virtual void OnRemovedFromGroup_Implementation() override;
+	virtual ULocationManagerComponent* GetGroupManager_Implementation() const override { return GroupManagerRef; }
+	virtual AActor* GetGroupActor_Implementation() const override { return GroupActorRef; }
 };
