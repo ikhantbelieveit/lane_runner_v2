@@ -806,6 +806,17 @@ void APlayerCharacter::OnHitHazard(bool oneHitKill)
 		{
 			audioSystem->Play(EAudioKey::TakeDamage);
 		}
+
+		FActorSpawnParameters SpawnParams;
+		FRotator defaultRotation = FRotator(0.0f, 90.0f, 0.0f);
+
+		UPaperFlipbookComponent* flipbookComp = GetComponentByClass<UPaperFlipbookComponent>();
+		FVector vfxLoc = GetActorLocation();
+
+		if (AOneShotAnim* impactAnim = GetWorld()->SpawnActor<AOneShotAnim>(ConfigData->VisualsConfig.TakeDamageEffect, vfxLoc, defaultRotation, SpawnParams))
+		{
+
+		}
 	}
 
 

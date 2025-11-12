@@ -143,6 +143,9 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Visual", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<class AOneShotAnim> LandImpactEffect;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Visual", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<class AOneShotAnim> TakeDamageEffect;
 };
 
 USTRUCT(BlueprintType)
