@@ -163,30 +163,6 @@ void UDestructibleObjectComponent::DestroyFromComp()
 				itemSpawnComp->Spawn(true, itemShouldScroll, true);
 			}
 		}
-
-		/*if (ABaseCollectible* item = GetWorld()->SpawnActor<ABaseCollectible>(SpawnCollectibleClass, spawnLoc, defaultRotation, SpawnParams))
-		{
-			if (USpawnComponent* itemSpawnComp = item->FindComponentByClass<USpawnComponent>())
-			{
-				itemSpawnComp->ResetAsSpawned = false;
-
-				bool itemShouldScroll = false;
-
-				if (GetOwner()->GetClass()->ImplementsInterface(UGroupMemberInterface::StaticClass()))
-				{
-					if (ULocationManagerComponent* locComp = IGroupMemberInterface::Execute_GetGroupManager(GetOwner()))
-					{
-						if (ULocationManagerComponent* itemLocComp = item->FindComponentByClass<ULocationManagerComponent>())
-						{
-							itemShouldScroll = locComp->bScrollEnabled && locComp->ScrollWithXPos == 0.0f;
-							itemLocComp->bScrollEnabled = itemShouldScroll;
-						}
-					}
-				}
-
-				itemSpawnComp->Spawn(true, itemShouldScroll, true);
-			}
-		}*/
 	}
 
 	if (bSpawnDeathDummy)

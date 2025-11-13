@@ -13,6 +13,7 @@ AProjectile::AProjectile()
 void AProjectile::BeginPlay()
 {
     Super::BeginPlay();
+
 }
 
 void AProjectile::Tick(float DeltaTime)
@@ -76,6 +77,8 @@ void AProjectile::SetupFromConfig()
             {
                 boxComp->ComponentTags.Add("PlayerProj");
             }
+
+            boxComp->OnComponentBeginOverlap.AddDynamic(this, &AProjectile::HandleBeginOverlap);
         }
     }
 }
@@ -142,14 +145,6 @@ void AProjectile::Fire(EProjectileDirection Direction, bool ScrollWithPlayer)
         }
     }
 
-    /*if (Direction == EProjectileDirection::Forward)
-    {
-        if (ULocationManagerComponent* scrollComp = FindComponentByClass<ULocationManagerComponent>())
-        {
-            scrollComp->bScrollEnabled = false;
-        }
-    }*/
-
     FiringDirection = Direction;
     
 }
@@ -190,12 +185,33 @@ void AProjectile::OnDestroy(bool impactScroll, float scrollWithPlayerOffset)
                 }
             }
         }
-
-        /*if (auto* audioSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGI_AudioSystem>())
-        {
-            audioSystem->Play(ConfigData->ImpactSoundKey);
-        }*/
     }
 
     Destroy();
+}
+
+void AProjectile::HandleBeginOverlap(UPrimitiveComponent* OverlappedComp,
+    AActor* OtherActor,
+    UPrimitiveComponent* OtherComp,
+    int32 OtherBodyIndex,
+    bool bFromSweep,
+    const FHitResult& SweepResult)
+{
+    if (!OtherActor || OtherActor == GetOwner()) return;
+
+    if (OtherComp->ComponentHasTag("DestroyProj"))
+    {
+        bool impactScroll = false;
+        float scrollOffset = 0;
+
+        ULocationManagerComponent* locManager = FindComponentByClass<ULocationManagerComponent>();
+
+        if (locManager)
+        {
+            impactScroll = locManager->bScrollEnabled;
+            scrollOffset = locManager->ScrollWithXPos;
+        }
+
+        OnDestroy(impactScroll, scrollOffset);
+    }
 }
