@@ -34,14 +34,39 @@ void UDestructibleObjectComponent::BeginPlay()
 
 	CurrentHealth = StartHealth;
 
-	UBoxComponent* box = (UBoxComponent*)GetOwner()->GetComponentByClass(UBoxComponent::StaticClass());
-	if (box)
+	// Cache collision
+	if (UBoxComponent* box = GetOwner()->FindComponentByClass<UBoxComponent>())
 	{
 		DefaultCollMode = box->GetCollisionEnabled();
 	}
 
-	auto* levelSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGI_LevelSystem>();
-	if (levelSystem)
+	// Spawn collectible ONCE here:
+	if (SpawnItemOnDestroy && SpawnCollectibleClass)
+	{
+		FActorSpawnParameters Params;
+		Params.Owner = GetOwner();
+		Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+		FVector SpawnLoc = GetOwner()->GetActorLocation();
+		FRotator SpawnRot = FRotator::ZeroRotator;
+
+		PreSpawnedCollectible = GetWorld()->SpawnActor<ABaseCollectible>(
+			SpawnCollectibleClass, SpawnLoc, SpawnRot, Params
+		);
+
+		if (PreSpawnedCollectible)
+		{
+			// Hide it immediately
+			if (USpawnComponent* SpawnComp = PreSpawnedCollectible->FindComponentByClass<USpawnComponent>())
+			{
+				SpawnComp->Despawn();  // makes it invisible + disables collision
+				SpawnComp->ResetAsSpawned = false;
+			}
+		}
+	}
+
+	// Listen for level reset
+	if (auto* levelSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGI_LevelSystem>())
 	{
 		levelSystem->CleanupBeforeReset.AddDynamic(this, &UDestructibleObjectComponent::OnLevelReset);
 	}
@@ -82,112 +107,87 @@ void UDestructibleObjectComponent::OnHit()
 
 void UDestructibleObjectComponent::DestroyFromComp()
 {
-	if (GetIsDestroyed())
-	{
-		return;
-	}
+    if (Destroyed) return;
 
-	if (GivePointsOnDestroy)
-	{
-		auto* levelSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGI_LevelSystem>();
-		if (levelSystem)
-		{
-			if (levelSystem->GetGameState() == EGameState::Active)
-			{
-				levelSystem->AddToScore(PointsGivenOnDestroy);
-			}
-		}
-	}
+    // Award points
+    if (GivePointsOnDestroy)
+    {
+        if (auto* levelSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGI_LevelSystem>())
+        {
+            if (levelSystem->GetGameState() == EGameState::Active)
+            {
+                levelSystem->AddToScore(PointsGivenOnDestroy);
+            }
+        }
+    }
 
-	USpawnComponent* spawnComp = Cast<USpawnComponent>(GetOwner()->GetComponentByClass(USpawnComponent::StaticClass()));
-	if (spawnComp)
-	{
-		spawnComp->Despawn();
-	}
+    // Despawn this object
+    if (USpawnComponent* spawnComp = GetOwner()->FindComponentByClass<USpawnComponent>())
+    {
+        spawnComp->Despawn();
+    }
 
-	if (SpawnItemOnDestroy && SpawnCollectibleClass)
-	{
-		FActorSpawnParameters SpawnParams;
-		SpawnParams.Owner = GetOwner();
-		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+    // ----------------------------------------------------------
+    // Spawn the PRE-SPAWNED COLLECTIBLE, not a new one
+    // ----------------------------------------------------------
+    if (SpawnItemOnDestroy && PreSpawnedCollectible)
+    {
+        bool itemShouldScroll = false;
 
-		FVector spawnLoc = GetOwner()->GetActorLocation();
-		spawnLoc.Y += FMath::RandRange(randomSpreadMin, randomSpreadMax);
+        // Determine scroll inheritance
+        ULocationManagerComponent* sourceLocManager = nullptr;
+        AActor* owningActor = GetOwner();
 
-		FRotator defaultRotation = FRotator();
+        if (GetClass()->ImplementsInterface(UGroupMemberInterface::StaticClass()))
+        {
+            sourceLocManager = IGroupMemberInterface::Execute_GetGroupManager(owningActor);
+        }
+        if (!sourceLocManager && owningActor->GetClass()->ImplementsInterface(UGroupMemberInterface::StaticClass()))
+        {
+            sourceLocManager = IGroupMemberInterface::Execute_GetGroupManager(owningActor);
+        }
+        if (!sourceLocManager)
+        {
+            sourceLocManager = owningActor->FindComponentByClass<ULocationManagerComponent>();
+        }
 
-		if (ABaseCollectible* item = GetWorld()->SpawnActor<ABaseCollectible>(SpawnCollectibleClass, spawnLoc, defaultRotation, SpawnParams))
-		{
-			if (USpawnComponent* itemSpawnComp = item->FindComponentByClass<USpawnComponent>())
-			{
-				itemSpawnComp->ResetAsSpawned = false;
+        // Teleport collectible to destruction location
+        FVector SpawnLoc = GetOwner()->GetActorLocation();
+        SpawnLoc.Y += FMath::RandRange(randomSpreadMin, randomSpreadMax);
+        PreSpawnedCollectible->SetActorLocation(SpawnLoc);
 
-				bool itemShouldScroll = false;
+        if (sourceLocManager)
+        {
+            itemShouldScroll = sourceLocManager->bScrollEnabled &&
+                sourceLocManager->ScrollWithXPos == 0.0f;
+        }
 
-				ULocationManagerComponent* sourceLocManager = nullptr;
-				AActor* owningActor = GetOwner();
+        // Finally activate it with SpawnComponent->Spawn()
+        if (USpawnComponent* SpawnComp = PreSpawnedCollectible->FindComponentByClass<USpawnComponent>())
+        {
+            SpawnComp->Spawn(true, itemShouldScroll, true);
+        }
+    }
 
-				// --- Step 1: If THIS actor implements GroupMemberInterface ---
-				if (GetClass()->ImplementsInterface(UGroupMemberInterface::StaticClass()))
-				{
-					sourceLocManager = IGroupMemberInterface::Execute_GetGroupManager(owningActor);
-				}
+    // Spawn death dummy (unchanged)
+    if (bSpawnDeathDummy && DeathDummyClass)
+    {
+        FActorSpawnParameters Params;
+        Params.Owner = GetOwner();
+        Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
-				// --- Step 2: If owner implements GroupMemberInterface ---
-				if (!sourceLocManager && owningActor && owningActor->GetClass()->ImplementsInterface(UGroupMemberInterface::StaticClass()))
-				{
-					sourceLocManager = IGroupMemberInterface::Execute_GetGroupManager(owningActor);
-				}
+        FVector SpawnLoc = GetOwner()->GetActorLocation();
+        ADeathDummy* DeathDummy = GetWorld()->SpawnActor<ADeathDummy>(
+            DeathDummyClass, SpawnLoc, FRotator::ZeroRotator, Params);
 
-				// --- Step 3: Fallback — look directly for a LocationManagerComponent on this actor ---
-				if (!sourceLocManager)
-				{
-					sourceLocManager = owningActor->FindComponentByClass<ULocationManagerComponent>();
-				}
+        if (DeathDummy)
+        {
+            DeathDummy->InitFromActor(GetOwner());
+        }
+    }
 
-				// --- Apply scroll settings if a location manager was found ---
-				if (sourceLocManager)
-				{
-					if (ULocationManagerComponent* itemLocComp = item->FindComponentByClass<ULocationManagerComponent>())
-					{
-						itemShouldScroll = sourceLocManager->bScrollEnabled && sourceLocManager->ScrollWithXPos == 0.0f;
-						itemLocComp->bScrollEnabled = itemShouldScroll;
-					}
-				}
-				else
-				{
-					// No valid location manager found — spawn item without scrolling
-					// UE_LOG(LogTemp, Verbose, TEXT("No location manager found for %s or its owner"), *GetName());
-				}
-
-				itemSpawnComp->Spawn(true, itemShouldScroll, true);
-			}
-		}
-	}
-
-	if (bSpawnDeathDummy)
-	{
-		if (DeathDummyClass)
-		{
-			FActorSpawnParameters Params;
-			Params.Owner = GetOwner();
-			Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-
-			FVector SpawnLoc = GetOwner()->GetActorLocation();
-			FRotator SpawnRot = FRotator::ZeroRotator;
-
-			ADeathDummy* DeathDummy = GetWorld()->SpawnActor<ADeathDummy>(DeathDummyClass, SpawnLoc, SpawnRot, Params);
-			if (DeathDummy)
-			{
-				// Optionally, pass info to it — like what sprite to display
-				DeathDummy->InitFromActor(GetOwner());
-			}
-		}
-	}
-	
-	Destroyed = true;
-
-	OnDestroyed.Broadcast();
+    Destroyed = true;
+    OnDestroyed.Broadcast();
 }
 
 void UDestructibleObjectComponent::ResetDestroy()
@@ -199,7 +199,16 @@ void UDestructibleObjectComponent::ResetDestroy()
 
 void UDestructibleObjectComponent::OnLevelReset()
 {
-	ResetDestroy();
+    ResetDestroy();
+
+    // Cleanup collectible state too
+    if (PreSpawnedCollectible)
+    {
+        if (USpawnComponent* SpawnComp = PreSpawnedCollectible->FindComponentByClass<USpawnComponent>())
+        {
+            SpawnComp->Despawn();
+        }
+    }
 }
 
 int UDestructibleObjectComponent::GetCurrentHealth()

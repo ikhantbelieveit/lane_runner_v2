@@ -8,6 +8,7 @@
 #include "EngineUtils.h"
 #include "LocationManagerComponent.h"
 #include "GI_AudioSystem.h"
+#include "SpawnComponent.h"
 
 // Sets default values for this component's properties
 UReactToProjComponent::UReactToProjComponent()

@@ -6,6 +6,7 @@
 #include "Components/ActorComponent.h"
 #include "SpawnComponent.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FSpawnEvent);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class LANERUNNERPROJECT_API USpawnComponent : public UActorComponent
@@ -44,12 +45,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FName DespawnedCollisionTag = FName("NoCollision");
 
-	//UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	//bool DropOnSpawn = false;
-	//	
-	//UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	//bool PlayerScrollOnSpawn = false;	//immediately start scrolling in line with the player on spawn
-
-	//UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	//bool ScrollOnPlayerReach = false;	//continue scrolling with the player, once player reaches them
+	UPROPERTY(BlueprintAssignable)
+	FSpawnEvent OnSpawn;
 };

@@ -64,6 +64,8 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TSubclassOf<class ABaseCollectible> SpawnCollectibleClass;
 
+	ABaseCollectible* PreSpawnedCollectible = nullptr;
+
 	
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -83,4 +85,6 @@ public:
 
 	UPROPERTY(BlueprintAssignable)
 	FDestructibleEvent OnDestroyed;
+
+	
 };

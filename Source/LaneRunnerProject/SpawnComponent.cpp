@@ -132,6 +132,8 @@ void USpawnComponent::Spawn(bool drop, bool scrollInstant, bool scrollOnReach)
 			detectComp->EventsToTrigger.Add(NewEvent);
 		}
 	}
+
+	OnSpawn.Broadcast();
 }
 
 void USpawnComponent::Despawn()

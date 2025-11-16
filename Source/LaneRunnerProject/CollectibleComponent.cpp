@@ -9,6 +9,7 @@
 #include "Components/StaticMeshComponent.h"
 #include "GI_LevelSystem.h"
 #include "GI_AudioSystem.h"
+#include "SpawnComponent.h"
 
 // Sets default values for this component's properties
 UCollectibleComponent::UCollectibleComponent()
@@ -137,6 +138,8 @@ void UCollectibleComponent::HandleBeginOverlap(
 	bool bFromSweep,
 	const FHitResult& SweepResult)
 {
+
+	
 
 	if (!OtherActor || OtherActor == GetOwner())
 	{
