@@ -39,6 +39,12 @@ protected:
     EProjectileDirection FiringDirection;
     EProjectileType ProjectileType;
 
+    FTimerHandle OverlapEnableTimer;
+    bool bReadyToDestroy;
+    bool bTriggerDestroyWhenReady;
+    bool bDelayedDestroy_ScrollWithPlayer;
+    float bDelayedDestroy_ScrollOffset;
+
 private:
     FVector Velocity;
 
@@ -58,4 +64,7 @@ public:
         bool bFromSweep,
         const FHitResult& SweepResult
     );
+
+    UFUNCTION()
+    void CheckOverlapOnInit();
 };

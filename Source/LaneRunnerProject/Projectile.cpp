@@ -14,14 +14,56 @@ void AProjectile::BeginPlay()
 {
     Super::BeginPlay();
 
+    bReadyToDestroy = false;
+
+    if (UWorld* World = GetWorld())
+    {
+        World->GetTimerManager().SetTimer(OverlapEnableTimer, this, &AProjectile::CheckOverlapOnInit, 0.01f, false);
+    }
 }
 
 void AProjectile::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
 
+    if (bTriggerDestroyWhenReady && bReadyToDestroy)
+    {
+        OnDestroy(bDelayedDestroy_ScrollWithPlayer, bDelayedDestroy_ScrollOffset);
+    }
+
     FVector NewLocation = GetActorLocation() + Velocity * DeltaTime;
     SetActorLocation(NewLocation);
+}
+
+void AProjectile::CheckOverlapOnInit()
+{
+    bReadyToDestroy = true;
+
+    UBoxComponent* Box = Cast<UBoxComponent>(GetComponentByClass(UBoxComponent::StaticClass()));
+
+    TArray<UPrimitiveComponent*> Overlaps;
+    Box->GetOverlappingComponents(Overlaps);
+
+    for (UPrimitiveComponent* O : Overlaps)
+    {
+        if (!O) continue;
+
+        if (O->ComponentHasTag("DestroyProj"))
+        {
+            bool impactScroll = false;
+            float scrollOffset = 0;
+
+            ULocationManagerComponent* locManager = FindComponentByClass<ULocationManagerComponent>();
+
+            if (locManager)
+            {
+                impactScroll = locManager->bScrollEnabled;
+                scrollOffset = locManager->ScrollWithXPos;
+            }
+
+            OnDestroy(impactScroll, scrollOffset);
+        }
+    }
 }
 
 void AProjectile::SetupFromConfig()
@@ -166,6 +208,14 @@ void AProjectile::SetProjectileType(EProjectileType Type)
 
 void AProjectile::OnDestroy(bool impactScroll, float scrollWithPlayerOffset)
 {
+    if (!bReadyToDestroy)
+    {
+        bTriggerDestroyWhenReady = true;
+        bDelayedDestroy_ScrollOffset = scrollWithPlayerOffset;
+        bDelayedDestroy_ScrollWithPlayer = impactScroll;
+        return;
+    }
+
     if (ConfigData->ImpactAnimClass)
     {
         float randomRotate = FMath::RandRange(0.0, 360.0);
