@@ -59,6 +59,7 @@ void UDestructibleObjectComponent::BeginPlay()
 			// Hide it immediately
 			if (USpawnComponent* SpawnComp = PreSpawnedCollectible->FindComponentByClass<USpawnComponent>())
 			{
+                UE_LOG(LogTemp, Warning, TEXT("[SPAWN] I am about to despawn the collectible!"));
 				SpawnComp->Despawn();  // makes it invisible + disables collision
 				SpawnComp->ResetAsSpawned = false;
 			}
@@ -167,6 +168,8 @@ void UDestructibleObjectComponent::DestroyFromComp()
         {
             SpawnComp->Spawn(true, itemShouldScroll, true);
         }
+
+        
     }
 
     // Spawn death dummy (unchanged)

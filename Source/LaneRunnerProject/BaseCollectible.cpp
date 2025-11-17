@@ -22,6 +22,8 @@ void ABaseCollectible::BeginPlay()
 {
 	Super::BeginPlay();
 
+	bReadyToCollect = false;
+
 	UBoxComponent* box = (UBoxComponent*)GetComponentByClass(UBoxComponent::StaticClass());
 	if (box)
 	{
@@ -35,12 +37,56 @@ void ABaseCollectible::BeginPlay()
 	}
 
 	StartPos = GetActorLocation();
+
+	auto* spawnComp = (USpawnComponent*)GetComponentByClass<USpawnComponent>();
+	if (spawnComp)
+	{
+		spawnComp->OnSpawn.AddDynamic(this, &ABaseCollectible::OnSpawn);
+		spawnComp->OnDespawn.AddDynamic(this, &ABaseCollectible::OnDespawn);
+	}
+}
+
+void ABaseCollectible::OnSpawn()
+{
+	bReadyToCollect = true;
+	Collected = false;
+
+	if (UWorld* World = GetWorld())
+	{
+		World->GetTimerManager().SetTimer(OverlapEnableTimer, this, &ABaseCollectible::CheckOverlapOnInit, 0.2f, false);
+	}
+}
+
+void ABaseCollectible::OnDespawn()
+{
+	bReadyToCollect = false;
+	Collected = false;
 }
 
 void ABaseCollectible::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+}
+
+void ABaseCollectible::CheckOverlapOnInit()
+{
+
+	UBoxComponent* Box = Cast<UBoxComponent>(GetComponentByClass(UBoxComponent::StaticClass()));
+
+	TArray<UPrimitiveComponent*> Overlaps;
+	Box->GetOverlappingComponents(Overlaps);
+
+	for (UPrimitiveComponent* O : Overlaps)
+	{
+		if (!O) continue;
+
+		if (O->ComponentHasTag("PlayerCollect"))
+		{
+			Collect();
+			return;
+		}
+	}
 }
 
 
@@ -51,8 +97,15 @@ bool ABaseCollectible::GetIsCollected()
 
 void ABaseCollectible::Collect()
 {
+	if (!bReadyToCollect)
+	{
+		//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("COLLECT FAIL - item not ready to collect"));
+		return;
+	}
+
 	if (GetIsCollected())
 	{
+		//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("COLLECT FAIL - item already collected"));
 		return;
 	}
 
@@ -85,15 +138,8 @@ void ABaseCollectible::Collect()
 
 void ABaseCollectible::OnLevelReset()
 {
-
 	Collected = false;
 
-}
-
-void ABaseCollectible::ResetCollect()
-{
-
-	
 }
 
 void ABaseCollectible::HandleBeginOverlap(
@@ -116,70 +162,3 @@ void ABaseCollectible::HandleBeginOverlap(
 		Collect();
 	}
 }
-
-//void ABaseCollectible::Despawn()
-//{
-//	//UStaticMeshComponent* mesh = (UStaticMeshComponent*)GetComponentByClass(UStaticMeshComponent::StaticClass());
-//	//if (mesh)
-//	//{
-//	//	mesh->SetVisibility(false);
-//	//}
-//
-//
-//	//UBoxComponent* box = (UBoxComponent*)GetComponentByClass(UBoxComponent::StaticClass());
-//	//if (box)
-//	//{
-//	//	//box->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-//	//	box->SetCollisionProfileName("NoCollision");
-//	//}
-//
-//	//UPaperSpriteComponent* sprite = (UPaperSpriteComponent*)GetComponentByClass(UPaperSpriteComponent::StaticClass());
-//	//if (sprite)
-//	//{
-//	//	sprite->SetVisibility(false);
-//	//}
-//}
-
-//void ABaseCollectible::Spawn(bool fromDestroyedObject)
-//{
-//	UStaticMeshComponent* mesh = (UStaticMeshComponent*)GetComponentByClass(UStaticMeshComponent::StaticClass());
-//	if (mesh)
-//	{
-//		mesh->SetVisibility(true);
-//	}
-//
-//	UBoxComponent* box = (UBoxComponent*)GetComponentByClass(UBoxComponent::StaticClass());
-//	if (box)
-//	{
-//		//box->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-//		box->SetCollisionProfileName("GravAndOverlap");
-//	}
-//
-//	UPaperSpriteComponent* sprite = (UPaperSpriteComponent*)GetComponentByClass(UPaperSpriteComponent::StaticClass());
-//	if (sprite)
-//	{
-//		sprite->SetVisibility(true);
-//	}
-//
-//	if (fromDestroyedObject)
-//	{
-//		ULocationManagerComponent* locManager = GetComponentByClass<ULocationManagerComponent>();
-//		if (locManager)
-//		{
-//			locManager->SetGravityEnabled(true);
-//		}
-//
-//		UPlayerDetectComponent* detectComp = (UPlayerDetectComponent*)GetComponentByClass(UPlayerDetectComponent::StaticClass());
-//		if (detectComp)
-//		{
-//			FLevelEventData NewEvent;
-//			NewEvent.EventType = ELevelEventType::TogglePlayerScroll;
-//
-//			NewEvent.TargetActors.Add(this);
-//
-//			NewEvent.BoolParam = true;
-//			detectComp->EventsToTrigger.Empty();
-//			detectComp->EventsToTrigger.Add(NewEvent);
-//		}
-//	}
-//}

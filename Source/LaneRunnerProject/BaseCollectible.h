@@ -23,13 +23,14 @@ protected:
 	virtual void Tick(float DeltaTime) override;
 
 	bool Collected;
+	FTimerHandle OverlapEnableTimer;
+
+	bool bReadyToCollect;
 
 public:
 	bool GetIsCollected();
 
 	void Collect();
-
-	void ResetCollect();
 
 	UFUNCTION()
 	void OnLevelReset();
@@ -44,12 +45,6 @@ public:
 		const FHitResult& SweepResult
 	);
 
-	/*UFUNCTION()
-	void Despawn();
-
-	UFUNCTION()
-	void Spawn(bool fromDestroyedObject);*/
-
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	int PointsValue = 10;
 
@@ -57,6 +52,15 @@ public:
 	bool GivePoints = true;
 
 	//bool ResetAsSpawned = true;
+
+	UFUNCTION()
+	void CheckOverlapOnInit();
+
+	UFUNCTION()
+	void OnSpawn();
+
+	UFUNCTION()
+	void OnDespawn();
 
 
 private:

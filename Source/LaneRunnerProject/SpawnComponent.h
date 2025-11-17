@@ -47,4 +47,7 @@ public:
 
 	UPROPERTY(BlueprintAssignable)
 	FSpawnEvent OnSpawn;
+
+	UPROPERTY(BlueprintAssignable)
+	FSpawnEvent OnDespawn;
 };

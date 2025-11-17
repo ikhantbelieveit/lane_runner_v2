@@ -27,6 +27,10 @@ void UCollectibleComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
+	UE_LOG(LogTemp, Warning, TEXT("[SPAWN] Collectible BeginPlay() actually ran!"));
+
+	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Magenta, TEXT("HELLO BEGIN PLAY"));
+
 	UBoxComponent* box = (UBoxComponent*)GetOwner()->GetComponentByClass(UBoxComponent::StaticClass());
 	if (box)
 	{
@@ -40,7 +44,23 @@ void UCollectibleComponent::BeginPlay()
 	{
 		levelSystem->CleanupBeforeReset.AddDynamic(this, &UCollectibleComponent::OnLevelReset);
 	}
+
+	/*if (UWorld* World = GetWorld())
+	{
+		World->GetTimerManager().SetTimer(OverlapEnableTimer, this, &UCollectibleComponent::CheckOverlapOnInit, 0.05f, false);
+	}*/
+
+	/*auto* spawnComp = (USpawnComponent*)GetOwner()->GetComponentByClass<USpawnComponent>();
+	if (spawnComp)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Magenta, TEXT("assigning spawn delegate"));
+		spawnComp->OnSpawn.AddDynamic(this, &UCollectibleComponent::OnSpawn);
+	}*/
 }
+
+
+
+
 
 
 // Called every frame

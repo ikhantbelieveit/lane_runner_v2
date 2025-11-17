@@ -70,7 +70,7 @@ void USpawnComponent::Spawn(bool drop, bool scrollInstant, bool scrollOnReach)
 	{
 		if (!box) continue;
 
-		if (box->ComponentHasTag("LineOfSight"))
+		if (box->ComponentHasTag("IgnoreSpawnInit"))
 		{
 			continue;
 		}
@@ -83,6 +83,8 @@ void USpawnComponent::Spawn(bool drop, bool scrollInstant, bool scrollOnReach)
 		{
 			box->SetCollisionProfileName(SpawnedCollisionTag);
 		}
+
+		box->SetGenerateOverlapEvents(true);
 	}
 
 	UPaperSpriteComponent* sprite = Cast<UPaperSpriteComponent>(GetOwner()->GetComponentByClass(UPaperSpriteComponent::StaticClass()));
@@ -166,4 +168,6 @@ void USpawnComponent::Despawn()
 	{
 		flipbook->SetVisibility(false);
 	}
+
+	OnDespawn.Broadcast();
 }
