@@ -49,6 +49,9 @@ protected:
 		const FHitResult& Hit
 	);
 
+	bool bReadyToReact;
+	FTimerHandle OverlapEnableTimer;
+
 public:	
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
@@ -60,6 +63,15 @@ public:
 	FName ProjTag;
 
 	virtual void HitByProjectile(AActor* projActor);
+
+	UFUNCTION()
+	void CheckOverlapOnInit();
+
+	UFUNCTION()
+	void OnSpawn();
+
+	UFUNCTION()
+	void OnDespawn();
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Overlap")

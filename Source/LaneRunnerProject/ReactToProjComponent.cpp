@@ -40,6 +40,44 @@ void UReactToProjComponent::BeginPlay()
 	{
 		meshComp->OnComponentHit.AddDynamic(this, &UReactToProjComponent::HandleHit);
 	}
+
+	bReadyToReact = false;
+
+	USpawnComponent* spawnComp = GetOwner()->FindComponentByClass<USpawnComponent>();
+	if (spawnComp)
+	{
+		spawnComp->OnSpawn.AddDynamic(this, &UReactToProjComponent::OnSpawn);
+		spawnComp->OnDespawn.AddDynamic(this, &UReactToProjComponent::OnDespawn);
+	}
+}
+
+void UReactToProjComponent::OnSpawn()
+{
+	bReadyToReact = true;
+
+	CheckOverlapOnInit();
+}
+
+void UReactToProjComponent::OnDespawn()
+{
+	bReadyToReact = false;
+}
+
+void UReactToProjComponent::CheckOverlapOnInit()
+{
+	TArray<UPrimitiveComponent*> Overlaps;
+	BoxComponent->GetOverlappingComponents(Overlaps);
+
+	for (UPrimitiveComponent* O : Overlaps)
+	{
+		if (!O) continue;
+
+		if (O->ComponentHasTag(ProjTag))
+		{
+			HitByProjectile(O->GetOwner());
+			return;
+		}
+	}
 }
 
 
@@ -86,6 +124,12 @@ void UReactToProjComponent::HandleHit(UPrimitiveComponent* HitComp, AActor* Othe
 
 void UReactToProjComponent::HitByProjectile(AActor* projActor)
 {
+	if (!bReadyToReact)
+	{
+		//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("TRIED TO HIT BEFORE READY - ABORT"));
+		return;
+	}
+
 	OnProjHit.Broadcast();
 
 	if (TakeDamageOnHit)
@@ -117,9 +161,13 @@ void UReactToProjComponent::HitByProjectile(AActor* projActor)
 		scrollWithPlayerOffset = scrollComp->ScrollWithXPos;
 	}
 
-	if (BlockProj)
+	if (projActor && projActor != nullptr)
 	{
-		AProjectile* proj = Cast<AProjectile>(projActor);
-		proj->OnDestroy(impactShouldScroll, scrollWithPlayerOffset);
+		if (BlockProj)
+		{
+			AProjectile* proj = Cast<AProjectile>(projActor);
+			proj->OnDestroy(impactShouldScroll, scrollWithPlayerOffset);
+		}
 	}
+	
 }

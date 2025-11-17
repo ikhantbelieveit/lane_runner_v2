@@ -59,7 +59,6 @@ void UDestructibleObjectComponent::BeginPlay()
 			// Hide it immediately
 			if (USpawnComponent* SpawnComp = PreSpawnedCollectible->FindComponentByClass<USpawnComponent>())
 			{
-                UE_LOG(LogTemp, Warning, TEXT("[SPAWN] I am about to despawn the collectible!"));
 				SpawnComp->Despawn();  // makes it invisible + disables collision
 				SpawnComp->ResetAsSpawned = false;
 			}
@@ -108,7 +107,11 @@ void UDestructibleObjectComponent::OnHit()
 
 void UDestructibleObjectComponent::DestroyFromComp()
 {
-    if (Destroyed) return;
+    if (Destroyed)
+    {
+        GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, TEXT("IT IS ALREADY DESTROYED YOU FOOL"));
+        return;
+    }
 
     // Award points
     if (GivePointsOnDestroy)
