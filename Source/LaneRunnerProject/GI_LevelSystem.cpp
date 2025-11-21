@@ -14,6 +14,7 @@
 #include "GI_ChunkManagerSystem.h"
 #include "GI_LevelGenerationSystem.h"
 #include "GameInit.h"
+#include "BaseEnemy.h"
 
 void UGI_LevelSystem::OnGameOverDelayComplete()
 {
@@ -682,6 +683,28 @@ void UGI_LevelSystem::ExecuteSingleEvent(const FLevelEventData& Event)
                 else
                 {
                     GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("NO SPAWN COMPONENT FOUND"));
+                }
+            }
+        }
+        break;
+    }
+
+    case ELevelEventType::SetAlert:
+    {
+        for (TObjectPtr<AActor> TargetPtr : Event.TargetActors)
+        {
+            AActor* Target = TargetPtr.Get();
+            if (!IsValid(Target)) continue;
+
+            TArray<AActor*> TargetChildren;
+            Target->GetAllChildActors(TargetChildren, true);
+
+            for (auto* child : TargetChildren)
+            {
+                if (ABaseEnemy* enemy = Cast<ABaseEnemy>(child))
+                {
+                    enemy->OnDetectPlayer();
+                    enemy->SetAnim("Alert");
                 }
             }
         }

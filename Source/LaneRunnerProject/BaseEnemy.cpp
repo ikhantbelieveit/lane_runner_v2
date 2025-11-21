@@ -7,6 +7,7 @@
 #include "GI_AudioSystem.h"
 #include "GI_ProjectileSystem.h"
 #include "GI_LevelSystem.h"
+#include "SpawnComponent.h"
 
 // Sets default values
 ABaseEnemy::ABaseEnemy()
@@ -321,4 +322,66 @@ void ABaseEnemy::OnRemovedFromGroup_Implementation()
 	UE_LOG(LogTemp, Log, TEXT("%s removed from group"), *GetName());
 	GroupActorRef = nullptr;
 	GroupManagerRef = nullptr;
+}
+
+void ABaseEnemy::InitializeFromChunkData_Implementation(const FChunkSpawnEntry& Entry)
+{
+	if (Entry.Metadata.IsEmpty()) return;
+
+	// Parse JSON
+	TSharedPtr<FJsonObject> JsonObject;
+	TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(Entry.Metadata);
+
+	if (FJsonSerializer::Deserialize(Reader, JsonObject) && JsonObject.IsValid())
+	{
+		bool bScrollEnabled = false;
+		if (JsonObject->HasField(TEXT("ScrollEnabled")))
+		{
+			bScrollEnabled = JsonObject->GetBoolField(TEXT("ScrollEnabled"));
+
+		}
+
+
+		float ScrollXPos = 0.0f;
+		if (JsonObject->HasField(TEXT("ScrollXPos")))
+		{
+			ScrollXPos = JsonObject->GetNumberField(TEXT("ScrollXPos"));
+		}
+
+		bool bStartSpawned = false;
+		if (JsonObject->HasField(TEXT("StartSpawned")))
+		{
+			bStartSpawned = JsonObject->GetBoolField(TEXT("StartSpawned"));
+		}
+
+		bool bSetAdvanceDirection = false;
+		EProjectileDirection newAdvanceDir = EProjectileDirection::None;
+
+		if (JsonObject->HasField(TEXT("AdvanceDirection")))
+		{
+			bSetAdvanceDirection = true;
+
+			// JSON numbers come back as double
+			int32 RawValue = static_cast<int32>(JsonObject->GetNumberField(TEXT("AdvanceDirection")));
+			newAdvanceDir = static_cast<EProjectileDirection>(RawValue);
+		}
+
+		if (bSetAdvanceDirection)
+		{
+			AdvanceDirection = newAdvanceDir;
+		}
+
+
+		if (ULocationManagerComponent* locManager = FindComponentByClass<ULocationManagerComponent>())
+		{
+			locManager->bStartScrollActive = bScrollEnabled;
+			locManager->bScrollEnabled = bScrollEnabled;
+			locManager->ScrollWithXPos = ScrollXPos;
+		}
+
+		if (USpawnComponent* spawnComp = FindComponentByClass<USpawnComponent>())
+		{
+			spawnComp->ResetAsSpawned = bStartSpawned;
+		}
+	}
 }

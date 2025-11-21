@@ -10,6 +10,7 @@
 #include "ProjectileRequestData.h"
 #include "GroupMember.h"
 #include "LocationManagerComponent.h"
+#include "ChunkInitializable.h"
 #include "BaseEnemy.generated.h"
 
 UENUM(BlueprintType)
@@ -21,7 +22,7 @@ enum class EEnemyDetectBehaviour : uint8
 };
 
 UCLASS()
-class LANERUNNERPROJECT_API ABaseEnemy : public AActor, public IGroupMemberInterface
+class LANERUNNERPROJECT_API ABaseEnemy : public AActor, public IGroupMemberInterface, public IChunkInitializable
 {
 	GENERATED_BODY()
 	
@@ -50,6 +51,7 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+	virtual void InitializeFromChunkData_Implementation(const FChunkSpawnEntry& Entry) override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	EEnemyDetectBehaviour DetectBehaviour;

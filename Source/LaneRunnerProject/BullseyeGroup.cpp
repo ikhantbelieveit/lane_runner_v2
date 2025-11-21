@@ -44,74 +44,54 @@ void ABullseyeGroup::Tick(float DeltaTime)
 
 void ABullseyeGroup::InitializeFromChunkData_Implementation(const FChunkSpawnEntry& Entry)
 {
-    if (Entry.Metadata.IsEmpty()) return;
+    UE_LOG(LogTemp, Warning, TEXT("[BULLSEYE GROUP] Metadata: %s"), *Entry.Metadata);
 
+    if (Entry.Metadata.IsEmpty())
+    {
+        UE_LOG(LogTemp, Warning, TEXT("[BULLSEYE GROUP] No metadata, aborting."));
+        return;
+    }
 
-    // Parse JSON
+    // Parse JSON for group-level config
     TSharedPtr<FJsonObject> JsonObject;
     TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(Entry.Metadata);
 
-    if (FJsonSerializer::Deserialize(Reader, JsonObject) && JsonObject.IsValid())
+    if (!(FJsonSerializer::Deserialize(Reader, JsonObject) && JsonObject.IsValid()))
     {
-        bool bScrollEnabled = false;
-        if (JsonObject->HasField(TEXT("ScrollEnabled")))
-        {
-            bScrollEnabled = JsonObject->GetBoolField(TEXT("ScrollEnabled"));
+        UE_LOG(LogTemp, Error, TEXT("[BULLSEYE GROUP] Invalid JSON"));
+        return;
+    }
 
+    // Example group-only settings
+    bool bScrollOnPlayerDetect = JsonObject->HasField(TEXT("ScrollOnPlayerDetect"))
+        ? JsonObject->GetBoolField(TEXT("ScrollOnPlayerDetect"))
+        : false;
+
+    // Apply group-level settings to children
+    TArray<AActor*> ChildActors;
+    GetAllChildActors(ChildActors, true);
+
+    for (AActor* Child : ChildActors)
+    {
+        if (!Child) continue;
+
+        // --- NEW: Let the child handle its own chunk init ---------------
+        if (Child->GetClass()->ImplementsInterface(UChunkInitializable::StaticClass()))
+        {
+            IChunkInitializable::Execute_InitializeFromChunkData(Child, Entry);
         }
 
-
-        float ScrollXPos = 0.0f;
-        if (JsonObject->HasField(TEXT("ScrollXPos")))
+        // --- Only do group-specific logic here --------------------------
+        if (bScrollOnPlayerDetect)
         {
-            ScrollXPos = JsonObject->GetNumberField(TEXT("ScrollXPos"));
-        }
-
-        bool bStartSpawned = false;
-        if (JsonObject->HasField(TEXT("StartSpawned")))
-        {
-            bStartSpawned = JsonObject->GetBoolField(TEXT("StartSpawned"));
-        }
-
-        bool bScrollOnPlayerDetect = false;
-        if (JsonObject->HasField(TEXT("ScrollOnPlayerDetect")))
-        {
-            bScrollOnPlayerDetect = JsonObject->GetBoolField(TEXT("ScrollOnPlayerDetect"));
-        }
-
-        TArray<AActor*> childActors;
-
-        GetAllChildActors(childActors, true);
-
-        for (AActor* child : childActors)
-        {
-            if (!child) continue;
-
-            
-
-            if (USpawnComponent* spawnComp = child->FindComponentByClass<USpawnComponent>())
+            if (UPlayerDetectComponent* DetectComp = Child->FindComponentByClass<UPlayerDetectComponent>())
             {
-                spawnComp->ResetAsSpawned = bStartSpawned;
+                FLevelEventData TriggerEvent;
+                TriggerEvent.EventType = ELevelEventType::TogglePlayerScroll;
+                TriggerEvent.BoolParam = true;
+                TriggerEvent.TargetActors.Add(this);
+                DetectComp->EventsToTrigger.Add(TriggerEvent);
             }
-
-            if (bScrollOnPlayerDetect)
-            {
-                if (UPlayerDetectComponent* detectComp = child->FindComponentByClass<UPlayerDetectComponent>())
-                {
-                    FLevelEventData triggerScrollEvent = FLevelEventData();
-                    triggerScrollEvent.EventType = ELevelEventType::TogglePlayerScroll;
-                    triggerScrollEvent.BoolParam = true;
-                    triggerScrollEvent.TargetActors.Add(this);
-                    detectComp->EventsToTrigger.Add(triggerScrollEvent);
-                }
-            }
-        }
-
-        if (ULocationManagerComponent* locManager = FindComponentByClass<ULocationManagerComponent>())
-        {
-            locManager->bStartScrollActive = bScrollEnabled;
-            locManager->bScrollEnabled = bScrollEnabled;
-            locManager->ScrollWithXPos = ScrollXPos;
         }
     }
 }
