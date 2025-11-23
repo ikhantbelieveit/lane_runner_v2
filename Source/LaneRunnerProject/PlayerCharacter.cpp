@@ -1843,25 +1843,22 @@ float APlayerCharacter::GetDistanceTravelled_Meters()
 
 bool APlayerCharacter::IsTouchingSolidFloor()
 {
-	//if (!SolidProxy) return false;
-
 	UWorld* World = GetWorld();
 	if (!World) return false;
 
 	FVector Start = GetActorLocation();
-	FVector End = Start - FVector(0.f, 0.f, 5.f); // small distance below capsule
+	FVector End = Start - FVector(0.f, 0.f, 5.f);
 
-	FHitResult Hit;
+	TArray<FHitResult> Hits;
 	FCollisionQueryParams Params;
 	Params.AddIgnoredActor(this);
 
-	// Sweep a capsule downward
-	bool bHit = World->SweepSingleByChannel(
-		Hit,
+	bool bAnyHit = World->SweepMultiByObjectType(
+		Hits,
 		Start,
 		End,
 		FQuat::Identity,
-		ECC_WorldStatic, // Use your floor collision channel
+		FCollisionObjectQueryParams(ECC_WorldStatic),
 		FCollisionShape::MakeCapsule(
 			GetCapsuleComponent()->GetScaledCapsuleRadius(),
 			GetCapsuleComponent()->GetScaledCapsuleHalfHeight()
@@ -1869,17 +1866,17 @@ bool APlayerCharacter::IsTouchingSolidFloor()
 		Params
 	);
 
-	if (bHit)
+	if (!bAnyHit) return false;
+
+	for (const FHitResult& Hit : Hits)
 	{
-		// Check the tag on either the component or actor
-		if (Hit.GetComponent() && Hit.GetComponent()->ComponentHasTag(TEXT("Floor")))
-		{
+		if (!Hit.GetActor()) continue;
+
+		if (Hit.GetComponent() && Hit.GetComponent()->ComponentHasTag("Floor"))
 			return true;
-		}
-		else if (Hit.GetActor() && Hit.GetActor()->ActorHasTag(TEXT("Floor")))
-		{
+
+		if (Hit.GetActor()->ActorHasTag("Floor"))
 			return true;
-		}
 	}
 
 	return false;
