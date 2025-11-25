@@ -25,15 +25,6 @@ APlayerCharacter::APlayerCharacter()
 	CameraComponent->SetupAttachment(GetRootComponent());
 	CameraComponent->SetRelativeLocation(FVector(-420.0f, 0.0f, 175.0f)); // eye height
 	CameraComponent->SetRelativeRotation(FRotator(-10.0f, 0.0f, 0.0f)); // slight downward tilt
-	
-	//PaperSprite Visuals
-	SpriteComponent = CreateDefaultSubobject<UPaperSpriteComponent>(TEXT("Sprite"));
-	SpriteComponent->SetupAttachment(GetRootComponent());
-	SpriteComponent->SetRelativeLocation(FVector(0.0f, 0.0f, 0.0f));
-
-	SpriteComponent_Ghost = CreateDefaultSubobject<UPaperSpriteComponent>(TEXT("SpriteGhost"));
-	SpriteComponent_Ghost->SetupAttachment(GetRootComponent());
-	SpriteComponent_Ghost->SetRelativeLocation(FVector(0.0f, 0.0f, 0.0f));
 
 	//Scroll Trigger Box
 	ScrollTriggerBox = CreateDefaultSubobject<UBoxComponent>(TEXT("ScrollTriggerBox"));
@@ -41,7 +32,7 @@ APlayerCharacter::APlayerCharacter()
 	ScrollTriggerBox->SetRelativeLocation(FVector(0.0f, 0.0f, 0.0f));
 	ScrollTriggerBox->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 
-	SpriteToggle = CreateDefaultSubobject<USpriteToggleComponent>(TEXT("SpriteToggle"));
+	//SpriteToggle = CreateDefaultSubobject<USpriteToggleComponent>(TEXT("SpriteToggle"));
 }
 
 // Called when the game starts or when spawned
@@ -68,17 +59,24 @@ void APlayerCharacter::BeginPlay()
 		}
 	}
 
-	// assign sprite transform
-	FRotator DesiredRotation = FRotator(0.0f, 90.0f, 0.0f);
-	SpriteComponent->SetWorldRotation(DesiredRotation);
-	SpriteComponent->SetRelativeScale3D(FVector(3.0f, 3.0f, 3.0f));
+	TArray<UPaperFlipbookComponent*> FlipbookComponents;
+	GetComponents<UPaperFlipbookComponent>(FlipbookComponents);
 
-	SpriteComponent_Ghost->SetWorldRotation(DesiredRotation);
-	SpriteComponent_Ghost->SetRelativeScale3D(FVector(3.0f, 3.0f, 3.0f));
+	for (UPaperFlipbookComponent* Comp : FlipbookComponents)
+	{
+		if (Comp && Comp->ComponentHasTag(FName("MainVisuals")))
+		{
+			MainVisualsFlipbookComponent = Comp;
+			break;
+		}
+	}
+
+	if (!MainVisualsFlipbookComponent)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("PlayerCharacter: No flipbook with tag 'MainVisuals' found!"));
+	}
 
 	ShadowPlaneMesh = FindComponentByTag<UStaticMeshComponent>(TEXT("ShadowPlane"));
-
-	//SpriteToggle->SetSpriteEnabled(FString("Sprite Base"));
 
 	//assign camera FOV
 	CameraComponent->SetFieldOfView(CameraFOV);
@@ -121,6 +119,7 @@ void APlayerCharacter::Tick(float DeltaTime)
 
 			UpdateLaneFromInput();
 			UpdateLaneTransition(DeltaTime);
+			UpdateLean_LaneSwitchEnd(DeltaTime);
 
 			UpdateJumpState(DeltaTime);
 			UpdateJumpFromInput();
@@ -188,16 +187,10 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 		EnhancedInputComponent->BindAction(Input_SpeedUpAction, ETriggerEvent::Started, this, &APlayerCharacter::Input_SpeedUpStart);
 		EnhancedInputComponent->BindAction(Input_SpeedUpAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Input_SpeedUp);
 		EnhancedInputComponent->BindAction(Input_SpeedUpAction, ETriggerEvent::Completed, this, &APlayerCharacter::Input_SpeedUpCancel);
-		/*EnhancedInputComponent->BindAction(Input_SpeedUpAction_Joystick, ETriggerEvent::Started, this, &APlayerCharacter::Input_SpeedUpStart_Joystick);
-		EnhancedInputComponent->BindAction(Input_SpeedUpAction_Joystick, ETriggerEvent::Triggered, this, &APlayerCharacter::Input_SpeedUp_Joystick);
-		EnhancedInputComponent->BindAction(Input_SpeedUpAction_Joystick, ETriggerEvent::Completed, this, &APlayerCharacter::Input_SpeedUpCancel_Joystick);*/
 
 		EnhancedInputComponent->BindAction(Input_SlowDownAction, ETriggerEvent::Started, this, &APlayerCharacter::Input_SlowDownStart);
 		EnhancedInputComponent->BindAction(Input_SlowDownAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Input_SlowDown);
 		EnhancedInputComponent->BindAction(Input_SlowDownAction, ETriggerEvent::Completed, this, &APlayerCharacter::Input_SlowDownCancel);
-		/*EnhancedInputComponent->BindAction(Input_SlowDownAction_Joystick, ETriggerEvent::Started, this, &APlayerCharacter::Input_SlowDownStart_Joystick);
-		EnhancedInputComponent->BindAction(Input_SlowDownAction_Joystick, ETriggerEvent::Triggered, this, &APlayerCharacter::Input_SlowDown_Joystick);
-		EnhancedInputComponent->BindAction(Input_SlowDownAction_Joystick, ETriggerEvent::Completed, this, &APlayerCharacter::Input_SlowDownCancel_Joystick);*/
 
 		EnhancedInputComponent->BindAction(Input_JumpAction, ETriggerEvent::Started, this, &APlayerCharacter::Input_JumpStart);
 		EnhancedInputComponent->BindAction(Input_JumpAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Input_Jump);
@@ -228,24 +221,6 @@ void APlayerCharacter::BeginPlay_SetupFromConfig()
 	if (ConfigData)
 	{
 		InputMap = ConfigData->InputConfig.InputMap;
-
-		PlayerSprite = ConfigData->VisualsConfig.PlayerSprite;
-
-		if (SpriteComponent)
-		{
-			if (!SpriteComponent->ComponentHasTag(FName("Sprite Base")))
-			{
-				SpriteComponent->ComponentTags.Add(FName("Sprite Base"));
-			}
-		}
-		
-		if (SpriteComponent_Ghost)
-		{
-			if (!SpriteComponent_Ghost->ComponentHasTag(FName("Sprite Ghost")))
-			{
-				SpriteComponent_Ghost->ComponentTags.Add(FName("Sprite Ghost"));
-			}
-		}
 		
 		DefaultRunSpeed = ConfigData->MovementConfig.DefaultRunSpeed;
 		FastRunSpeed = ConfigData->MovementConfig.FastRunSpeed;
@@ -1702,18 +1677,56 @@ void APlayerCharacter::UpdateLaneTransition(float DeltaTime)
 	Pos.Y = NewY;
 	SetActorLocation(Pos);
 
+	// Determine desired lean direction
+	float DesiredLean = 0.f;
+
+	if (LaneTargetY < LaneStartY)       // moving left
+		DesiredLean = -LaneSwitch_LeanAngle;
+	else if (LaneTargetY > LaneStartY)  // moving right
+		DesiredLean = LaneSwitch_LeanAngle;
+
+	// Smoothly rotate sprite
+	FRotator CurrentRot = MainVisualsFlipbookComponent->GetRelativeRotation();
+	FRotator TargetRot = FRotator(DesiredLean, CurrentRot.Yaw, CurrentRot.Roll);
+
+	FRotator NewRot = FMath::RInterpTo(CurrentRot, TargetRot, DeltaTime, LaneSwitch_LeanInterpSpeed);
+	MainVisualsFlipbookComponent->SetRelativeRotation(NewRot);
+
 	// Also smoothly align camera
 	FVector CamPos = CameraComponent->GetComponentLocation();
 	CamPos.Y = FMath::FInterpTo(CamPos.Y, 0.0f, DeltaTime, 12.f);
 	CameraComponent->SetWorldLocation(CamPos);
 
+	//if transition finished
 	if (Alpha >= 1.0f)
 	{
-		// Finished
 		bIsSwitchingLanes = false;
 		LaneMovementBlocked = false;
 
+		bIsResettingLean = true;
+
 		UpdateCheckForPit();
+	}
+}
+
+void APlayerCharacter::UpdateLean_LaneSwitchEnd(float DeltaTime)
+{
+	if (!bIsResettingLean)
+	{
+		return;
+	}
+
+	FRotator CurrentRot = MainVisualsFlipbookComponent->GetRelativeRotation();
+	FRotator UprightRot = FRotator(0.f, CurrentRot.Yaw, CurrentRot.Roll);
+
+	FRotator NewRot = FMath::RInterpTo(CurrentRot, UprightRot, DeltaTime, LaneSwitch_LeanInterpSpeed);
+	MainVisualsFlipbookComponent->SetRelativeRotation(NewRot);
+
+	// Stop when close enough
+	if (FMath::IsNearlyEqual(NewRot.Pitch, 0.f, 0.1f))
+	{
+		MainVisualsFlipbookComponent->SetRelativeRotation(UprightRot);
+		bIsResettingLean = false;
 	}
 }
 

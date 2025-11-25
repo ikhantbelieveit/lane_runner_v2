@@ -41,6 +41,8 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAccess = "true"))
 	UCameraComponent* CameraComponent;
 
+	UPaperFlipbookComponent* MainVisualsFlipbookComponent;
+
 	UInputMappingContext* InputMap;
 	UInputAction* Input_LeftAction;
 	UInputAction* Input_RightAction;
@@ -58,12 +60,6 @@ protected:
 
 	UInputAction* Input_Continue;
 	UInputAction* Input_DebugReset;
-
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Visuals", meta = (AllowPrivateAccess = "true"))
-	UPaperSpriteComponent* SpriteComponent;
-
-	UPaperSprite* PlayerSprite;
 
 	bool LeftInput_Pressed;
 	bool RightInput_Pressed;
@@ -210,6 +206,7 @@ public:
 	void UpdateAnimation();
 	void UpdateDistanceTravelled();
 	void UpdateLaneTransition(float DeltaTime);
+	void UpdateLean_LaneSwitchEnd(float DeltaTime);
 
 	//lane
 	bool MoveLane_Left();
@@ -281,17 +278,9 @@ protected:
 	void StartMercyInvincibility();
 	void CancelMercyInvincibility();
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	USpriteToggleComponent* SpriteToggle;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Visuals", meta = (AllowPrivateAccess = "true"))
-	UPaperSpriteComponent* SpriteComponent_Ghost;
-
 	bool IsBoosting = false;
 	float BoostOverrideSpeed;
 	float BoostTimeRemaining;
-
-	//float MaxSpeedCache_Boost;
 
 	void StartBoost(float boostSpeed, float timeToBoost);
 	void CancelBoost();
@@ -356,6 +345,11 @@ protected:
 
 	float LaneStartY = 0.0f;
 	float LaneTargetY = 0.0f;
+
+	float LaneSwitch_LeanAngle = 15.f;          // Degrees
+	float LaneSwitch_LeanInterpSpeed = 20.0f;    // Rotation smoothing
+
+	bool bIsResettingLean = false;
 
 public:
 	UFUNCTION(BlueprintCallable)
