@@ -120,6 +120,7 @@ void APlayerCharacter::Tick(float DeltaTime)
 			UpdateSpeedFromInput();
 
 			UpdateLaneFromInput();
+			UpdateLaneTransition(DeltaTime);
 
 			UpdateJumpState(DeltaTime);
 			UpdateJumpFromInput();
@@ -1037,49 +1038,25 @@ bool APlayerCharacter::MoveLane_Right()
 bool APlayerCharacter::SetLane(int laneIndex)
 {
 	if (!CanPlayerOccupyLane(laneIndex))
-	{
 		return false;
-	}
 
-	bool moveLeft = false;
-	bool moveRight = false;
+	// Already moving? Don't allow another switch
+	if (bIsSwitchingLanes)
+		return false;
 
-	if (laneIndex == CurrentLaneIndex - 1)
-	{
-		moveLeft = true;
-	}
-
-	if (laneIndex == CurrentLaneIndex + 1)
-	{
-		moveRight = true;
-	}
-
+	int OldLane = CurrentLaneIndex;
 	CurrentLaneIndex = laneIndex;
 
-	if (moveLeft)
-	{
-		FVector offset = FVector(0, -LaneDistance, 0);
-		AddActorWorldOffset(offset, true);
+	// Determine target Y position
+	float CurrentY = GetActorLocation().Y;
+	float TargetY = LaneIndexToWorldY(laneIndex);
 
-		CameraComponent->SetWorldLocation(FVector(
-			CameraComponent->GetComponentLocation().X,
-			0,
-			CameraComponent->GetComponentLocation().Z));
-	}
-
-	if (moveRight)
-	{
-		FVector offset = FVector(0, LaneDistance, 0);
-		AddActorWorldOffset(offset);
-
-
-		CameraComponent->SetWorldLocation(FVector(
-			CameraComponent->GetComponentLocation().X,
-			0,
-			CameraComponent->GetComponentLocation().Z));
-	}
-
-	UpdateCheckForPit();
+	// Setup transition
+	LaneStartY = CurrentY;
+	LaneTargetY = TargetY;
+	LaneSwitchTimer = 0.0f;
+	bIsSwitchingLanes = true;
+	LaneMovementBlocked = true;      // Prevent further inputs
 
 	return true;
 }
@@ -1706,6 +1683,38 @@ void APlayerCharacter::UpdateDistanceTravelled()
 	LastFramePos = CurrentPos;
 
 	OnDistanceSet.Broadcast();
+}
+
+void APlayerCharacter::UpdateLaneTransition(float DeltaTime)
+{
+	if (!bIsSwitchingLanes)
+	{
+		return;
+	}
+
+	LaneSwitchTimer += DeltaTime;
+
+	float Alpha = FMath::Clamp(LaneSwitchTimer / LaneSwitchTime, 0.f, 1.f);
+	float Ease = FMath::InterpEaseInOut(0.f, 1.f, Alpha, 2.0f);
+	float NewY = FMath::Lerp(LaneStartY, LaneTargetY, Ease);
+
+	FVector Pos = GetActorLocation();
+	Pos.Y = NewY;
+	SetActorLocation(Pos);
+
+	// Also smoothly align camera
+	FVector CamPos = CameraComponent->GetComponentLocation();
+	CamPos.Y = FMath::FInterpTo(CamPos.Y, 0.0f, DeltaTime, 12.f);
+	CameraComponent->SetWorldLocation(CamPos);
+
+	if (Alpha >= 1.0f)
+	{
+		// Finished
+		bIsSwitchingLanes = false;
+		LaneMovementBlocked = false;
+
+		UpdateCheckForPit();
+	}
 }
 
 void APlayerCharacter::OnFlipbookFinish()

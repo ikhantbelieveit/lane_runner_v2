@@ -209,6 +209,7 @@ public:
 	void UpdateDropShadow();
 	void UpdateAnimation();
 	void UpdateDistanceTravelled();
+	void UpdateLaneTransition(float DeltaTime);
 
 	//lane
 	bool MoveLane_Left();
@@ -349,6 +350,13 @@ protected:
 	float DistanceTravelled = 0.0f;
 	FVector LastFramePos = FVector::ZeroVector;
 
+	bool bIsSwitchingLanes = false;
+	float LaneSwitchTime = 0.10f;        // how long a lane switch takes
+	float LaneSwitchTimer = 0.0f;
+
+	float LaneStartY = 0.0f;
+	float LaneTargetY = 0.0f;
+
 public:
 	UFUNCTION(BlueprintCallable)
 	void OnLevelRestart();
@@ -359,4 +367,12 @@ public:
 	float GetDistanceTravelled_PureUnits();
 
 	float GetDistanceTravelled_Meters();
+
+	float LaneIndexToWorldY(int laneIndex) const
+	{
+		// middle lane = index 2 = world Y = 0
+		const int MiddleLane = 2;
+		int Offset = laneIndex - MiddleLane;
+		return Offset * LaneDistance;
+	}
 };
