@@ -54,10 +54,10 @@ void UDestructibleObjectComponent::BeginPlay()
 			SpawnCollectibleClass, SpawnLoc, SpawnRot, Params
 		);
 
-		if (PreSpawnedCollectible)
+        if (ABaseCollectible* Collectible = PreSpawnedCollectible.Get())
 		{
 			// Hide it immediately
-			if (USpawnComponent* SpawnComp = PreSpawnedCollectible->FindComponentByClass<USpawnComponent>())
+			if (USpawnComponent* SpawnComp = Collectible->FindComponentByClass<USpawnComponent>())
 			{
 				SpawnComp->Despawn();  // makes it invisible + disables collision
 				SpawnComp->ResetAsSpawned = false;
@@ -134,7 +134,10 @@ void UDestructibleObjectComponent::DestroyFromComp()
     // ----------------------------------------------------------
     // Spawn the PRE-SPAWNED COLLECTIBLE, not a new one
     // ----------------------------------------------------------
-    if (SpawnItemOnDestroy && PreSpawnedCollectible)
+
+    ABaseCollectible* Collectible = PreSpawnedCollectible.Get();
+
+    if (SpawnItemOnDestroy && Collectible)
     {
         bool itemShouldScroll = false;
 
@@ -208,9 +211,15 @@ void UDestructibleObjectComponent::OnLevelReset()
     ResetDestroy();
 
     // Cleanup collectible state too
-    if (PreSpawnedCollectible)
+    if (ABaseCollectible* Collectible = PreSpawnedCollectible.Get())
     {
-        if (USpawnComponent* SpawnComp = PreSpawnedCollectible->FindComponentByClass<USpawnComponent>())
+        if (!IsValid(Collectible) || Collectible->IsPendingKillPending())
+        {
+            PreSpawnedCollectible.Reset();
+            return;
+        }
+
+        if (USpawnComponent* SpawnComp = Collectible->FindComponentByClass<USpawnComponent>())
         {
             SpawnComp->Despawn();
         }

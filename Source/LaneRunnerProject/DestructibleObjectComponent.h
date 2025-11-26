@@ -64,7 +64,8 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TSubclassOf<class ABaseCollectible> SpawnCollectibleClass;
 
-	ABaseCollectible* PreSpawnedCollectible = nullptr;
+	UPROPERTY()
+	TWeakObjectPtr<ABaseCollectible> PreSpawnedCollectible;
 
 	
 
