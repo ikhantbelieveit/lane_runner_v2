@@ -695,33 +695,49 @@ void APlayerCharacter::CancelVerticalSpeed()
 
 void APlayerCharacter::ResetPlayer()
 {
-	//set lane to middle
-	SetLane(2);
+	// --- Cancel lane switching state ---
+	bIsSwitchingLanes = false;
+	bIsResettingLean = false;     // if you're using lean reset mode
+	LaneMovementBlocked = false;
+	LaneSwitchTimer = 0.f;
 
-	//Move back to start
-	SetActorLocation(SpawnPos);
-	UpdateCameraPos();
+	// --- Force lane index back to the middle ---
+	CurrentLaneIndex = 2;   // don't call SetLane(), avoids starting a transition
+
+	// --- Force Y position to lane centre immediately ---
+	FVector ResetPos = SpawnPos;
+	ResetPos.Y = 0.f;       // middle lane = Y = 0
+	SetActorLocation(ResetPos);
+
+	// --- Reset lean on flipbook visuals ---
+	if (MainVisualsFlipbookComponent)
+	{
+		FRotator UprightRot = FRotator(0.f,
+			MainVisualsFlipbookComponent->GetRelativeRotation().Yaw,
+			MainVisualsFlipbookComponent->GetRelativeRotation().Roll);
+
+		MainVisualsFlipbookComponent->SetRelativeRotation(UprightRot);
+	}
+
+	// --- Reset camera Y position too ---
+	FVector CamPos = CameraComponent->GetComponentLocation();
+	CamPos.Y = 0.f;
+	CameraComponent->SetWorldLocation(CamPos);
 
 	ResetHealth();
-
 	CancelMercyInvincibility();
-	
-	ClearInputValues();	//maybe not needed? figured its handy
-
+	ClearInputValues();
 	CancelBoost();
 
 	TouchingBlockJumpSurface = false;
-	LaneMovementBlocked = false;
 	HasJumpAvailable = true;
 	LastSurfaceWasBlockJump = false;
 
-
 	SetJumpState(EPlayerJumpState::Grounded);
-
 	SetAnimState(ECharacterAnimState::Grounded);
 
 	DistanceTravelled = 0.0f;
-	LastFramePos = SpawnPos;
+	LastFramePos = ResetPos;
 }
 
 void APlayerCharacter::SetAnimState(ECharacterAnimState newState)
