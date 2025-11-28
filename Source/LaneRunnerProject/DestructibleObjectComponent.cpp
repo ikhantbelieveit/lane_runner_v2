@@ -14,6 +14,7 @@
 #include "GI_AudioSystem.h"
 #include "GroupMember.h"
 #include "DeathDummy.h"
+#include "GI_CollectiblePoolSystem.h"
 
 
 // Sets default values for this component's properties
@@ -38,31 +39,6 @@ void UDestructibleObjectComponent::BeginPlay()
 	if (UBoxComponent* box = GetOwner()->FindComponentByClass<UBoxComponent>())
 	{
 		DefaultCollMode = box->GetCollisionEnabled();
-	}
-
-	// Spawn collectible ONCE here:
-	if (SpawnItemOnDestroy && SpawnCollectibleClass)
-	{
-		FActorSpawnParameters Params;
-		Params.Owner = GetOwner();
-		Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-
-		FVector SpawnLoc = GetOwner()->GetActorLocation();
-		FRotator SpawnRot = FRotator::ZeroRotator;
-
-		PreSpawnedCollectible = GetWorld()->SpawnActor<ABaseCollectible>(
-			SpawnCollectibleClass, SpawnLoc, SpawnRot, Params
-		);
-
-        if (ABaseCollectible* Collectible = PreSpawnedCollectible.Get())
-		{
-			// Hide it immediately
-			if (USpawnComponent* SpawnComp = Collectible->FindComponentByClass<USpawnComponent>())
-			{
-				SpawnComp->Despawn();  // makes it invisible + disables collision
-				SpawnComp->ResetAsSpawned = false;
-			}
-		}
 	}
 
 	// Listen for level reset
@@ -131,13 +107,7 @@ void UDestructibleObjectComponent::DestroyFromComp()
         spawnComp->Despawn();
     }
 
-    // ----------------------------------------------------------
-    // Spawn the PRE-SPAWNED COLLECTIBLE, not a new one
-    // ----------------------------------------------------------
-
-    ABaseCollectible* Collectible = PreSpawnedCollectible.Get();
-
-    if (SpawnItemOnDestroy && Collectible)
+    if (SpawnItemOnDestroy)
     {
         bool itemShouldScroll = false;
 
@@ -158,25 +128,26 @@ void UDestructibleObjectComponent::DestroyFromComp()
             sourceLocManager = owningActor->FindComponentByClass<ULocationManagerComponent>();
         }
 
-        // Teleport collectible to destruction location
-        FVector SpawnLoc = GetOwner()->GetActorLocation();
-        SpawnLoc.Y += FMath::RandRange(randomSpreadMin, randomSpreadMax);
-        PreSpawnedCollectible->SetActorLocation(SpawnLoc);
-
         if (sourceLocManager)
         {
             itemShouldScroll = sourceLocManager->bScrollEnabled &&
                 sourceLocManager->ScrollWithXPos == 0.0f;
         }
 
-        // Finally activate it with SpawnComponent->Spawn()
-        if (USpawnComponent* SpawnComp = PreSpawnedCollectible->FindComponentByClass<USpawnComponent>())
+        if (auto* Pool = GetWorld()->GetGameInstance()->GetSubsystem<UGI_CollectiblePoolSystem>())
         {
-            SpawnComp->Spawn(true, itemShouldScroll, true);
-        }
+            FCollectibleRequest Req;
+            Req.Type = SpawnItemType;
+            Req.SpawnLocation = GetOwner()->GetActorLocation();
+            Req.SpawnLocation.Y += FMath::RandRange(randomSpreadMin, randomSpreadMax);
+            
 
-        
+            Req.bShouldScroll = itemShouldScroll;
+
+            Pool->RequestCollectible(Req);
+        }
     }
+
 
     // Spawn death dummy (unchanged)
     if (bSpawnDeathDummy && DeathDummyClass)
@@ -209,21 +180,6 @@ void UDestructibleObjectComponent::ResetDestroy()
 void UDestructibleObjectComponent::OnLevelReset()
 {
     ResetDestroy();
-
-    // Cleanup collectible state too
-    if (ABaseCollectible* Collectible = PreSpawnedCollectible.Get())
-    {
-        if (!IsValid(Collectible) || Collectible->IsPendingKillPending())
-        {
-            PreSpawnedCollectible.Reset();
-            return;
-        }
-
-        if (USpawnComponent* SpawnComp = Collectible->FindComponentByClass<USpawnComponent>())
-        {
-            SpawnComp->Despawn();
-        }
-    }
 }
 
 int UDestructibleObjectComponent::GetCurrentHealth()

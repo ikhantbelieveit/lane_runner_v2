@@ -9,6 +9,7 @@
 #include "PlayerDetectComponent.h"
 #include "LocationManagerComponent.h"
 #include "SpawnComponent.h"
+#include "GI_CollectiblePoolSystem.h"
 
 // Sets default values
 ABaseCollectible::ABaseCollectible()
@@ -59,8 +60,13 @@ void ABaseCollectible::OnSpawn()
 
 void ABaseCollectible::OnDespawn()
 {
-	bReadyToCollect = false;
-	Collected = false;
+	ResetCollectible();
+
+	if (bIsPooledInstance)
+	{
+		auto* Pool = GetWorld()->GetGameInstance()->GetSubsystem<UGI_CollectiblePoolSystem>();
+		Pool->ReturnCollectible(this);
+	}
 }
 
 void ABaseCollectible::Tick(float DeltaTime)
@@ -133,6 +139,17 @@ void ABaseCollectible::Collect()
 	if (audioSystem)
 	{
 		audioSystem->Play(EAudioKey::CoinGet);
+	}
+}
+
+void ABaseCollectible::ResetCollectible()
+{
+	Collected = false;
+	bReadyToCollect = false;
+
+	if (ULocationManagerComponent* LM = FindComponentByClass<ULocationManagerComponent>())
+	{
+		LM->bScrollEnabled = LM->bStartScrollActive;
 	}
 }
 

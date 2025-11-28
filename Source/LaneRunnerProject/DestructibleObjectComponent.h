@@ -6,6 +6,7 @@
 #include "Components/ActorComponent.h"
 #include "Components/BoxComponent.h"
 #include "BaseCollectible.h"
+#include "ECollectibleType.h"
 #include "DestructibleObjectComponent.generated.h"
 
 class ADeathDummy;
@@ -62,10 +63,13 @@ public:
 	bool SpawnItemOnDestroy = true;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	ECollectibleType SpawnItemType = ECollectibleType::Star_Basic;
+
+	/*UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TSubclassOf<class ABaseCollectible> SpawnCollectibleClass;
 
 	UPROPERTY()
-	TWeakObjectPtr<ABaseCollectible> PreSpawnedCollectible;
+	TWeakObjectPtr<ABaseCollectible> PreSpawnedCollectible;*/
 
 	
 

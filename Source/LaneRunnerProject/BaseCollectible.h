@@ -34,6 +34,9 @@ public:
 	void Collect();
 
 	UFUNCTION()
+	void ResetCollectible();
+
+	UFUNCTION()
 	void OnLevelReset();
 
 	UFUNCTION()
@@ -54,6 +57,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	bool GivePoints = true;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	bool bIsPooledInstance = true;
 
 	//bool ResetAsSpawned = true;
 

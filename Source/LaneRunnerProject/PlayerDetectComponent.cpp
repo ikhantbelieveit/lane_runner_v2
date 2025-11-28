@@ -109,6 +109,14 @@ void UPlayerDetectComponent::HandleBeginOverlap(
 
 	if (OtherComp->ComponentHasTag(PlayerAreaTag))
 	{
+		/*GEngine->AddOnScreenDebugMessage(
+			-1,
+			5.0f,
+			FColor::Cyan,
+			FString::Printf(TEXT("Object detects player (%s)"),
+				GetOwner() ? *GetOwner()->GetName() : TEXT("NoOwner"))
+		);*/
+
 		if (UseParentEventLogic)
 		{
 			if (AEventTrigger* trigger = Cast<AEventTrigger>(GetOwner()))

@@ -9,6 +9,8 @@
 #include "GI_AudioSystem.h"
 #include "LevelChunkDefinitionAsset.h"
 #include "Projectile.h"
+#include "ECollectibleType.h"
+#include "BaseCollectible.h"
 #include "GI_ConfigData.generated.h"
 
 USTRUCT(BlueprintType)
@@ -52,6 +54,32 @@ public:
 	TMap<EProjectileType, TSubclassOf<class AProjectile>> ProjectileClass_LUT;
 };
 
+USTRUCT(BlueprintType)
+struct FCollectiblePoolConfigEntry
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(EditAnywhere)
+	ECollectibleType Type;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<ABaseCollectible> Class;
+
+	UPROPERTY(EditAnywhere)
+	int32 InitialPoolSize = 0;
+};
+
+UCLASS(BlueprintType)
+class UCollectiblePoolConfigData : public UDataAsset
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(EditAnywhere)
+	TArray<FCollectiblePoolConfigEntry> Entries;
+};
+
 UCLASS()
 class LANERUNNERPROJECT_API UGI_ConfigData : public UDataAsset
 {
@@ -66,6 +94,9 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	UChunkDefLoadConfigAsset* ChunkLoadConfig;
+
+	UPROPERTY(EditAnywhere)
+	UCollectiblePoolConfigData* CollectiblePoolConfig;
 
 	UPROPERTY(EditAnywhere)
 	UProjectileSystemConfigData* ProjectileSystemConfig;

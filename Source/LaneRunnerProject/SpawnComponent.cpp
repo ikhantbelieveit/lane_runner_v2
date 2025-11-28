@@ -9,6 +9,8 @@
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "PlayerDetectComponent.h"
 #include "LocationManagerComponent.h"
+#include "GI_CollectiblePoolSystem.h"
+#include "BaseCollectible.h"
 
 // Sets default values for this component's properties
 USpawnComponent::USpawnComponent()
