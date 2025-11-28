@@ -11,6 +11,7 @@
 #include "GI_ProjectileSystem.h"
 #include "GI_AudioSystem.h"
 #include "BlockJumpSurface.h"
+#include "BaseCollectible.h"
 
 
 // Sets default values
@@ -436,6 +437,29 @@ void APlayerCharacter::Input_JumpStart(const FInputActionValue& Value)
 		{
 			JumpInput_Pressed = true;
 		}
+	}
+
+
+	UWorld* World = GetWorld();
+	if (!World) return;
+
+	TArray<AActor*> FoundActors;
+	UGameplayStatics::GetAllActorsOfClass(World, ABaseCollectible::StaticClass(), FoundActors);
+
+	const int32 Count = FoundActors.Num();
+
+	// UE_LOG output
+	UE_LOG(LogTemp, Warning, TEXT("[DEBUG] Collectible Count: %d"), Count);
+
+	// On-screen debug message
+	if (GEngine)
+	{
+		GEngine->AddOnScreenDebugMessage(
+			-1,                // key (-1 = create a new line each time)
+			5.0f,              // display time
+			FColor::Cyan,    // color
+			FString::Printf(TEXT("Collectible Count: %d"), Count)
+		);
 	}
 }
 

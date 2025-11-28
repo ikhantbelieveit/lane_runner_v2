@@ -15,6 +15,7 @@
 #include "GI_LevelGenerationSystem.h"
 #include "GameInit.h"
 #include "BaseEnemy.h"
+#include "BaseCollectible.h"
 
 void UGI_LevelSystem::OnGameOverDelayComplete()
 {
@@ -259,6 +260,7 @@ void UGI_LevelSystem::RegenerateLevel()
             auto* generationSystem = GetGameInstance()->GetSubsystem<UGI_LevelGenerationSystem>();
             int seed = gameInit->LevelGenSettingsAsset->GetSeed();
             GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, FString::Printf(TEXT("[LEVEL] Applying random elements to premade level with seed: %d"), seed));
+            UE_LOG(LogTemp, Log, TEXT("[LEVEL] Randomizing level with seed: %d"), seed);
             FRandomStream random(seed);
             generationSystem->ResolveMissingChunkVariants(random, levelLayoutData);
         }

@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Components/BoxComponent.h"
+#include "ECollectibleType.h"
 #include "BaseCollectible.generated.h"
 
 UCLASS()
@@ -44,6 +45,9 @@ public:
 		bool bFromSweep,
 		const FHitResult& SweepResult
 	);
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	ECollectibleType Type;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	int PointsValue = 10;
