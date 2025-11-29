@@ -117,6 +117,7 @@ void APlayerCharacter::Tick(float DeltaTime)
 			UpdateSpeedFromInput();
 
 			UpdateLaneFromInput();
+			UpdateLaneSwitchCooldown(DeltaTime);
 			UpdateLaneTransition(DeltaTime);
 			UpdateLean_LaneSwitchEnd(DeltaTime);
 
@@ -182,6 +183,11 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 		EnhancedInputComponent->BindAction(Input_RightAction, ETriggerEvent::Started, this, &APlayerCharacter::Input_RightStart);
 		EnhancedInputComponent->BindAction(Input_LeftAction_Joystick, ETriggerEvent::Started, this, &APlayerCharacter::Input_LeftStart_Joystick);
 		EnhancedInputComponent->BindAction(Input_RightAction_Joystick, ETriggerEvent::Started, this, &APlayerCharacter::Input_RightStart_Joystick);
+
+		EnhancedInputComponent->BindAction(Input_LeftAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Input_Left);
+		EnhancedInputComponent->BindAction(Input_RightAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Input_Right);
+		EnhancedInputComponent->BindAction(Input_LeftAction_Joystick, ETriggerEvent::Triggered, this, &APlayerCharacter::Input_Left_Joystick);
+		EnhancedInputComponent->BindAction(Input_RightAction_Joystick, ETriggerEvent::Triggered, this, &APlayerCharacter::Input_Right_Joystick);
 
 		EnhancedInputComponent->BindAction(Input_SpeedUpAction, ETriggerEvent::Started, this, &APlayerCharacter::Input_SpeedUpStart);
 		EnhancedInputComponent->BindAction(Input_SpeedUpAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Input_SpeedUp);
@@ -317,6 +323,21 @@ void APlayerCharacter::Input_LeftStart(const FInputActionValue& Value)
 	LeftInput_Pressed = true;
 }
 
+void APlayerCharacter::Input_RightStart(const FInputActionValue& Value)
+{
+	RightInput_Pressed = true;
+}
+
+void APlayerCharacter::Input_Left(const FInputActionValue& Value)
+{
+	LeftInput_Active = true;
+}
+
+void APlayerCharacter::Input_Right(const FInputActionValue& Value)
+{
+	RightInput_Active = true;
+}
+
 void APlayerCharacter::Input_LeftStart_Joystick(const FInputActionValue& Value)
 {
 	float axis = Value.Get<float>();
@@ -326,17 +347,30 @@ void APlayerCharacter::Input_LeftStart_Joystick(const FInputActionValue& Value)
 	}
 }
 
-void APlayerCharacter::Input_RightStart(const FInputActionValue& Value)
-{
-	RightInput_Pressed = true;
-}
-
 void APlayerCharacter::Input_RightStart_Joystick(const FInputActionValue& Value)
 {
 	float axis = Value.Get<float>();
 	if (axis > 0)
 	{
 		RightInput_Pressed = true;
+	}
+}
+
+void APlayerCharacter::Input_Left_Joystick(const FInputActionValue& Value)
+{
+	float axis = Value.Get<float>();
+	if (axis < 0)
+	{
+		LeftInput_Active = true;
+	}
+}
+
+void APlayerCharacter::Input_Right_Joystick(const FInputActionValue& Value)
+{
+	float axis = Value.Get<float>();
+	if (axis > 0)
+	{
+		RightInput_Active = true;
 	}
 }
 
@@ -524,6 +558,8 @@ void APlayerCharacter::ClearInputValues()
 {
 	LeftInput_Pressed = false;
 	RightInput_Pressed = false;
+	LeftInput_Active = false;
+	RightInput_Active = false;
 
 	SpeedInput_Active = false;
 	SpeedInput_Pressed = false;
@@ -562,7 +598,17 @@ void APlayerCharacter::UpdateLaneFromInput()
 		return;
 	}
 
+	bool tryMoveLeft = false;
 	if (LeftInput_Pressed)
+	{
+		tryMoveLeft = true;
+	}
+	if (LeftInput_Active && LaneSwitch_Hold_CooldownLeft == 0.f)
+	{
+		tryMoveLeft = true;
+	}
+
+	if (tryMoveLeft)
 	{
 		if (SolidBlockingLeftLane())
 		{
@@ -574,7 +620,17 @@ void APlayerCharacter::UpdateLaneFromInput()
 		}
 	}
 
+	bool tryMoveRight = false;
 	if (RightInput_Pressed)
+	{
+		tryMoveRight = true;
+	}
+	if (RightInput_Active && LaneSwitch_Hold_CooldownRight == 0.f)
+	{
+		tryMoveRight = true;
+	}
+
+	if (tryMoveRight)
 	{
 		if (SolidBlockingRightLane())
 		{
@@ -694,21 +750,21 @@ void APlayerCharacter::CancelVerticalSpeed()
 
 void APlayerCharacter::ResetPlayer()
 {
-	// --- Cancel lane switching state ---
 	bIsSwitchingLanes = false;
-	bIsResettingLean = false;     // if you're using lean reset mode
+	bIsResettingLean = false;
 	LaneMovementBlocked = false;
 	LaneSwitchTimer = 0.f;
+	LaneSwitch_Hold_CooldownLeft = 0.f;
+	LaneSwitch_Hold_CooldownRight = 0.f;
 
-	// --- Force lane index back to the middle ---
-	CurrentLaneIndex = 2;   // don't call SetLane(), avoids starting a transition
+	CurrentLaneIndex = 2;
 
-	// --- Force Y position to lane centre immediately ---
+
 	FVector ResetPos = SpawnPos;
-	ResetPos.Y = 0.f;       // middle lane = Y = 0
+	ResetPos.Y = 0.f;
 	SetActorLocation(ResetPos);
 
-	// --- Reset lean on flipbook visuals ---
+
 	if (MainVisualsFlipbookComponent)
 	{
 		FRotator UprightRot = FRotator(0.f,
@@ -718,7 +774,7 @@ void APlayerCharacter::ResetPlayer()
 		MainVisualsFlipbookComponent->SetRelativeRotation(UprightRot);
 	}
 
-	// --- Reset camera Y position too ---
+
 	FVector CamPos = CameraComponent->GetComponentLocation();
 	CamPos.Y = 0.f;
 	CameraComponent->SetWorldLocation(CamPos);
@@ -1017,12 +1073,22 @@ void APlayerCharacter::TryAddHealth(int addHealth)
 
 bool APlayerCharacter::MoveLane_Left()
 {
-	return (SetLane(CurrentLaneIndex - 1));
+	if (SetLane(CurrentLaneIndex - 1))
+	{
+		LaneSwitch_Hold_CooldownLeft = LaneSwitch_HoldButtonDelay;
+		return true;
+	}
+	return false;
 }
 
 bool APlayerCharacter::MoveLane_Right()
 {
-	return (SetLane(CurrentLaneIndex + 1));
+	if (SetLane(CurrentLaneIndex + 1))
+	{
+		LaneSwitch_Hold_CooldownRight = LaneSwitch_HoldButtonDelay;
+		return true;
+	}
+	return false;
 }
 
 bool APlayerCharacter::SetLane(int laneIndex)
@@ -1673,6 +1739,20 @@ void APlayerCharacter::UpdateDistanceTravelled()
 	LastFramePos = CurrentPos;
 
 	OnDistanceSet.Broadcast();
+}
+
+void APlayerCharacter::UpdateLaneSwitchCooldown(float DeltaTime)
+{
+	if (LaneSwitch_Hold_CooldownLeft > 0.0f)
+	{
+		LaneSwitch_Hold_CooldownLeft = (FMath::Clamp(LaneSwitch_Hold_CooldownLeft, 0, LaneSwitch_Hold_CooldownLeft - DeltaTime));
+	}
+	
+
+	if (LaneSwitch_Hold_CooldownRight > 0.0f)
+	{
+		LaneSwitch_Hold_CooldownRight = (FMath::Clamp(LaneSwitch_Hold_CooldownRight, 0, LaneSwitch_Hold_CooldownRight - DeltaTime));
+	}
 }
 
 void APlayerCharacter::UpdateLaneTransition(float DeltaTime)

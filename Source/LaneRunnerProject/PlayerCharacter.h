@@ -64,6 +64,9 @@ protected:
 	bool LeftInput_Pressed;
 	bool RightInput_Pressed;
 
+	bool LeftInput_Active;
+	bool RightInput_Active;
+
 	bool SpeedInput_Active;
 	bool SpeedInput_Pressed;
 	bool SpeedInput_Released;
@@ -135,9 +138,13 @@ public:
 	//input methods
 	void Input_LeftStart(const FInputActionValue& Value);
 	void Input_RightStart(const FInputActionValue& Value);
+	void Input_Left(const FInputActionValue& Value);
+	void Input_Right(const FInputActionValue& Value);
 
 	void Input_LeftStart_Joystick(const FInputActionValue& Value);
 	void Input_RightStart_Joystick(const FInputActionValue& Value);
+	void Input_Left_Joystick(const FInputActionValue& Value);
+	void Input_Right_Joystick(const FInputActionValue& Value);
 
 	virtual void Input_SpeedUpStart(const FInputActionValue& Value);
 	virtual void Input_SpeedUp(const FInputActionValue& Value);
@@ -205,6 +212,7 @@ public:
 	void UpdateDropShadow();
 	void UpdateAnimation();
 	void UpdateDistanceTravelled();
+	void UpdateLaneSwitchCooldown(float DeltaTime);
 	void UpdateLaneTransition(float DeltaTime);
 	void UpdateLean_LaneSwitchEnd(float DeltaTime);
 
@@ -350,6 +358,10 @@ protected:
 	float LaneSwitch_LeanInterpSpeed = 20.0f;    // Rotation smoothing
 
 	bool bIsResettingLean = false;
+
+	float LaneSwitch_HoldButtonDelay = .2f;
+	float LaneSwitch_Hold_CooldownLeft = 0.f;
+	float LaneSwitch_Hold_CooldownRight = 0.f;
 
 public:
 	UFUNCTION(BlueprintCallable)
