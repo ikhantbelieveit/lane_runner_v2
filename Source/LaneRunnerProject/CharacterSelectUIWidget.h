@@ -45,11 +45,17 @@ public:
 	UFUNCTION()
 	void OnCharacterButton1Pressed();
 
+	UFUNCTION()
+	void OnCharFocus1();
+
 	UPROPERTY(meta = (BindWidget))
 	UUIButtonWidget* CharacterButton2;
 
 	UFUNCTION()
 	void OnCharacterButton2Pressed();
+
+	UFUNCTION()
+	void OnCharFocus2();
 
 	UPROPERTY(meta = (BindWidget))
 	UUIButtonWidget* CharacterButton3;
@@ -57,11 +63,17 @@ public:
 	UFUNCTION()
 	void OnCharacterButton3Pressed();
 
+	UFUNCTION()
+	void OnCharFocus3();
+
 	UPROPERTY(meta = (BindWidget))
 	UUIButtonWidget* CharacterButton4;
 
 	UFUNCTION()
 	void OnCharacterButton4Pressed();
+
+	UFUNCTION()
+	void OnCharFocus4();
 
 	UPROPERTY(meta = (BindWidget))
 	UUIButtonWidget* CharacterButton5;
@@ -69,11 +81,17 @@ public:
 	UFUNCTION()
 	void OnCharacterButton5Pressed();
 
+	UFUNCTION()
+	void OnCharFocus5();
+
 	UPROPERTY(meta = (BindWidget))
 	UUIButtonWidget* CharacterButton6;
 
 	UFUNCTION()
 	void OnCharacterButton6Pressed();
+
+	UFUNCTION()
+	void OnCharFocus6();
 
 	UPROPERTY(meta = (BindWidget))
 	UImage* Character1PreviewImage;

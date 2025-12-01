@@ -62,13 +62,14 @@ void UUIButtonWidget::SynchronizeProperties()
 FReply UUIButtonWidget::NativeOnFocusReceived(const FGeometry& InGeometry, const FFocusEvent& InFocusEvent)
 {
 	ShowArrow(true);
+	BroadcastFocusGain.Broadcast();
 	return Super::NativeOnFocusReceived(InGeometry, InFocusEvent);
 }
 
 void UUIButtonWidget::NativeOnFocusLost(const FFocusEvent& InFocusEvent)
 {
 	ShowArrow(false);
-
+	BroadcastFocusLost.Broadcast();
 	Super::NativeOnFocusLost(InFocusEvent);
 }
 

@@ -4,6 +4,7 @@
 #include "MainMenuUIWidget.h"
 #include "GI_UIStateSystem.h"
 #include "GI_LevelSystem.h"
+#include "Misc/ConfigCacheIni.h"
 
 void UMainMenuUIWidget::Initialise()
 {
@@ -25,6 +26,21 @@ void UMainMenuUIWidget::Initialise()
 		QuitButton->BroadcastButtonClick.AddDynamic(this, &UMainMenuUIWidget::OnQuitButtonPressed);
 		QuitButton->SetVisibility(ESlateVisibility::Hidden);
 	}
+
+	FString ProjectVersion;
+
+	if (GConfig)
+	{
+		GConfig->GetString(
+			TEXT("/Script/EngineSettings.GeneralProjectSettings"),
+			TEXT("ProjectVersion"),
+			ProjectVersion,
+			GGameIni
+		);
+	}
+
+	FString Label = FString::Printf(TEXT("ALPHA...VERSION %s"), *ProjectVersion);
+	VersionNumberDisplay->SetText(FText::FromString(Label));
 }
 
 void UMainMenuUIWidget::Tick(float DeltaTime)

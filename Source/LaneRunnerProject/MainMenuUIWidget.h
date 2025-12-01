@@ -6,6 +6,7 @@
 #include "BaseUIScreen.h"
 #include "Components/Button.h" 
 #include "Components/Image.h" 
+#include "Components/TextBlock.h"
 #include "UIButtonWidget.h"
 #include "MainMenuUIWidget.generated.h"
 
@@ -43,4 +44,7 @@ public:
 
 	UFUNCTION()
 	void OnQuitButtonPressed();
+
+	UPROPERTY(meta = (BindWidget))
+	UTextBlock* VersionNumberDisplay;
 };

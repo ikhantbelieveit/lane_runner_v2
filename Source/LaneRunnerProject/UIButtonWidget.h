@@ -61,4 +61,10 @@ public:
 
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FUIButtonEvent BroadcastButtonClick;
+
+	UPROPERTY(BlueprintAssignable, Category = "Events")
+	FUIButtonEvent BroadcastFocusGain;
+
+	UPROPERTY(BlueprintAssignable, Category = "Events")
+	FUIButtonEvent BroadcastFocusLost;
 };

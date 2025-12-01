@@ -23,31 +23,37 @@ void UCharacterSelectUIWidget::Initialise()
 	{
 		DefaultSelection = CharacterButton1;
 		CharacterButton1->BroadcastButtonClick.AddDynamic(this, &UCharacterSelectUIWidget::OnCharacterButton1Pressed);
+		CharacterButton1->BroadcastFocusGain.AddDynamic(this, &UCharacterSelectUIWidget::OnCharFocus1);
 	}
 
 	if (CharacterButton2)
 	{
 		CharacterButton2->BroadcastButtonClick.AddDynamic(this, &UCharacterSelectUIWidget::OnCharacterButton2Pressed);
+		CharacterButton2->BroadcastFocusGain.AddDynamic(this, &UCharacterSelectUIWidget::OnCharFocus2);
 	}
 
 	if (CharacterButton3)
 	{
 		CharacterButton3->BroadcastButtonClick.AddDynamic(this, &UCharacterSelectUIWidget::OnCharacterButton3Pressed);
+		CharacterButton3->BroadcastFocusGain.AddDynamic(this, &UCharacterSelectUIWidget::OnCharFocus3);
 	}
 
 	if (CharacterButton4)
 	{
 		CharacterButton4->BroadcastButtonClick.AddDynamic(this, &UCharacterSelectUIWidget::OnCharacterButton4Pressed);
+		CharacterButton4->BroadcastFocusGain.AddDynamic(this, &UCharacterSelectUIWidget::OnCharFocus4);
 	}
 
 	if (CharacterButton5)
 	{
 		CharacterButton5->BroadcastButtonClick.AddDynamic(this, &UCharacterSelectUIWidget::OnCharacterButton5Pressed);
+		CharacterButton5->BroadcastFocusGain.AddDynamic(this, &UCharacterSelectUIWidget::OnCharFocus5);
 	}
 
 	if (CharacterButton6)
 	{
 		CharacterButton6->BroadcastButtonClick.AddDynamic(this, &UCharacterSelectUIWidget::OnCharacterButton6Pressed);
+		CharacterButton6->BroadcastFocusGain.AddDynamic(this, &UCharacterSelectUIWidget::OnCharFocus6);
 	}
 }
 
@@ -109,6 +115,102 @@ void UCharacterSelectUIWidget::OnCharacterButton1Pressed()
 	ToggleConfirmButton(true);
 
 	ShowPreviewImage(ECharacterType::Cowboy_Red);
+}
+
+void UCharacterSelectUIWidget::OnCharFocus1()
+{
+	ShowPreviewImage(ECharacterType::Cowboy_Red);
+
+	AActor* playerActor = UGameplayStatics::GetActorOfClass(GetWorld(), APlayerCharacter::StaticClass());
+
+	if (playerActor)
+	{
+		APlayerCharacter* playerRef = Cast<APlayerCharacter>(playerActor);
+		if (playerRef)
+		{
+			playerRef->SetCharacterType(ECharacterType::Cowboy_Red);
+		}
+	}
+}
+
+void UCharacterSelectUIWidget::OnCharFocus2()
+{
+	ShowPreviewImage(ECharacterType::Cowboy_Purple);
+
+	AActor* playerActor = UGameplayStatics::GetActorOfClass(GetWorld(), APlayerCharacter::StaticClass());
+
+	if (playerActor)
+	{
+		APlayerCharacter* playerRef = Cast<APlayerCharacter>(playerActor);
+		if (playerRef)
+		{
+			playerRef->SetCharacterType(ECharacterType::Cowboy_Purple);
+		}
+	}
+}
+
+void UCharacterSelectUIWidget::OnCharFocus3()
+{
+	ShowPreviewImage(ECharacterType::Scrooge);
+
+	AActor* playerActor = UGameplayStatics::GetActorOfClass(GetWorld(), APlayerCharacter::StaticClass());
+
+	if (playerActor)
+	{
+		APlayerCharacter* playerRef = Cast<APlayerCharacter>(playerActor);
+		if (playerRef)
+		{
+			playerRef->SetCharacterType(ECharacterType::Scrooge);
+		}
+	}
+}
+
+void UCharacterSelectUIWidget::OnCharFocus4()
+{
+	ShowPreviewImage(ECharacterType::Cow);
+
+	AActor* playerActor = UGameplayStatics::GetActorOfClass(GetWorld(), APlayerCharacter::StaticClass());
+
+	if (playerActor)
+	{
+		APlayerCharacter* playerRef = Cast<APlayerCharacter>(playerActor);
+		if (playerRef)
+		{
+			playerRef->SetCharacterType(ECharacterType::Cow);
+		}
+	}
+}
+
+void UCharacterSelectUIWidget::OnCharFocus5()
+{
+	ShowPreviewImage(ECharacterType::Egg);
+
+	AActor* playerActor = UGameplayStatics::GetActorOfClass(GetWorld(), APlayerCharacter::StaticClass());
+
+	if (playerActor)
+	{
+		APlayerCharacter* playerRef = Cast<APlayerCharacter>(playerActor);
+		if (playerRef)
+		{
+			playerRef->SetCharacterType(ECharacterType::Egg);
+		}
+	}
+}
+
+void UCharacterSelectUIWidget::OnCharFocus6()
+{
+	ShowPreviewImage(ECharacterType::Postman);
+
+	AActor* playerActor = UGameplayStatics::GetActorOfClass(GetWorld(), APlayerCharacter::StaticClass());
+
+	if (playerActor)
+	{
+		APlayerCharacter* playerRef = Cast<APlayerCharacter>(playerActor);
+		if (playerRef)
+		{
+			playerRef->SetCharacterType(ECharacterType::Postman);
+		}
+	}
 }
 
 void UCharacterSelectUIWidget::OnCharacterButton2Pressed()
