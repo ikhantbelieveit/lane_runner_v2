@@ -7,6 +7,7 @@
 #include "ChunkSpawnEntry.h"
 #include "LevelChunkConfigData.h"
 #include "LevelLayoutData.h"
+#include "Components/BoxComponent.h"
 #include "LevelChunkActor.generated.h"
 
 
@@ -56,4 +57,17 @@ protected:
 	TMap<FName, FName> ActiveVariants;
 	bool IsActorVariantActive(const AActor* Actor) const;
 	void DeactivateActor(AActor* Actor) const;
+
+	UBoxComponent* BoundsBox = nullptr;
+
+	UFUNCTION()
+	void OnBoundsBoxBeginOverlap(
+		UPrimitiveComponent* OverlappedComp,
+		AActor* OtherActor,
+		UPrimitiveComponent* OtherComp,
+		int32 OtherBodyIndex,
+		bool bFromSweep,
+		const FHitResult& SweepResult);
+
+	FName ChunkID;
 };

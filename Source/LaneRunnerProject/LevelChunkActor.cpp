@@ -47,6 +47,29 @@ void ALevelChunkActor::BeginPlay()
             FloorComp->InitialiseFloor(ConfigData);
         }
     }
+
+    //init bounds box
+    BoundsBox = nullptr;
+
+
+    TArray<UBoxComponent*> boxComps;
+    GetComponents<UBoxComponent>(boxComps);
+
+    for (UBoxComponent* Box : boxComps)
+    {
+        if (Box->ComponentHasTag("BoundsBox"))
+        {
+            BoundsBox = Box;
+            break;
+        }
+    }
+
+    if (!BoundsBox)
+    {
+        return;
+    }
+
+    BoundsBox->OnComponentBeginOverlap.AddDynamic(this, &ALevelChunkActor::OnBoundsBoxBeginOverlap);
 }
 
 void ALevelChunkActor::OnConstruction(const FTransform& Transform)
@@ -223,6 +246,22 @@ void ALevelChunkActor::DeactivateActor(AActor* Actor) const
     Actor->SetActorTickEnabled(false);
 }
 
+void ALevelChunkActor::OnBoundsBoxBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+    if (!OtherComp) return;
+
+    if (OtherComp->ComponentHasTag(TEXT("PlayerColl")))
+    {
+#pragma region DebugLogs
+        /*FString debugMessage = FString::Printf(TEXT("[LEVEL] Player entered chunk bounds: %s"), *ChunkID.ToString());
+
+        UE_LOG(LogTemp, Warning, TEXT("%s"), *debugMessage);
+        GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, debugMessage);*/
+#pragma endregion
+        
+    }
+}
+
 
 void ALevelChunkActor::Teardown()
 {
@@ -273,6 +312,8 @@ void ALevelChunkActor::ApplyVariant()
 
 void ALevelChunkActor::InitializeFromLayoutData(const FLevelChunkData& InChunkData)
 {
+    ChunkID = InChunkData.ChunkID;
+
     ActiveVariants.Empty();
     
 
@@ -281,6 +322,7 @@ void ALevelChunkActor::InitializeFromLayoutData(const FLevelChunkData& InChunkDa
         ActiveVariants.Add(FName(Entry.SetID), FName(Entry.Variant));
     }
 
+#pragma region DebugLogs
     //debug logs below
     /*if (ActiveVariants.Num() == 0)
     {
@@ -312,6 +354,7 @@ void ALevelChunkActor::InitializeFromLayoutData(const FLevelChunkData& InChunkDa
 
         UE_LOG(LogTemp, Log, TEXT("====================================="));
     }*/
+#pragma endregion
 
     ApplyVariant();
 }
