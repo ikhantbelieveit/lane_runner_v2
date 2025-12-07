@@ -39,7 +39,7 @@ void UMainMenuUIWidget::Initialise()
 		);
 	}
 
-	FString Label = FString::Printf(TEXT("ALPHA...VERSION %s"), *ProjectVersion);
+	FString Label = ProjectVersion;
 	VersionNumberDisplay->SetText(FText::FromString(Label));
 }
 

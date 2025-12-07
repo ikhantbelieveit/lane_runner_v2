@@ -115,11 +115,6 @@ void AProjectile::SetupFromConfig()
 
         if (boxComp)
         {
-            if (!boxComp->ComponentHasTag("PlayerProj"))
-            {
-                boxComp->ComponentTags.Add("PlayerProj");
-            }
-
             boxComp->OnComponentBeginOverlap.AddDynamic(this, &AProjectile::HandleBeginOverlap);
         }
     }
