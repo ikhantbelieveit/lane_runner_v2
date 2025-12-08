@@ -18,28 +18,12 @@ void AJumpingSnake::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	UTimedActionComponent* actionComponent = GetComponentByClass<UTimedActionComponent>();
-	if (actionComponent)
-	{
-		actionComponent->PerformActionEvent.AddDynamic(this, &AJumpingSnake::PerformJump);
-	}
-	else
-	{
-	}
+
 }
 
 // Called every frame
 void AJumpingSnake::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-}
-
-void AJumpingSnake::PerformJump()
-{
-	FVector jumpVector = FVector(0.0f, 0.0f, JumpVelocity);
-
-	UBoxComponent* boxComp = GetComponentByClass<UBoxComponent>();
-	boxComp->AddImpulse(jumpVector, NAME_None, true);
 
 }

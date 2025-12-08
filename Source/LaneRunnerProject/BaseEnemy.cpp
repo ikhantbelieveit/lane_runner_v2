@@ -8,6 +8,7 @@
 #include "GI_ProjectileSystem.h"
 #include "GI_LevelSystem.h"
 #include "SpawnComponent.h"
+#include "TimedActionComponent.h"
 
 // Sets default values
 ABaseEnemy::ABaseEnemy()
@@ -21,6 +22,12 @@ ABaseEnemy::ABaseEnemy()
 void ABaseEnemy::BeginPlay()
 {
 	Super::BeginPlay();
+
+	UTimedActionComponent* actionComponent = GetComponentByClass<UTimedActionComponent>();
+	if (actionComponent)
+	{
+		actionComponent->PerformActionEvent.AddDynamic(this, &ABaseEnemy::PerformTimedAction);
+	}
 	
 
 	ULineOfSightComponent* lineOfSight = GetComponentByClass<ULineOfSightComponent>();
@@ -139,6 +146,18 @@ void ABaseEnemy::BeginPlay()
 				ProjectileOrigins.Add(FName(*originName), comp);
 				break;
 			}
+		}
+	}
+
+	TArray<UBoxComponent*> boxComps;
+	GetComponents<UBoxComponent>(boxComps);
+
+	for (UBoxComponent* box : boxComps)
+	{
+		if (box->ComponentHasTag("PhysicsBox"))
+		{
+			PhysicsBox = box;
+			break;
 		}
 	}
 }
@@ -383,5 +402,31 @@ void ABaseEnemy::InitializeFromChunkData_Implementation(const FChunkSpawnEntry& 
 		{
 			spawnComp->ResetAsSpawned = bStartSpawned;
 		}
+	}
+}
+
+void ABaseEnemy::PerformJump()
+{
+	if (!PhysicsBox)
+	{
+		return;
+	}
+
+	FVector jumpVector = FVector(0.0f, 0.0f, JumpVelocity);
+	PhysicsBox->AddImpulse(jumpVector, NAME_None, true);
+}
+
+void ABaseEnemy::PerformTimedAction()
+{
+	if (!IsAlive)
+	{
+		return;
+	}
+
+	switch (TimedActionType)
+	{
+	case EEnemyTimedActionType::Jump:
+		PerformJump();
+		break;
 	}
 }

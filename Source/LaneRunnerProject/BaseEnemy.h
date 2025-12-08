@@ -11,6 +11,7 @@
 #include "GroupMember.h"
 #include "LocationManagerComponent.h"
 #include "ChunkInitializable.h"
+#include "Components/BoxComponent.h"
 #include "BaseEnemy.generated.h"
 
 UENUM(BlueprintType)
@@ -19,6 +20,14 @@ enum class EEnemyDetectBehaviour : uint8
 	None UMETA(DisplayName = "None"),
 	StraightAdvance UMETA(DisplayName = "Straight Advance"),
 	Shoot_OneOff UMETA(DisplayName = "Shoot (One-Off)")
+};
+
+UENUM(BlueprintType)
+enum class EEnemyTimedActionType: uint8
+{
+	None UMETA(DisplayName = "None"),
+	Jump UMETA(DisplayName = "Jump"),
+	Shoot UMETA(DisplayName = "Shoot")
 };
 
 UCLASS()
@@ -48,6 +57,8 @@ protected:
 
 	TMap<FName, USceneComponent*> ProjectileOrigins;
 
+	UBoxComponent* PhysicsBox;
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -55,6 +66,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	EEnemyDetectBehaviour DetectBehaviour;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	EEnemyTimedActionType TimedActionType;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float AdvanceSpeed;
@@ -97,6 +111,15 @@ public:
 
 	UFUNCTION()
 	void SetAnim(FString animName);
+
+	UFUNCTION()
+	void PerformJump();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float JumpVelocity;
+
+	UFUNCTION()
+	void PerformTimedAction();
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Group")

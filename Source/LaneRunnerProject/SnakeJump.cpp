@@ -10,14 +10,7 @@ void ASnakeJump::BeginPlay()
 {
 	Super::BeginPlay();
 
-	UTimedActionComponent* actionComponent = GetComponentByClass<UTimedActionComponent>();
-	if (actionComponent)
-	{
-		actionComponent->PerformActionEvent.AddDynamic(this, &ASnakeJump::PerformJump);
-	}
-	else
-	{
-	}
+
 }
 
 // Called every frame
@@ -27,11 +20,3 @@ void ASnakeJump::Tick(float DeltaTime)
 
 }
 
-void ASnakeJump::PerformJump()
-{
-	FVector jumpVector = FVector(0.0f, 0.0f, JumpVelocity);
-
-	UBoxComponent* boxComp = GetComponentByClass<UBoxComponent>();
-	boxComp->AddImpulse(jumpVector, NAME_None, true);
-
-}
