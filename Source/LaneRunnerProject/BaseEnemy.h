@@ -59,6 +59,12 @@ protected:
 
 	UBoxComponent* PhysicsBox;
 
+	int TimedActionShootIndex;
+
+	void PerformNextTimedShoot();
+
+	bool TryPerformShoot(FName name);
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -120,6 +126,9 @@ public:
 
 	UFUNCTION()
 	void PerformTimedAction();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<FName> TimedActionShootNames;
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Group")

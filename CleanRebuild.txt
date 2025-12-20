@@ -1,0 +1,28 @@
+@echo off
+set PROJECT_DIR=C:\Users\Joseph\Documents\GitHub\lane_runner_v2\LaneRunnerProject
+set UE_DIR=C:\Program Files\Epic Games\UE_5.6
+
+echo === Cleaning generated folders ===
+rmdir /s /q "%PROJECT_DIR%\Binaries"
+rmdir /s /q "%PROJECT_DIR%\DerivedDataCache"
+rmdir /s /q "%PROJECT_DIR%\Intermediate"
+rmdir /s /q "%PROJECT_DIR%\Saved"
+
+echo === Regenerating Visual Studio project files ===
+"%UE_DIR%\Engine\Build\BatchFiles\GenerateProjectFiles.bat" ^
+-project="%PROJECT_DIR%\LaneRunnerProject.uproject" ^
+-game -engine
+
+echo === Building project (Development Editor) ===
+"%UE_DIR%\Engine\Build\BatchFiles\Build.bat" ^
+LaneRunnerProjectEditor ^
+Win64 ^
+Development ^
+-project="%PROJECT_DIR%\LaneRunnerProject.uproject" ^
+-waitmutex -NoHotReload
+
+echo === Opening Visual Studio ===
+start "" "%PROJECT_DIR%\LaneRunnerProject.sln"
+
+echo === DONE ===
+pause

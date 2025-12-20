@@ -13,5 +13,6 @@ enum class EProjectileType : uint8
 	None    UMETA(DisplayName = "None"),
 	PlayerBullet UMETA(DisplayName = "Player Bullet"),
 	TallBanditBullet UMETA(DisplayName = "Tall Bandit Bullet"),
-	ShortBanditBullet UMETA(DisplayName = "Short Bandit Bullet")
+	ShortBanditBullet UMETA(DisplayName = "Short Bandit Bullet"),
+	ShootBugBullet UMETA(DisplayName = "Shoot Bug Bullet"),
 };

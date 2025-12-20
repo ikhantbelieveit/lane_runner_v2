@@ -23,11 +23,7 @@ void ABaseEnemy::BeginPlay()
 {
 	Super::BeginPlay();
 
-	UTimedActionComponent* actionComponent = GetComponentByClass<UTimedActionComponent>();
-	if (actionComponent)
-	{
-		actionComponent->PerformActionEvent.AddDynamic(this, &ABaseEnemy::PerformTimedAction);
-	}
+	
 	
 
 	ULineOfSightComponent* lineOfSight = GetComponentByClass<ULineOfSightComponent>();
@@ -160,6 +156,13 @@ void ABaseEnemy::BeginPlay()
 			break;
 		}
 	}
+
+	UTimedActionComponent* actionComponent = GetComponentByClass<UTimedActionComponent>();
+	if (actionComponent)
+	{
+		actionComponent->PerformActionEvent.AddDynamic(this, &ABaseEnemy::PerformTimedAction);
+		actionComponent->StartAction();
+	}
 }
 
 bool ABaseEnemy::HasPerformedDetectAction()
@@ -173,6 +176,8 @@ bool ABaseEnemy::HasPerformedDetectAction()
 	}
 	return false;
 }
+
+
 
 // Called every frame
 void ABaseEnemy::Tick(float DeltaTime)
@@ -249,26 +254,7 @@ void ABaseEnemy::OnDetectPlayer()
 
 			for (FName projName : shootProjNames)
 			{
-				FProjectileRequestData* projRequest = ProjectileDataMap.Find(projName);
-				for (FShootItem& item : projRequest->Items)
-				{
-					FVector shootPos = GetActorLocation();
-
-					if (item.ShootOriginName != NAME_None)
-					{
-						if (USceneComponent** foundComp = ProjectileOrigins.Find(item.ShootOriginName))
-						{
-							if (*foundComp)
-							{
-								shootPos = (*foundComp)->GetComponentLocation();
-							}
-						}
-					}
-
-					item.ShootPos = shootPos;
-				}
-
-				if (!projSystem->ProcessProjectileRequest(*projRequest))
+				if (!TryPerformShoot(projName))
 				{
 					//complain here
 				}
@@ -277,6 +263,37 @@ void ABaseEnemy::OnDetectPlayer()
 					PerformedOneOffShoot = true;
 				}
 			}
+
+			//for (FName projName : shootProjNames)
+			//{
+			//	FProjectileRequestData* projRequest = ProjectileDataMap.Find(projName);
+			//	for (FShootItem& item : projRequest->Items)
+			//	{
+			//		FVector shootPos = GetActorLocation();
+
+			//		if (item.ShootOriginName != NAME_None)
+			//		{
+			//			if (USceneComponent** foundComp = ProjectileOrigins.Find(item.ShootOriginName))
+			//			{
+			//				if (*foundComp)
+			//				{
+			//					shootPos = (*foundComp)->GetComponentLocation();
+			//				}
+			//			}
+			//		}
+
+			//		item.ShootPos = shootPos;
+			//	}
+
+			//	if (!projSystem->ProcessProjectileRequest(*projRequest))
+			//	{
+			//		//complain here
+			//	}
+			//	else
+			//	{
+			//		PerformedOneOffShoot = true;
+			//	}
+			//}
 		}
 
 		
@@ -416,6 +433,72 @@ void ABaseEnemy::PerformJump()
 	PhysicsBox->AddImpulse(jumpVector, NAME_None, true);
 }
 
+void ABaseEnemy::PerformNextTimedShoot()
+{
+	if (!TimedActionShootNames.IsValidIndex(TimedActionShootIndex))
+	{
+		return;
+	}
+
+	FName timedShootName = TimedActionShootNames[TimedActionShootIndex];
+
+	if (!TryPerformShoot(timedShootName))
+	{
+		//complain here
+	}
+
+	TimedActionShootIndex = (TimedActionShootIndex + 1) % TimedActionShootNames.Num();
+}
+
+bool ABaseEnemy::TryPerformShoot(FName name)
+{
+	auto* projSystem = GetGameInstance()->GetSubsystem<UGI_ProjectileSystem>();
+	if (!projSystem)
+	{
+		return false;
+	}
+
+	FProjectileRequestData* projRequest = ProjectileDataMap.Find(name);
+	if (!projRequest)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("No projectile data for %s"), *name.ToString());
+		return false;
+	}
+
+	FProjectileRequestData LocalRequest = *projRequest;
+
+	for (FShootItem& item : LocalRequest.Items)
+	{
+		FVector shootPos = GetActorLocation();
+
+		if (item.ShootOriginName != NAME_None)
+		{
+			if (USceneComponent** foundComp = ProjectileOrigins.Find(item.ShootOriginName))
+			{
+				if (*foundComp)
+				{
+					shootPos = (*foundComp)->GetComponentLocation();
+
+					GEngine->AddOnScreenDebugMessage(
+						-1,
+						2.0f,
+						FColor::Green,
+						FString::Printf(
+							TEXT("Shoot from %s @ %.2f"),
+							*item.ShootOriginName.ToString(),
+							GetWorld()->TimeSeconds
+						)
+					);
+				}
+			}
+		}
+
+		item.ShootPos = shootPos;
+	}
+
+	return projSystem->ProcessProjectileRequest(LocalRequest);
+}
+
 void ABaseEnemy::PerformTimedAction()
 {
 	if (!IsAlive)
@@ -427,6 +510,9 @@ void ABaseEnemy::PerformTimedAction()
 	{
 	case EEnemyTimedActionType::Jump:
 		PerformJump();
+		break;
+	case EEnemyTimedActionType::Shoot:
+		PerformNextTimedShoot();
 		break;
 	}
 }
