@@ -263,41 +263,8 @@ void ABaseEnemy::OnDetectPlayer()
 					PerformedOneOffShoot = true;
 				}
 			}
-
-			//for (FName projName : shootProjNames)
-			//{
-			//	FProjectileRequestData* projRequest = ProjectileDataMap.Find(projName);
-			//	for (FShootItem& item : projRequest->Items)
-			//	{
-			//		FVector shootPos = GetActorLocation();
-
-			//		if (item.ShootOriginName != NAME_None)
-			//		{
-			//			if (USceneComponent** foundComp = ProjectileOrigins.Find(item.ShootOriginName))
-			//			{
-			//				if (*foundComp)
-			//				{
-			//					shootPos = (*foundComp)->GetComponentLocation();
-			//				}
-			//			}
-			//		}
-
-			//		item.ShootPos = shootPos;
-			//	}
-
-			//	if (!projSystem->ProcessProjectileRequest(*projRequest))
-			//	{
-			//		//complain here
-			//	}
-			//	else
-			//	{
-			//		PerformedOneOffShoot = true;
-			//	}
-			//}
 		}
 
-		
-		
 		break;
 	}
 
@@ -478,17 +445,6 @@ bool ABaseEnemy::TryPerformShoot(FName name)
 				if (*foundComp)
 				{
 					shootPos = (*foundComp)->GetComponentLocation();
-
-					GEngine->AddOnScreenDebugMessage(
-						-1,
-						2.0f,
-						FColor::Green,
-						FString::Printf(
-							TEXT("Shoot from %s @ %.2f"),
-							*item.ShootOriginName.ToString(),
-							GetWorld()->TimeSeconds
-						)
-					);
 				}
 			}
 		}
