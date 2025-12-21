@@ -38,9 +38,6 @@ public:
     float MeshScale = 0.2f;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Visual", meta = (AllowPrivateAccess = "true"))
-    UPaperSprite* ProjSprite;
-
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Visual", meta = (AllowPrivateAccess = "true"))
     TSubclassOf<class AOneShotAnim> ImpactAnimClass;
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Audio")

@@ -16,6 +16,7 @@ void UGI_CollectiblePoolSystem::Initialize(FSubsystemCollectionBase& Collection)
     if (levelSystem)
     {
         levelSystem->CleanupBeforeReset.AddDynamic(this, &UGI_CollectiblePoolSystem::ResetAllPools);
+
     }
 
     if (UWorld* World = GetWorld())
@@ -55,8 +56,6 @@ void UGI_CollectiblePoolSystem::TickSubsystem(float DeltaTime)
 
 bool UGI_CollectiblePoolSystem::InitialiseFromConfig()
 {
-    UE_LOG(LogTemp, Warning, TEXT("!!! [POOL] InitialiseFromConfig CALLED !!!"));
-
     UMyGameInstance* GI = Cast<UMyGameInstance>(GetGameInstance());
     if (!GI || !GI->ConfigData || !GI->ConfigData->CollectiblePoolConfig)
         return false;
@@ -107,6 +106,7 @@ ABaseCollectible* UGI_CollectiblePoolSystem::CreateNewCollectible(ECollectibleTy
 
         if (USpawnComponent* SpawnComp = NewCol->FindComponentByClass<USpawnComponent>())
         {
+            SpawnComp->ResetAsSpawned = false;
             SpawnComp->Despawn();
         }
     }
@@ -136,6 +136,8 @@ ABaseCollectible* UGI_CollectiblePoolSystem::RequestCollectible(const FCollectib
                 SpawnComp->Spawn(true, Request.bShouldScroll, true);
             }
 
+            //GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("Spawn collectible from request"));
+
             return Col;
         }
         else
@@ -153,10 +155,12 @@ ABaseCollectible* UGI_CollectiblePoolSystem::RequestCollectible(const FCollectib
 
         if (USpawnComponent* SpawnComp = NewCol->FindComponentByClass<USpawnComponent>())
         {
+            SpawnComp->ResetAsSpawned = false;
             SpawnComp->Spawn(true, Request.bShouldScroll, true);
         }
     }
 
+    //GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("Spawn collectible from request - made new"));
     return NewCol;
 }
 
@@ -181,6 +185,8 @@ void UGI_CollectiblePoolSystem::ReturnCollectible(ABaseCollectible* Collectible)
 
 void UGI_CollectiblePoolSystem::ResetAllPools()
 {
+    //GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("ResetAllPools called"));
+    
     for (auto& Elem : Pools)
     {
         FCollectiblePool& Pool = Elem.Value;
@@ -200,6 +206,8 @@ void UGI_CollectiblePoolSystem::ResetAllPools()
 
         Pool.Active.Empty();
     }
+
+    
 
     
 }

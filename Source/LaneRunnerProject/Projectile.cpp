@@ -71,7 +71,6 @@ void AProjectile::SetupFromConfig()
     
 
     UProjectileMovementComponent* projMoveComp = (UProjectileMovementComponent*)GetComponentByClass(UProjectileMovementComponent::StaticClass());
-    UPaperSpriteComponent* spriteComp = (UPaperSpriteComponent*)GetComponentByClass(UPaperSpriteComponent::StaticClass());
     UBoxComponent* boxComp = (UBoxComponent*)GetComponentByClass(UBoxComponent::StaticClass());
     ULocationManagerComponent* scrollComp = GetComponentByClass<ULocationManagerComponent>();
 
@@ -106,11 +105,6 @@ void AProjectile::SetupFromConfig()
             projMoveComp->MaxSpeed = ConfigData->Speed;
 
             break;
-        }
-        
-        if (spriteComp)
-        {
-            spriteComp->SetSprite(ConfigData->ProjSprite);
         }
 
         if (boxComp)

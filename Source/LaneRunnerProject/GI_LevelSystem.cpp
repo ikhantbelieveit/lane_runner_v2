@@ -222,6 +222,7 @@ void UGI_LevelSystem::EnterLevel()
 
     RegenerateLevel();
     CleanupBeforeReset.Broadcast();
+    UE_LOG(LogTemp, Warning, TEXT("[POOL] CleanupBeforeReset BROADCAST"));
 
 	ResetLevelStats();
 

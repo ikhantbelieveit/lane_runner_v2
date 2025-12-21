@@ -29,10 +29,26 @@ void USpawnComponent::BeginPlay()
 	Super::BeginPlay();
 
 	auto* levelSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGI_LevelSystem>();
-	if (levelSystem)
+	if (!levelSystem)
 	{
-		levelSystem->CleanupBeforeReset.AddDynamic(this, &USpawnComponent::Reset);
+		return;
 	}
+
+	AActor* Owner = GetOwner();
+	if (!Owner)
+	{
+		return;
+	}
+
+	if (ABaseCollectible* Collectible = Cast<ABaseCollectible>(Owner))
+	{
+		if (Collectible->bIsPooledInstance)
+		{
+			return;
+		}
+	}
+
+	levelSystem->CleanupBeforeReset.AddDynamic(this, &USpawnComponent::Reset);
 	
 }
 
@@ -137,6 +153,13 @@ void USpawnComponent::Spawn(bool drop, bool scrollInstant, bool scrollOnReach)
 		}
 	}
 
+	AActor* Owner = GetOwner();
+	if (Owner)
+	{
+		Owner->SetActorHiddenInGame(false);
+		Owner->SetActorTickEnabled(true);
+	}
+
 	OnSpawn.Broadcast();
 }
 
@@ -169,6 +192,13 @@ void USpawnComponent::Despawn()
 	if (flipbook)
 	{
 		flipbook->SetVisibility(false);
+	}
+
+	AActor* Owner = GetOwner();
+	if (Owner)
+	{
+		Owner->SetActorHiddenInGame(true);
+		Owner->SetActorTickEnabled(false);
 	}
 
 	OnDespawn.Broadcast();
