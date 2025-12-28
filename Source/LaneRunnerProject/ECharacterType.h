@@ -19,5 +19,6 @@ enum class ECharacterType : uint8
 	Egg UMETA(DisplayName = "Egg Person"),
 	Postman UMETA(DisplayName = "Postman"),
 	Rat UMETA(DisplayName = "Rat"),
-	Wonka UMETA(DisplayName = "Wonka")
+	Wonka UMETA(DisplayName = "Wonka"),
+	ScroogeWife UMETA(DisplayName = "ScroogeWife")
 };

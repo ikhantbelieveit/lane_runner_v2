@@ -253,10 +253,10 @@ void ALevelChunkActor::OnBoundsBoxBeginOverlap(UPrimitiveComponent* OverlappedCo
     if (OtherComp->ComponentHasTag(TEXT("PlayerColl")))
     {
 #pragma region DebugLogs
-        /*FString debugMessage = FString::Printf(TEXT("[LEVEL] Player entered chunk bounds: %s"), *ChunkID.ToString());
+        FString debugMessage = FString::Printf(TEXT("[LEVEL] Player entered chunk bounds: %s"), *ChunkID.ToString());
 
         UE_LOG(LogTemp, Warning, TEXT("%s"), *debugMessage);
-        GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, debugMessage);*/
+        GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, debugMessage);
 #pragma endregion
         
     }

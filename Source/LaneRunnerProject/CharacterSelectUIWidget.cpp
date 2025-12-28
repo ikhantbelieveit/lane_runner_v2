@@ -55,6 +55,12 @@ void UCharacterSelectUIWidget::Initialise()
 		CharacterButton6->BroadcastButtonClick.AddDynamic(this, &UCharacterSelectUIWidget::OnCharacterButton6Pressed);
 		CharacterButton6->BroadcastFocusGain.AddDynamic(this, &UCharacterSelectUIWidget::OnCharFocus6);
 	}
+
+	if (CharacterButton7)
+	{
+		CharacterButton7->BroadcastButtonClick.AddDynamic(this, &UCharacterSelectUIWidget::OnCharacterButton7Pressed);
+		CharacterButton7->BroadcastFocusGain.AddDynamic(this, &UCharacterSelectUIWidget::OnCharFocus7);
+	}
 }
 
 void UCharacterSelectUIWidget::SetupBeforeShow()
@@ -115,6 +121,24 @@ void UCharacterSelectUIWidget::OnCharacterButton1Pressed()
 	ToggleConfirmButton(true);
 
 	ShowPreviewImage(ECharacterType::Cowboy_Red);
+}
+
+void UCharacterSelectUIWidget::OnCharacterButton7Pressed()
+{
+	AActor* playerActor = UGameplayStatics::GetActorOfClass(GetWorld(), APlayerCharacter::StaticClass());
+
+	if (playerActor)
+	{
+		APlayerCharacter* playerRef = Cast<APlayerCharacter>(playerActor);
+		if (playerRef)
+		{
+			playerRef->SetCharacterType(ECharacterType::ScroogeWife);
+		}
+	}
+
+	ToggleConfirmButton(true);
+
+	ShowPreviewImage(ECharacterType::ScroogeWife);
 }
 
 void UCharacterSelectUIWidget::OnCharFocus1()
@@ -209,6 +233,24 @@ void UCharacterSelectUIWidget::OnCharFocus6()
 		if (playerRef)
 		{
 			playerRef->SetCharacterType(ECharacterType::Postman);
+		}
+	}
+}
+
+
+
+void UCharacterSelectUIWidget::OnCharFocus7()
+{
+	ShowPreviewImage(ECharacterType::ScroogeWife);
+
+	AActor* playerActor = UGameplayStatics::GetActorOfClass(GetWorld(), APlayerCharacter::StaticClass());
+
+	if (playerActor)
+	{
+		APlayerCharacter* playerRef = Cast<APlayerCharacter>(playerActor);
+		if (playerRef)
+		{
+			playerRef->SetCharacterType(ECharacterType::ScroogeWife);
 		}
 	}
 }
@@ -315,6 +357,7 @@ void UCharacterSelectUIWidget::ShowPreviewImage(ECharacterType characterType)
 	bool showCow = characterType == ECharacterType::Cow;
 	bool showEgg = characterType == ECharacterType::Egg;
 	bool showPostman = characterType == ECharacterType::Postman;
+	bool showScroogeWife = characterType == ECharacterType::ScroogeWife;
 
 	Character1PreviewImage->SetVisibility(showRedCowboy ? ESlateVisibility::Visible : ESlateVisibility::Hidden);
 	Character2PreviewImage->SetVisibility(showPurpleCowboy ? ESlateVisibility::Visible : ESlateVisibility::Hidden);
@@ -322,6 +365,7 @@ void UCharacterSelectUIWidget::ShowPreviewImage(ECharacterType characterType)
 	Character4PreviewImage->SetVisibility(showCow ? ESlateVisibility::Visible : ESlateVisibility::Hidden);
 	Character5PreviewImage->SetVisibility(showEgg ? ESlateVisibility::Visible : ESlateVisibility::Hidden);
 	Character6PreviewImage->SetVisibility(showPostman ? ESlateVisibility::Visible : ESlateVisibility::Hidden);
+	Character7PreviewImage->SetVisibility(showScroogeWife ? ESlateVisibility::Visible : ESlateVisibility::Hidden);
 }
 
 
@@ -353,8 +397,9 @@ void UCharacterSelectUIWidget::ToggleConfirmButton(bool active)
 		CharacterButton4->SetNavigationRuleExplicit(EUINavigation::Right, ConfirmButton);
 		CharacterButton5->SetNavigationRuleExplicit(EUINavigation::Right, ConfirmButton);
 		CharacterButton6->SetNavigationRuleExplicit(EUINavigation::Right, ConfirmButton);
+		CharacterButton7->SetNavigationRuleExplicit(EUINavigation::Right, ConfirmButton);
 
-		CharacterButton6->SetNavigationRuleExplicit(EUINavigation::Down, ConfirmButton);
+		CharacterButton7->SetNavigationRuleExplicit(EUINavigation::Down, ConfirmButton);
 	}
 	else
 	{
@@ -366,7 +411,8 @@ void UCharacterSelectUIWidget::ToggleConfirmButton(bool active)
 		CharacterButton4->SetNavigationRuleBase(EUINavigation::Right, EUINavigationRule::Escape);
 		CharacterButton5->SetNavigationRuleBase(EUINavigation::Right, EUINavigationRule::Escape);
 		CharacterButton6->SetNavigationRuleBase(EUINavigation::Right, EUINavigationRule::Escape);
+		CharacterButton7->SetNavigationRuleBase(EUINavigation::Right, EUINavigationRule::Escape);
 
-		CharacterButton6->SetNavigationRuleBase(EUINavigation::Down, EUINavigationRule::Escape);
+		CharacterButton7->SetNavigationRuleBase(EUINavigation::Down, EUINavigationRule::Escape);
 	}
 }

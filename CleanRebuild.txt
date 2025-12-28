@@ -8,10 +8,11 @@ rmdir /s /q "%PROJECT_DIR%\DerivedDataCache"
 rmdir /s /q "%PROJECT_DIR%\Intermediate"
 rmdir /s /q "%PROJECT_DIR%\Saved"
 
-echo === Regenerating Visual Studio project files ===
-"%UE_DIR%\Engine\Build\BatchFiles\GenerateProjectFiles.bat" ^
+echo === Regenerating Visual Studio project files (UE5-safe) ===
+"%UE_DIR%\Engine\Binaries\DotNET\UnrealBuildTool\UnrealBuildTool.exe" ^
+-projectfiles ^
 -project="%PROJECT_DIR%\LaneRunnerProject.uproject" ^
--game -engine
+-game -engine -progress
 
 echo === Building project (Development Editor) ===
 "%UE_DIR%\Engine\Build\BatchFiles\Build.bat" ^
