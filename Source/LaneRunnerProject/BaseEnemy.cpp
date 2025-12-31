@@ -34,6 +34,7 @@ void ABaseEnemy::BeginPlay()
 
 	UPaperSpriteComponent* foundAlertSprite = nullptr;
 	UPaperSpriteComponent* foundMainVisuals = nullptr;
+	
 
 	UPaperFlipbookComponent* foundMainVisualsFlipbook = nullptr;
 
@@ -161,7 +162,11 @@ void ABaseEnemy::BeginPlay()
 	if (actionComponent)
 	{
 		actionComponent->PerformActionEvent.AddDynamic(this, &ABaseEnemy::PerformTimedAction);
-		actionComponent->StartAction();
+		actionComponent->StartDelay = TimedActionOffset;
+		if (TimedActionStartInstant)
+		{
+			actionComponent->StartAction();
+		}
 	}
 }
 

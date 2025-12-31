@@ -130,6 +130,13 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<FName> TimedActionShootNames;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool TimedActionStartInstant = true;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float TimedActionOffset = 0.0f;
+
+
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Group")
 	TObjectPtr<ULocationManagerComponent> GroupManagerRef;

@@ -34,9 +34,6 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Projectile")
     float Lifetime = 1.5f;
 
-    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Projectile")
-    float MeshScale = 0.2f;
-
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Visual", meta = (AllowPrivateAccess = "true"))
     TSubclassOf<class AOneShotAnim> ImpactAnimClass;
 

@@ -22,8 +22,5 @@ Development ^
 -project="%PROJECT_DIR%\LaneRunnerProject.uproject" ^
 -waitmutex -NoHotReload
 
-echo === Opening Visual Studio ===
-start "" "%PROJECT_DIR%\LaneRunnerProject.sln"
-
 echo === DONE ===
 pause
