@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "SpawnComponent.h"
 #include "Components/ActorComponent.h"
 #include "TimedActionComponent.generated.h"
 
@@ -23,6 +24,8 @@ protected:
     FTimerHandle ActionTimerHandle;
 
     virtual void PerformAction();
+
+    USpawnComponent* SpawnComponent;
 
 public:
     // Interval between actions
@@ -68,4 +71,12 @@ public:
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Timed Action")
     float RandomStartDelayMax = 5.0f;
+
+    
+
+    UFUNCTION()
+    void OnSpawned();
+
+    UFUNCTION()
+    void OnDespawned();
 };

@@ -20,7 +20,14 @@ void UTimedActionComponent::BeginPlay()
         StartDelay = FMath::RandRange(RandomStartDelayMin, RandomStartDelayMax);
     }
 
-    if (StartOnPlay)
+    SpawnComponent = GetOwner()->FindComponentByClass<USpawnComponent>();
+    if (SpawnComponent)
+    {
+        SpawnComponent->OnSpawn.AddDynamic(this, &UTimedActionComponent::OnSpawned);
+        SpawnComponent->OnDespawn.AddDynamic(this, &UTimedActionComponent::OnDespawned);
+    }
+
+    if (StartOnPlay && (!SpawnComponent || SpawnComponent->GetCurrentSpawned()))
     {
         StartAction();
     }
@@ -62,4 +69,14 @@ void UTimedActionComponent::ResetAction()
 {
     StopAction();
     StartAction();
+}
+
+void UTimedActionComponent::OnSpawned()
+{
+    StartAction();
+}
+
+void UTimedActionComponent::OnDespawned()
+{
+    StopAction();
 }

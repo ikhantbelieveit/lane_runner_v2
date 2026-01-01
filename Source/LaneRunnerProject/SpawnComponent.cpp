@@ -64,6 +64,11 @@ void USpawnComponent::Reset()
 	}
 }
 
+bool USpawnComponent::GetCurrentSpawned()
+{
+	return CurrentSpawned;
+}
+
 
 // Called every frame
 void USpawnComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -160,6 +165,8 @@ void USpawnComponent::Spawn(bool drop, bool scrollInstant, bool scrollOnReach)
 		Owner->SetActorTickEnabled(true);
 	}
 
+	CurrentSpawned = true;
+
 	OnSpawn.Broadcast();
 }
 
@@ -200,6 +207,8 @@ void USpawnComponent::Despawn()
 		Owner->SetActorHiddenInGame(true);
 		Owner->SetActorTickEnabled(false);
 	}
+
+	CurrentSpawned = false;
 
 	OnDespawn.Broadcast();
 }

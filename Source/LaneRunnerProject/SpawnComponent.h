@@ -52,4 +52,6 @@ public:
 
 	UPROPERTY(BlueprintAssignable)
 	FSpawnEvent OnDespawn;
+
+	bool GetCurrentSpawned();
 };
