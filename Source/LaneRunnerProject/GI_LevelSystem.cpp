@@ -737,7 +737,7 @@ void UGI_LevelSystem::ExecuteSingleEvent(const FLevelEventData& Event)
             {
                 if (ABaseEnemy* enemy = Cast<ABaseEnemy>(child))
                 {
-                    enemy->OnDetectPlayer();
+                    enemy->OnDetectPlayer(true);
                     enemy->SetAnim("Alert");
                 }
             }

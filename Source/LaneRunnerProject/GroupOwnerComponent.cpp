@@ -80,7 +80,7 @@ void UGroupOwnerComponent::AlertAllGroupMembers()
 	{
 		if (ABaseEnemy* Enemy = Cast<ABaseEnemy>(WeakMember.Get()))
 		{
-			Enemy->OnDetectPlayer();
+			Enemy->OnDetectPlayer(false);
 			Enemy->SetAnim("Alert");
 		}
 	}

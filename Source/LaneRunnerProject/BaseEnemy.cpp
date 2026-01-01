@@ -29,7 +29,7 @@ void ABaseEnemy::BeginPlay()
 	ULineOfSightComponent* lineOfSight = GetComponentByClass<ULineOfSightComponent>();
 	if (lineOfSight)
 	{
-		lineOfSight->OnDetectPlayer.AddDynamic(this, &ABaseEnemy::OnDetectPlayer);
+		lineOfSight->OnDetectPlayer.AddDynamic(this, &ABaseEnemy::OnLineOfSightDetect);
 	}
 
 	UPaperSpriteComponent* foundAlertSprite = nullptr;
@@ -178,6 +178,8 @@ bool ABaseEnemy::HasPerformedDetectAction()
 		return PerformedOneOffShoot;
 	case EEnemyDetectBehaviour::StraightAdvance:
 		return PerformedAdvance;
+	case EEnemyDetectBehaviour::StartTimedAction:
+		return false;
 	}
 	return false;
 }
@@ -221,7 +223,12 @@ void ABaseEnemy::SetAnim(FString animName)
 	}
 }
 
-void ABaseEnemy::OnDetectPlayer()
+void ABaseEnemy::OnLineOfSightDetect()
+{
+	OnDetectPlayer(true);
+}
+
+void ABaseEnemy::OnDetectPlayer(bool bPlayAlertSound)
 {
 	if (!IsAlive)
 	{
@@ -251,8 +258,6 @@ void ABaseEnemy::OnDetectPlayer()
 		}
 		break;
 	case EEnemyDetectBehaviour::Shoot_OneOff:
-		auto* projSystem = GetGameInstance()->GetSubsystem<UGI_ProjectileSystem>();
-
 		if (lineOfSight)
 		{
 			TArray<FName> shootProjNames = lineOfSight->GetSightZoneProjNames();
@@ -271,10 +276,23 @@ void ABaseEnemy::OnDetectPlayer()
 		}
 
 		break;
+	case EEnemyDetectBehaviour::StartTimedAction:
+	
+		auto* timedAction = GetComponentByClass<UTimedActionComponent>();
+		if (timedAction)
+		{
+			timedAction->StartAction();
+		}
+		break;
+	
 	}
 
-	auto* audioSystem = GetGameInstance()->GetSubsystem<UGI_AudioSystem>();
-	audioSystem->Play(EAudioKey::EnemyAlert);
+	if (bPlayAlertSound)
+	{
+		auto* audioSystem = GetGameInstance()->GetSubsystem<UGI_AudioSystem>();
+		audioSystem->Play(EAudioKey::EnemyAlert);
+	}
+	
 
 	if (AlertVFX && ShowAlertVFX)
 	{
@@ -494,6 +512,17 @@ void ABaseEnemy::SetIdle()
 	if (MainVisualsFlipbook)
 	{
 		MainVisualsFlipbook->SetFlipbook(DefaultFlipbook);
+	}
+
+	switch (DetectBehaviour)
+	{
+	case EEnemyDetectBehaviour::StartTimedAction:
+		auto* timedAction = GetComponentByClass<UTimedActionComponent>();
+		if (timedAction)
+		{
+			timedAction->StopAction();
+		}
+		break;
 	}
 
 	//TODO: deactivate specific Alert Behaviours as needed 

@@ -19,7 +19,8 @@ enum class EEnemyDetectBehaviour : uint8
 {
 	None UMETA(DisplayName = "None"),
 	StraightAdvance UMETA(DisplayName = "Straight Advance"),
-	Shoot_OneOff UMETA(DisplayName = "Shoot (One-Off)")
+	Shoot_OneOff UMETA(DisplayName = "Shoot (One-Off)"),
+	StartTimedAction UMETA(DisplayName = "Start Timed Action"),
 };
 
 UENUM(BlueprintType)
@@ -86,7 +87,10 @@ public:
 	bool bScrollOnPlayerDetect;
 
 	UFUNCTION()
-	void OnDetectPlayer();
+	void OnLineOfSightDetect();
+
+	UFUNCTION()
+	void OnDetectPlayer(bool bPlayAlertSound);
 
 	UFUNCTION(BlueprintCallable)
 	bool IsEnemyAlive();
