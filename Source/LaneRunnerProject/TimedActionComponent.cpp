@@ -73,7 +73,10 @@ void UTimedActionComponent::ResetAction()
 
 void UTimedActionComponent::OnSpawned()
 {
-    StartAction();
+    if (StartOnSpawn)
+    {
+        StartAction();
+    }
 }
 
 void UTimedActionComponent::OnDespawned()

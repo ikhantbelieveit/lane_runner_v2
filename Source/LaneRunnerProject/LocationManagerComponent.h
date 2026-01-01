@@ -14,6 +14,9 @@ enum class EPathFollowMode : uint8
 	PingPong UMETA(DisplayName = "Ping-Pong")
 };
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FLocationEvent);
+
+
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class LANERUNNERPROJECT_API ULocationManagerComponent : public UActorComponent
 {
@@ -114,6 +117,9 @@ public:
 	void StopAutoMove(bool clampToEnd);
 
 	void UpdateAutoMove(float DeltaTime);
+
+	UPROPERTY(BlueprintAssignable)
+	FLocationEvent OnAutoMoveEnd;
 
 private:
 	// Scroll

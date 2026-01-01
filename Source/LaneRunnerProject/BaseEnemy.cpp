@@ -477,3 +477,24 @@ void ABaseEnemy::PerformTimedAction()
 		break;
 	}
 }
+
+void ABaseEnemy::SetIdle()
+{
+	if (!IsAlive)
+	{
+		return;
+	}
+
+	// Reset alert visuals only (not full enemy reset)
+	if (AlertVFX)
+	{
+		AlertVFX->SetVisibility(false);
+	}
+
+	if (MainVisualsFlipbook)
+	{
+		MainVisualsFlipbook->SetFlipbook(DefaultFlipbook);
+	}
+
+	//TODO: deactivate specific Alert Behaviours as needed 
+}

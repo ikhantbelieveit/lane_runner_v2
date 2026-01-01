@@ -49,5 +49,11 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Group")
 	void DespawnGroupMembers();
 
+	UFUNCTION(BlueprintCallable, Category = "Group")
+	void AlertAllGroupMembers();
+
+	UFUNCTION(BlueprintCallable, Category = "Group")
+	void UnAlertAllGroupMembers();
+
 		
 };

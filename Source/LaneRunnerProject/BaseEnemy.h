@@ -136,6 +136,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float TimedActionOffset = 0.0f;
 
+	void SetIdle();
+
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Group")

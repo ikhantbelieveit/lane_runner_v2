@@ -16,6 +16,7 @@
 #include "GameInit.h"
 #include "BaseEnemy.h"
 #include "BaseCollectible.h"
+#include "GroupOwnerComponent.h"
 
 void UGI_LevelSystem::OnGameOverDelayComplete()
 {
@@ -513,6 +514,36 @@ void UGI_LevelSystem::ExecuteSingleEvent(const FLevelEventData& Event)
         break;
     }
 
+    case ELevelEventType::MoveToAlert:
+    {
+        for (TObjectPtr<AActor> TargetPtr : Event.TargetActors)
+        {
+            AActor* Target = TargetPtr.Get();
+            if (!IsValid(Target)) continue;
+
+            if (ULocationManagerComponent* LocationComp = Target->FindComponentByClass<ULocationManagerComponent>())
+            {
+                if (UGroupOwnerComponent* GroupComp =
+                    Target->FindComponentByClass<UGroupOwnerComponent>())
+                {
+                    // Prevent duplicate bindings
+                    LocationComp->OnAutoMoveEnd.RemoveDynamic(
+                        GroupComp,
+                        &UGroupOwnerComponent::AlertAllGroupMembers
+                    );
+
+                    LocationComp->OnAutoMoveEnd.AddDynamic(
+                        GroupComp,
+                        &UGroupOwnerComponent::AlertAllGroupMembers
+                    );
+                }
+
+                LocationComp->StartAutoMove(Event.DirectionParam, Event.NumericParam, Event.BoolParam, Event.VectorParam, false);
+            }
+        }
+        break;
+    }
+
     case ELevelEventType::StartAutoMoveGroup:
     {
         for (TObjectPtr<AActor> TargetPtr : Event.TargetActors)
@@ -711,6 +742,23 @@ void UGI_LevelSystem::ExecuteSingleEvent(const FLevelEventData& Event)
                 }
             }
         }
+        break;
+    }
+
+    case ELevelEventType::SetIdle:
+    {
+        for (TObjectPtr<AActor> TargetPtr : Event.TargetActors)
+        {
+            AActor* Target = TargetPtr.Get();
+            if (!IsValid(Target)) continue;
+
+            if (UGroupOwnerComponent* GroupComp =
+                Target->FindComponentByClass<UGroupOwnerComponent>())
+            {
+                GroupComp->UnAlertAllGroupMembers();
+            }
+        }
+        
         break;
     }
 

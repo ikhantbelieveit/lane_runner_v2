@@ -404,6 +404,8 @@ void ULocationManagerComponent::StopAutoMove(bool clampToEnd)
 			ownerComp->DespawnGroupMembers();
 		}
 	}
+
+	OnAutoMoveEnd.Broadcast();
 }
 
 void ULocationManagerComponent::UpdateAutoMove(float DeltaTime)

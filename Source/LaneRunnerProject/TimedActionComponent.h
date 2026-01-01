@@ -72,6 +72,9 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Timed Action")
     float RandomStartDelayMax = 5.0f;
 
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Timed Action")
+    bool StartOnSpawn = true;
+
     
 
     UFUNCTION()

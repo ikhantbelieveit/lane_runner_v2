@@ -30,4 +30,6 @@ enum class ELevelEventType : uint8
 	StopAutoMoveGroup UMETA(DisplayName = "Stop Auto Move Group"),
 	MoveToDespawn UMETA(DisplayName = "Move to Despawn"),
 	SetAlert UMETA(DisplayName = "Set Alert"),
+	MoveToAlert UMETA(DisplayName = "Move to Alert"),
+	SetIdle UMETA(DisplayName = "Set Idle")
 };

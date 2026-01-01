@@ -2,6 +2,7 @@
 
 
 #include "GroupOwnerComponent.h"
+#include "BaseEnemy.h"
 
 UGroupOwnerComponent::UGroupOwnerComponent()
 {
@@ -69,6 +70,29 @@ void UGroupOwnerComponent::DespawnGroupMembers()
 			{
 				SpawnComp->Despawn();
 			}
+		}
+	}
+}
+
+void UGroupOwnerComponent::AlertAllGroupMembers()
+{
+	for (const TWeakObjectPtr<AActor>& WeakMember : GroupMembers)
+	{
+		if (ABaseEnemy* Enemy = Cast<ABaseEnemy>(WeakMember.Get()))
+		{
+			Enemy->OnDetectPlayer();
+			Enemy->SetAnim("Alert");
+		}
+	}
+}
+
+void UGroupOwnerComponent::UnAlertAllGroupMembers()
+{
+	for (const TWeakObjectPtr<AActor>& WeakMember : GroupMembers)
+	{
+		if (ABaseEnemy* Enemy = Cast<ABaseEnemy>(WeakMember.Get()))
+		{
+			Enemy->SetIdle();
 		}
 	}
 }
