@@ -382,75 +382,21 @@ void UGI_LevelSystem::ExecuteSingleEvent(const FLevelEventData& Event)
 
     case ELevelEventType::SetObjectPath:
     {
-        AActor* SplineOwner = Event.ActorParam.Get();
-        if (!IsValid(SplineOwner))
-        {
-            UE_LOG(LogTemp, Warning, TEXT("SetObjectPath: ActorParam is invalid, skipping event."));
-            break;
-        }
-
-        USplineComponent* SetSpline = SplineOwner->FindComponentByClass<USplineComponent>();
-        if (!IsValid(SetSpline))
-        {
-            UE_LOG(LogTemp, Warning, TEXT("SetObjectPath: ActorParam has no valid SplineComponent, skipping event."));
-            break;
-        }
-
-        for (TObjectPtr<AActor> TargetPtr : Event.TargetActors)
-        {
-            AActor* Target = TargetPtr.Get();
-            if (!IsValid(Target)) continue;
-
-            if (ULocationManagerComponent* LocationComp = Target->FindComponentByClass<ULocationManagerComponent>())
-            {
-                LocationComp->SetSpline(SetSpline);
-            }
-        }
         break;
     }
 
     case ELevelEventType::TogglePathFollow:
     {
-        for (TObjectPtr<AActor> TargetPtr : Event.TargetActors)
-        {
-            AActor* Target = TargetPtr.Get();
-            if (!IsValid(Target)) continue;
-
-            if (ULocationManagerComponent* LocationComp = Target->FindComponentByClass<ULocationManagerComponent>())
-            {
-                LocationComp->bFollowEnabled = Event.BoolParam;
-            }
-        }
         break;
     }
 
     case ELevelEventType::SetObjectSpeed:
     {
-        for (TObjectPtr<AActor> TargetPtr : Event.TargetActors)
-        {
-            AActor* Target = TargetPtr.Get();
-            if (!IsValid(Target)) continue;
-
-            if (ULocationManagerComponent* LocationComp = Target->FindComponentByClass<ULocationManagerComponent>())
-            {
-                LocationComp->SetPathSpeed(Event.NumericParam);
-            }
-        }
         break;
     }
 
     case ELevelEventType::InvertSpeed:
     {
-        for (TObjectPtr<AActor> TargetPtr : Event.TargetActors)
-        {
-            AActor* Target = TargetPtr.Get();
-            if (!IsValid(Target)) continue;
-
-            if (ULocationManagerComponent* LocationComp = Target->FindComponentByClass<ULocationManagerComponent>())
-            {
-                LocationComp->SetPathSpeed(-LocationComp->GetCurrentSpeed());
-            }
-        }
         break;
     }
 

@@ -30,16 +30,9 @@ void ULocationManagerComponent::BeginPlay()
 		levelSystem->CleanupBeforeReset.AddDynamic(this, &ULocationManagerComponent::Reset);
 	}
 
-	// Cache spline
-	if (SplineActor)
-	{
-		CurrentSplineComp = SplineActor->FindComponentByClass<USplineComponent>();
-	}
-
 	TargetActor = GetOwner();
 
 	StartPos = TargetActor->GetActorLocation();
-
 
 	Reset();
 }
@@ -67,26 +60,8 @@ void ULocationManagerComponent::TickComponent(float DeltaTime, ELevelTick TickTy
 
 	UpdateAutoMove(DeltaTime);
 
-	if (!bFollowEnabled && !bScrollEnabled)
+	if (!bScrollEnabled)
 		return;
-
-	if (bFollowEnabled && CurrentSplineComp)
-	{
-		FVector PathLoc;
-		FRotator PathRot;
-		bool bHasPath = false;
-
-		UpdatePath(DeltaTime, PathLoc, PathRot, bHasPath);
-
-		if (bHasPath)
-		{
-			NewLoc.Y = PathLoc.Y;
-			if (bRotateToMatchPath)
-			{
-				NewRot = PathRot;
-			}
-		}
-	}
 
 	if (bScrollEnabled && bHasPlayerRef)
 	{
@@ -95,46 +70,6 @@ void ULocationManagerComponent::TickComponent(float DeltaTime, ELevelTick TickTy
 	}
 
 	TargetActor->SetActorLocationAndRotation(NewLoc, NewRot, false, nullptr, ETeleportType::TeleportPhysics);
-}
-
-void ULocationManagerComponent::UpdatePath(float DeltaTime, FVector& OutLocation, FRotator& OutRotation, bool& bOutHasPath)
-{
-	if (!bFollowEnabled || !CurrentSplineComp) return;
-
-	const float SplineLength = CurrentSplineComp->GetSplineLength();
-	DistanceAlongSpline += CurrentPathSpeed * DeltaTime * Direction;
-
-	switch (FollowMode)
-	{
-	case EPathFollowMode::Loop:
-		DistanceAlongSpline = FMath::Fmod(DistanceAlongSpline, SplineLength);
-		if (DistanceAlongSpline < 0.f) DistanceAlongSpline += SplineLength;
-		break;
-	case EPathFollowMode::Clamp:
-		DistanceAlongSpline = FMath::Clamp(DistanceAlongSpline, 0.f, SplineLength);
-		break;
-	case EPathFollowMode::PingPong:
-		if (DistanceAlongSpline > SplineLength)
-		{
-			DistanceAlongSpline = SplineLength;
-			Direction *= -1;
-		}
-		else if (DistanceAlongSpline < 0.f)
-		{
-			DistanceAlongSpline = 0.f;
-			Direction *= -1;
-		}
-		break;
-	}
-
-	OutLocation = CurrentSplineComp->GetLocationAtDistanceAlongSpline(DistanceAlongSpline, ESplineCoordinateSpace::World);
-
-	if (bRotateToMatchPath)
-	{
-		OutRotation = CurrentSplineComp->GetRotationAtDistanceAlongSpline(DistanceAlongSpline, ESplineCoordinateSpace::World);
-	}
-
-	bOutHasPath = true;
 }
 
 void ULocationManagerComponent::UpdateScroll(FVector& InOutLocation, bool& bOutHasScroll)
@@ -200,10 +135,7 @@ void ULocationManagerComponent::UpdateGravity(float DeltaTime)
 
 void ULocationManagerComponent::Reset()
 {
-	ResetPath();
-
 	bScrollEnabled = bStartScrollActive;
-	bFollowEnabled = bStartFollowEnabled;
 	bAutoMoveEnabled = bStartAutoMoveEnabled;
 	bDespawnOnAutoMoveEnd = false;
 
@@ -213,47 +145,6 @@ void ULocationManagerComponent::Reset()
 	StopAutoMove(false);
 
 	TargetActor->SetActorLocation(StartPos);
-}
-
-void ULocationManagerComponent::ResetPath()
-{
-	CurrentPathSpeed = DefaultSpeed;
-	DistanceAlongSpline = 0.f;
-	Direction = 1;
-	if (!InitialSplineActor)
-	{
-		ClearSpline();
-	}
-	else
-	{
-		if (USplineComponent* splineComp = InitialSplineActor->GetComponentByClass<USplineComponent>())
-		{
-			SetSpline(splineComp);
-		}
-	}
-
-	bAutoMoveEnabled = false;
-	bHasAutoMoveStop = false;
-}
-
-void ULocationManagerComponent::SetPathSpeed(float NewSpeed)
-{
-	CurrentPathSpeed = NewSpeed;
-}
-
-void ULocationManagerComponent::SetSpline(USplineComponent* NewSpline)
-{
-	if (NewSpline)
-	{
-		CurrentSplineComp = NewSpline;
-		DistanceAlongSpline = 0.f;
-	}
-}
-
-void ULocationManagerComponent::ClearSpline()
-{
-	CurrentSplineComp = nullptr;
-	bFollowEnabled = false;
 }
 
 void ULocationManagerComponent::SetGravityEnabled(bool bEnabled)
@@ -279,11 +170,6 @@ void ULocationManagerComponent::SetGravityEnabled(bool bEnabled)
 	}
 
 	bGravityEnabled = bEnabled;
-}
-
-float ULocationManagerComponent::GetCurrentSpeed()
-{
-	return CurrentPathSpeed;
 }
 
 void ULocationManagerComponent::ApplyAutoMove()

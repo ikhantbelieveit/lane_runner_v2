@@ -44,28 +44,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Scroll")
 	bool bScrollInterp = false;
 
-	/** === Path Follower Settings === */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Path")
-	AActor* SplineActor;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Path")
-	AActor* InitialSplineActor;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Path")
-	float DefaultSpeed = 400.f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Path")
-	bool bFollowEnabled = false;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Path")
-	bool bStartFollowEnabled = false;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Path")
-	bool bRotateToMatchPath = false;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Path")
-	EPathFollowMode FollowMode = EPathFollowMode::Clamp;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gravity")
 	bool bGravityEnabled = false;
 
@@ -81,13 +59,6 @@ public:
 	/** === Runtime State === */
 	UFUNCTION(BlueprintCallable)
 	void Reset();
-
-	void ResetPath();
-	void SetPathSpeed(float NewSpeed);
-	void SetSpline(USplineComponent* NewSpline);
-	void ClearSpline();
-
-	float GetCurrentSpeed();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AutoMove")
 	bool bAutoMoveEnabled = false;
@@ -127,19 +98,12 @@ private:
 	bool bHasPlayerRef = false;
 	FVector StartPos;
 
-	// Path follow
-	USplineComponent* CurrentSplineComp = nullptr;
-	float CurrentPathSpeed = 0.f;
-	float DistanceAlongSpline = 0.f;
-	int Direction = 1;
-
 	//auto move
 	EProjectileDirection CurrentAutoMoveDirection;
 	float CurrentAutoMoveSpeed;
 	bool IsAutoMoving = false;
 
 	// Helpers
-	void UpdatePath(float DeltaTime, FVector& OutLocation, FRotator& OutRotation, bool& bOutHasPath);
 	void UpdateScroll(FVector& InOutLocation, bool& bOutHasScroll);
 	void UpdateGravity(float DeltaTime);
 
