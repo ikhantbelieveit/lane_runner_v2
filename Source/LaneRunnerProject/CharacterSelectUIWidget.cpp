@@ -68,8 +68,6 @@ void UCharacterSelectUIWidget::SetupBeforeShow()
 	ToggleConfirmButton(false);
 
 	ShowPreviewImage(ECharacterType::Cowboy_Red);
-
-	
 }
 
 void UCharacterSelectUIWidget::OnScreenShown()
@@ -366,8 +364,25 @@ void UCharacterSelectUIWidget::ShowPreviewImage(ECharacterType characterType)
 	Character5PreviewImage->SetVisibility(showEgg ? ESlateVisibility::Visible : ESlateVisibility::Hidden);
 	Character6PreviewImage->SetVisibility(showPostman ? ESlateVisibility::Visible : ESlateVisibility::Hidden);
 	Character7PreviewImage->SetVisibility(showScroogeWife ? ESlateVisibility::Visible : ESlateVisibility::Hidden);
+
+	RefreshCharacterFlavourText(characterType);
 }
 
+
+void UCharacterSelectUIWidget::RefreshCharacterFlavourText(ECharacterType characterType)
+{
+	const FText* FoundText = CharacterFlavourText_LUT.Find(characterType);
+
+	if (FoundText)
+	{
+		FlavourTextBlock->SetText(*FoundText);
+	}
+	else
+	{
+
+		FlavourTextBlock->SetText(FText::GetEmpty());
+	}
+}
 
 void UCharacterSelectUIWidget::OnStartGameDelayComplete()
 {

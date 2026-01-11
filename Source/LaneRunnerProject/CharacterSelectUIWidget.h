@@ -40,6 +40,9 @@ public:
 	void OnConfirmButtonPressed();
 
 	UPROPERTY(meta = (BindWidget))
+	UTextBlock* FlavourTextBlock;
+
+	UPROPERTY(meta = (BindWidget))
 	UUIButtonWidget* CharacterButton1;
 
 	UFUNCTION()
@@ -129,6 +132,11 @@ public:
 	float StartGameDelay = 0.5f;
 
 	void ToggleConfirmButton(bool active);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TMap<ECharacterType, FText> CharacterFlavourText_LUT;
+
+	void RefreshCharacterFlavourText(ECharacterType characterType);
 
 private:
 	FTimerHandle StartGameDelayHandle;
