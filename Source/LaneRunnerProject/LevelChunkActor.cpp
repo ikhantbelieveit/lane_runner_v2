@@ -6,6 +6,9 @@
 #include "Kismet/GameplayStatics.h"
 #include "ChunkInitializable.h"
 #include "FloorComponent.h"
+#include "PaperSpriteComponent.h"
+#include "PaperFlipbookComponent.h"
+#include "SpawnComponent.h"
 
 
 // Sets default values
@@ -21,33 +24,6 @@ void ALevelChunkActor::BeginPlay()
 {
 	Super::BeginPlay();
     
-    if (ActiveVariants.Num() == 0 && ConfigData)
-    {
-        ApplyVariant();
-    }
-
-    // Apply to persistent actors in the scene (placed manually in the chunk blueprint)
-    TArray<AActor*> ChildActors;
-    GetAllChildActors(ChildActors, true);
-
-    for (AActor* Child : ChildActors)
-    {
-        if (!Child) continue;
-
-        // Deactivate if this actor doesn't match the selected variants
-        if (!IsActorVariantActive(Child))
-        {
-            DeactivateActor(Child);
-            continue;
-        }
-
-        // Initialize any floor components
-        if (UFloorComponent* FloorComp = Child->FindComponentByClass<UFloorComponent>())
-        {
-            FloorComp->InitialiseFloor(ConfigData);
-        }
-    }
-
     //init bounds box
     BoundsBox = nullptr;
 
@@ -136,7 +112,14 @@ void ALevelChunkActor::SpawnChunkElements()
     {
         if (!Entry.ActorClass) continue;
 
-        //GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("TRY SPAWN CHUNK ENTRY"));
+        if (!Entry.VariantSet.IsNone() && !Entry.VariantOption.IsNone())
+        {
+            FName ActiveOption = ActiveVariants.FindRef(Entry.VariantSet);
+            if (ActiveOption.IsValid() && ActiveOption != Entry.VariantOption)
+            {
+                continue; // skip this spawn entirely
+            }
+        }
 
         FTransform SpawnTransform = Entry.RelativeTransform * GetActorTransform();
 
@@ -149,15 +132,6 @@ void ALevelChunkActor::SpawnChunkElements()
         );
 
         if (!NewActor) continue;
-
-        if (!Entry.VariantSet.IsNone() && !Entry.VariantOption.IsNone())
-        {
-            FName ActiveOption = ActiveVariants.FindRef(Entry.VariantSet);
-            if (ActiveOption.IsValid() && ActiveOption != Entry.VariantOption)
-            {
-                continue; // skip this spawn entirely
-            }
-        }
 
         // Assign ID tag
         if (!Entry.ActorID.IsNone())
@@ -240,11 +214,56 @@ bool ALevelChunkActor::IsActorVariantActive(const AActor* Actor) const
 
 void ALevelChunkActor::DeactivateActor(AActor* Actor) const
 {
-    if (!Actor) return;
-    Actor->SetActorHiddenInGame(true);
+    if (!Actor)
+    {
+        return;
+    }
+    if (!IsValid(Actor))
+    {
+        return;
+    }
+
     Actor->SetActorEnableCollision(false);
     Actor->SetActorTickEnabled(false);
+
+    USpawnComponent* spawnComp = Cast<USpawnComponent>(Actor->GetComponentByClass(USpawnComponent::StaticClass()));
+    if (spawnComp)
+    {
+        spawnComp->ResetAsSpawned = false;
+        spawnComp->Despawn();
+    }
+    else
+    {
+        Actor->SetActorHiddenInGame(true);
+    }
 }
+
+void ALevelChunkActor::ReactivateActor(AActor* Actor) const
+{
+    if (!Actor)
+    {
+        return;
+    }
+    if (!IsValid(Actor))
+    {
+        return;
+    }
+
+    Actor->SetActorEnableCollision(true);
+    Actor->SetActorTickEnabled(true);
+
+    USpawnComponent* spawnComp = Cast<USpawnComponent>(Actor->GetComponentByClass(USpawnComponent::StaticClass()));
+    if (spawnComp)
+    {
+        spawnComp->ResetAsSpawned = true;
+        //spawning handled by reset callback later
+    }
+    else
+    {
+        Actor->SetActorHiddenInGame(false);
+    }
+}
+
 
 void ALevelChunkActor::OnBoundsBoxBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
@@ -288,10 +307,19 @@ void ALevelChunkActor::ApplyVariant()
 
         if (IsActorVariantActive(Child))
         {
-            // Reactivate
-            Child->SetActorHiddenInGame(false);
-            Child->SetActorEnableCollision(true);
-            Child->SetActorTickEnabled(true);
+            ReactivateActor(Child);
+
+            UPaperSpriteComponent* sprite = Cast<UPaperSpriteComponent>(Child->GetComponentByClass(UPaperSpriteComponent::StaticClass()));
+            if (sprite)
+            {
+                sprite->SetVisibility(true);
+            }
+
+            UPaperFlipbookComponent* flipbook = Cast<UPaperFlipbookComponent>(Child->GetComponentByClass(UPaperFlipbookComponent::StaticClass()));
+            if (flipbook)
+            {
+                flipbook->SetVisibility(true);
+            }
 
             // Initialize floor components
             if (UFloorComponent* FloorComp = Child->FindComponentByClass<UFloorComponent>())
@@ -315,12 +343,13 @@ void ALevelChunkActor::InitializeFromLayoutData(const FLevelChunkData& InChunkDa
     ChunkID = InChunkData.ChunkID;
 
     ActiveVariants.Empty();
-    
 
     for (const FChunkVariantEntry& Entry : InChunkData.ActiveVariants)
     {
         ActiveVariants.Add(FName(Entry.SetID), FName(Entry.Variant));
     }
+
+    ApplyVariant();
 
 #pragma region DebugLogs
     //debug logs below
@@ -355,6 +384,4 @@ void ALevelChunkActor::InitializeFromLayoutData(const FLevelChunkData& InChunkDa
         UE_LOG(LogTemp, Log, TEXT("====================================="));
     }*/
 #pragma endregion
-
-    ApplyVariant();
 }

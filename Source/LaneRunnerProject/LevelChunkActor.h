@@ -57,6 +57,7 @@ protected:
 	TMap<FName, FName> ActiveVariants;
 	bool IsActorVariantActive(const AActor* Actor) const;
 	void DeactivateActor(AActor* Actor) const;
+	void ReactivateActor(AActor* Actor) const;
 
 	UBoxComponent* BoundsBox = nullptr;
 
