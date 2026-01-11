@@ -65,14 +65,6 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	ECollectibleType SpawnItemType = ECollectibleType::Star_Basic;
 
-	/*UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	TSubclassOf<class ABaseCollectible> SpawnCollectibleClass;
-
-	UPROPERTY()
-	TWeakObjectPtr<ABaseCollectible> PreSpawnedCollectible;*/
-
-	
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool FlashOnDamage = false;
 
@@ -91,5 +83,6 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FDestructibleEvent OnDestroyed;
 
+	USceneComponent* SpawnOrigin;
 	
 };

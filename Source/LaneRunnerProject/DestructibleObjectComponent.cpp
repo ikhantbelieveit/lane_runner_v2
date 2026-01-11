@@ -46,6 +46,24 @@ void UDestructibleObjectComponent::BeginPlay()
 	{
 		levelSystem->CleanupBeforeReset.AddDynamic(this, &UDestructibleObjectComponent::OnLevelReset);
 	}
+
+    TArray<USceneComponent*> sceneComponents;
+    GetOwner()->GetComponents<USceneComponent>(sceneComponents);
+
+    for (USceneComponent* comp : sceneComponents)
+    {
+        if (!comp) continue;
+
+        for (const FName& tag : comp->ComponentTags)
+        {
+            FString tagStr = tag.ToString();
+            if (tagStr == "SPAWNORIGIN")
+            {
+                SpawnOrigin = comp;
+                break;
+            }
+        }
+    }
 }
 
 
@@ -138,7 +156,7 @@ void UDestructibleObjectComponent::DestroyFromComp()
         {
             FCollectibleRequest Req;
             Req.Type = SpawnItemType;
-            Req.SpawnLocation = GetOwner()->GetActorLocation();
+            Req.SpawnLocation = SpawnOrigin ? SpawnOrigin->GetComponentTransform().GetLocation() : GetOwner()->GetActorLocation();
             Req.SpawnLocation.Y += FMath::RandRange(randomSpreadMin, randomSpreadMax);
             
 
@@ -156,7 +174,7 @@ void UDestructibleObjectComponent::DestroyFromComp()
         Params.Owner = GetOwner();
         Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
-        FVector SpawnLoc = GetOwner()->GetActorLocation();
+        FVector SpawnLoc = SpawnOrigin ? SpawnOrigin->GetComponentTransform().GetLocation() : GetOwner()->GetActorLocation();
         ADeathDummy* DeathDummy = GetWorld()->SpawnActor<ADeathDummy>(
             DeathDummyClass, SpawnLoc, FRotator::ZeroRotator, Params);
 
