@@ -21,8 +21,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Custom Button")
 	FText LabelText;
 
-
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Custom Button")
 	UTexture2D* ArrowTexture;
 

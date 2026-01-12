@@ -7,8 +7,10 @@
 #include "Components/Button.h" 
 #include "Components/TextBlock.h"
 #include "Components/Image.h"
+#include "Components/WidgetSwitcher.h"
 #include "ECharacterType.h"
 #include "UIButtonWidget.h"
+#include "CharacterSelectInfoPanel.h"
 #include "CharacterSelectUIWidget.generated.h"
 
 /**
@@ -22,8 +24,11 @@ class LANERUNNERPROJECT_API UCharacterSelectUIWidget : public UBaseUIScreen
 public:
 	virtual void Initialise() override;
 
+	virtual void NativeConstruct() override;
+
 	virtual void SetupBeforeShow() override;
 	virtual void OnScreenShown() override;
+	//virtual void OnScreenHidden() override;
 
 	virtual void Tick(float DeltaTime) override;
 
@@ -105,40 +110,24 @@ public:
 	UFUNCTION()
 	void OnCharFocus7();
 
-	UPROPERTY(meta = (BindWidget))
-	UImage* Character1PreviewImage;
-
-	UPROPERTY(meta = (BindWidget))
-	UImage* Character2PreviewImage;
-
-	UPROPERTY(meta = (BindWidget))
-	UImage* Character3PreviewImage;
-
-	UPROPERTY(meta = (BindWidget))
-	UImage* Character4PreviewImage;
-
-	UPROPERTY(meta = (BindWidget))
-	UImage* Character5PreviewImage;
-
-	UPROPERTY(meta = (BindWidget))
-	UImage* Character6PreviewImage;
-
-	UPROPERTY(meta = (BindWidget))
-	UImage* Character7PreviewImage;
-
-	void ShowPreviewImage(ECharacterType characterType);
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float StartGameDelay = 0.5f;
 
 	void ToggleConfirmButton(bool active);
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TMap<ECharacterType, FText> CharacterFlavourText_LUT;
-
-	void RefreshCharacterFlavourText(ECharacterType characterType);
+	UPROPERTY(meta = (BindWidget))
+	UWidgetSwitcher* InfoPanelSwitcher;
 
 private:
 	FTimerHandle StartGameDelayHandle;
 	void OnStartGameDelayComplete();
+
+	TMap<ECharacterType, TObjectPtr<UCharacterSelectInfoPanel>> InfoPanel_LUT;
+
+	void InitialiseInfoPanelLUT();
+
+	void RefreshShownInfoPanel();
+
+	void SetSelectedCharacter(ECharacterType characterType);
+	ECharacterType CurrentSelectedCharacter;
 };

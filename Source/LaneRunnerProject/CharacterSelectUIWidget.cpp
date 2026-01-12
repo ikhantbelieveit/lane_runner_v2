@@ -5,6 +5,7 @@
 #include "GI_UIStateSystem.h"
 #include "GI_LevelSystem.h"
 #include "Kismet/GameplayStatics.h"
+#include "Blueprint/WidgetTree.h"
 #include "PlayerCharacter.h"
 
 void UCharacterSelectUIWidget::Initialise()
@@ -63,11 +64,58 @@ void UCharacterSelectUIWidget::Initialise()
 	}
 }
 
+void UCharacterSelectUIWidget::NativeConstruct()
+{
+	Super::NativeConstruct();
+
+	InitialiseInfoPanelLUT();
+	RefreshShownInfoPanel();
+}
+
+void UCharacterSelectUIWidget::InitialiseInfoPanelLUT()
+{
+	InfoPanel_LUT.Empty();
+
+	if (!WidgetTree)
+	{
+		return;
+	}
+
+	TArray<UWidget*> AllWidgets;
+	WidgetTree->GetAllWidgets(AllWidgets);
+
+	// 1) Collect panels, set them Visible briefly so they can compute desired size
+	TArray<UCharacterSelectInfoPanel*> Panels;
+	Panels.Reserve(AllWidgets.Num());
+
+	for (UWidget* W : AllWidgets)
+	{
+		UCharacterSelectInfoPanel* Panel = Cast<UCharacterSelectInfoPanel>(W);
+		if (!Panel)
+		{
+			continue;
+		}
+
+		if (InfoPanel_LUT.Contains(Panel->CharacterType))
+		{
+			continue;
+		}
+
+		InfoPanel_LUT.Add(Panel->CharacterType, Panel);
+		Panels.Add(Panel);
+
+		// Make visible for warm-up pass
+		Panel->SetVisibility(ESlateVisibility::Visible);
+	}
+
+	// 2) Force layout now that they're visible (desired sizes become valid)
+	ForceLayoutPrepass();
+}
+
 void UCharacterSelectUIWidget::SetupBeforeShow()
 {
 	ToggleConfirmButton(false);
-
-	ShowPreviewImage(ECharacterType::Cowboy_Red);
+	SetSelectedCharacter(ECharacterType::Cowboy_Red);
 }
 
 void UCharacterSelectUIWidget::OnScreenShown()
@@ -75,6 +123,12 @@ void UCharacterSelectUIWidget::OnScreenShown()
 	DefaultSelection = CharacterButton1;
 	CharacterButton1->SetKeyboardFocus();
 }
+
+//void UCharacterSelectUIWidget::OnScreenHidden()
+//{
+//	CurrentSelectedCharacter = ECharacterType::None;
+//	RefreshShownInfoPanel();
+//}
 
 void UCharacterSelectUIWidget::Tick(float DeltaTime)
 {
@@ -105,231 +159,113 @@ void UCharacterSelectUIWidget::OnConfirmButtonPressed()
 
 void UCharacterSelectUIWidget::OnCharacterButton1Pressed()
 {
-	AActor* playerActor = UGameplayStatics::GetActorOfClass(GetWorld(), APlayerCharacter::StaticClass());
-
-	if (playerActor)
-	{
-		APlayerCharacter* playerRef = Cast<APlayerCharacter>(playerActor);
-		if (playerRef)
-		{
-			playerRef->SetCharacterType(ECharacterType::Cowboy_Red);
-		}
-	}
-
 	ToggleConfirmButton(true);
-
-	ShowPreviewImage(ECharacterType::Cowboy_Red);
+	SetSelectedCharacter(ECharacterType::Cowboy_Red);
 }
 
 void UCharacterSelectUIWidget::OnCharacterButton7Pressed()
 {
-	AActor* playerActor = UGameplayStatics::GetActorOfClass(GetWorld(), APlayerCharacter::StaticClass());
-
-	if (playerActor)
-	{
-		APlayerCharacter* playerRef = Cast<APlayerCharacter>(playerActor);
-		if (playerRef)
-		{
-			playerRef->SetCharacterType(ECharacterType::ScroogeWife);
-		}
-	}
-
 	ToggleConfirmButton(true);
-
-	ShowPreviewImage(ECharacterType::ScroogeWife);
+	SetSelectedCharacter(ECharacterType::ScroogeWife);
 }
 
 void UCharacterSelectUIWidget::OnCharFocus1()
 {
-	ShowPreviewImage(ECharacterType::Cowboy_Red);
-
-	AActor* playerActor = UGameplayStatics::GetActorOfClass(GetWorld(), APlayerCharacter::StaticClass());
-
-	if (playerActor)
-	{
-		APlayerCharacter* playerRef = Cast<APlayerCharacter>(playerActor);
-		if (playerRef)
-		{
-			playerRef->SetCharacterType(ECharacterType::Cowboy_Red);
-		}
-	}
+	SetSelectedCharacter(ECharacterType::Cowboy_Red);
 }
 
 void UCharacterSelectUIWidget::OnCharFocus2()
 {
-	ShowPreviewImage(ECharacterType::Cowboy_Purple);
-
-	AActor* playerActor = UGameplayStatics::GetActorOfClass(GetWorld(), APlayerCharacter::StaticClass());
-
-	if (playerActor)
-	{
-		APlayerCharacter* playerRef = Cast<APlayerCharacter>(playerActor);
-		if (playerRef)
-		{
-			playerRef->SetCharacterType(ECharacterType::Cowboy_Purple);
-		}
-	}
+	SetSelectedCharacter(ECharacterType::Cowboy_Purple);
 }
 
 void UCharacterSelectUIWidget::OnCharFocus3()
 {
-	ShowPreviewImage(ECharacterType::Scrooge);
-
-	AActor* playerActor = UGameplayStatics::GetActorOfClass(GetWorld(), APlayerCharacter::StaticClass());
-
-	if (playerActor)
-	{
-		APlayerCharacter* playerRef = Cast<APlayerCharacter>(playerActor);
-		if (playerRef)
-		{
-			playerRef->SetCharacterType(ECharacterType::Scrooge);
-		}
-	}
+	SetSelectedCharacter(ECharacterType::Scrooge);
 }
 
 void UCharacterSelectUIWidget::OnCharFocus4()
 {
-	ShowPreviewImage(ECharacterType::Cow);
-
-	AActor* playerActor = UGameplayStatics::GetActorOfClass(GetWorld(), APlayerCharacter::StaticClass());
-
-	if (playerActor)
-	{
-		APlayerCharacter* playerRef = Cast<APlayerCharacter>(playerActor);
-		if (playerRef)
-		{
-			playerRef->SetCharacterType(ECharacterType::Cow);
-		}
-	}
+	SetSelectedCharacter(ECharacterType::Cow);
 }
 
 void UCharacterSelectUIWidget::OnCharFocus5()
 {
-	ShowPreviewImage(ECharacterType::Egg);
-
-	AActor* playerActor = UGameplayStatics::GetActorOfClass(GetWorld(), APlayerCharacter::StaticClass());
-
-	if (playerActor)
-	{
-		APlayerCharacter* playerRef = Cast<APlayerCharacter>(playerActor);
-		if (playerRef)
-		{
-			playerRef->SetCharacterType(ECharacterType::Egg);
-		}
-	}
+	SetSelectedCharacter(ECharacterType::Egg);
 }
 
 void UCharacterSelectUIWidget::OnCharFocus6()
 {
-	ShowPreviewImage(ECharacterType::Postman);
-
-	AActor* playerActor = UGameplayStatics::GetActorOfClass(GetWorld(), APlayerCharacter::StaticClass());
-
-	if (playerActor)
-	{
-		APlayerCharacter* playerRef = Cast<APlayerCharacter>(playerActor);
-		if (playerRef)
-		{
-			playerRef->SetCharacterType(ECharacterType::Postman);
-		}
-	}
+	SetSelectedCharacter(ECharacterType::Postman);
 }
-
-
 
 void UCharacterSelectUIWidget::OnCharFocus7()
 {
-	ShowPreviewImage(ECharacterType::ScroogeWife);
-
-	AActor* playerActor = UGameplayStatics::GetActorOfClass(GetWorld(), APlayerCharacter::StaticClass());
-
-	if (playerActor)
-	{
-		APlayerCharacter* playerRef = Cast<APlayerCharacter>(playerActor);
-		if (playerRef)
-		{
-			playerRef->SetCharacterType(ECharacterType::ScroogeWife);
-		}
-	}
+	SetSelectedCharacter(ECharacterType::ScroogeWife);
 }
 
 void UCharacterSelectUIWidget::OnCharacterButton2Pressed()
 {
-	AActor* playerActor = UGameplayStatics::GetActorOfClass(GetWorld(), APlayerCharacter::StaticClass());
-
-	if (playerActor)
-	{
-		APlayerCharacter* playerRef = Cast<APlayerCharacter>(playerActor);
-		if (playerRef)
-		{
-			playerRef->SetCharacterType(ECharacterType::Cowboy_Purple);
-		}
-	}
-
 	ToggleConfirmButton(true);
-
-	ShowPreviewImage(ECharacterType::Cowboy_Purple);
+	SetSelectedCharacter(ECharacterType::Cowboy_Purple);
 }
 
 void UCharacterSelectUIWidget::OnCharacterButton3Pressed()
 {
-	AActor* playerActor = UGameplayStatics::GetActorOfClass(GetWorld(), APlayerCharacter::StaticClass());
-
-	if (playerActor)
-	{
-		APlayerCharacter* playerRef = Cast<APlayerCharacter>(playerActor);
-		if (playerRef)
-		{
-			playerRef->SetCharacterType(ECharacterType::Scrooge);
-		}
-	}
-
 	ToggleConfirmButton(true);
-
-
-	ShowPreviewImage(ECharacterType::Scrooge);
+	SetSelectedCharacter(ECharacterType::Scrooge);
 }
 
 void UCharacterSelectUIWidget::OnCharacterButton4Pressed()
 {
-	AActor* playerActor = UGameplayStatics::GetActorOfClass(GetWorld(), APlayerCharacter::StaticClass());
-
-	if (playerActor)
-	{
-		APlayerCharacter* playerRef = Cast<APlayerCharacter>(playerActor);
-		if (playerRef)
-		{
-			playerRef->SetCharacterType(ECharacterType::Cow);
-		}
-	}
-
 	ToggleConfirmButton(true);
-
-
-	ShowPreviewImage(ECharacterType::Cow);
+	SetSelectedCharacter(ECharacterType::Cow);
 }
 
 void UCharacterSelectUIWidget::OnCharacterButton5Pressed()
 {
-	AActor* playerActor = UGameplayStatics::GetActorOfClass(GetWorld(), APlayerCharacter::StaticClass());
-
-	if (playerActor)
-	{
-		APlayerCharacter* playerRef = Cast<APlayerCharacter>(playerActor);
-		if (playerRef)
-		{
-			playerRef->SetCharacterType(ECharacterType::Egg);
-		}
-	}
-
 	ToggleConfirmButton(true);
-
-
-	ShowPreviewImage(ECharacterType::Egg);
+	SetSelectedCharacter(ECharacterType::Egg);
 }
 
 void UCharacterSelectUIWidget::OnCharacterButton6Pressed()
 {
+	ToggleConfirmButton(true);
+	SetSelectedCharacter(ECharacterType::Postman);
+}
+
+void UCharacterSelectUIWidget::RefreshShownInfoPanel()
+{
+	/*if (!InfoPanelSwitcher) return;
+
+	if (UCharacterSelectInfoPanel* Panel = InfoPanel_LUT.FindRef(CurrentSelectedCharacter))
+	{
+		InfoPanelSwitcher->SetActiveWidget(Panel);
+		InfoPanelSwitcher->ForceLayoutPrepass();
+	}*/
+	for (const TPair<ECharacterType, TObjectPtr<UCharacterSelectInfoPanel>>& Pair : InfoPanel_LUT)
+	{
+		UCharacterSelectInfoPanel* Panel = Pair.Value;
+		if (!Panel)
+		{
+			continue;
+		}
+
+		const bool bShouldBeVisible = (Pair.Key == CurrentSelectedCharacter);
+		Panel->SetRenderOpacity(bShouldBeVisible ? 1.0f : 0.0f);
+		//Panel->SetIsEnabled(bShouldBeVisible);
+		/*Panel->SetVisibility(bShouldBeVisible ? ESlateVisibility::Visible : ESlateVisibility::Hidden);
+		if (bShouldBeVisible)
+		{
+			Panel->ForceLayoutPrepass();
+		}*/
+	}
+
+	//ForceLayoutPrepass();
+}
+
+void UCharacterSelectUIWidget::SetSelectedCharacter(ECharacterType characterType)
+{
 	AActor* playerActor = UGameplayStatics::GetActorOfClass(GetWorld(), APlayerCharacter::StaticClass());
 
 	if (playerActor)
@@ -337,51 +273,12 @@ void UCharacterSelectUIWidget::OnCharacterButton6Pressed()
 		APlayerCharacter* playerRef = Cast<APlayerCharacter>(playerActor);
 		if (playerRef)
 		{
-			playerRef->SetCharacterType(ECharacterType::Postman);
+			playerRef->SetCharacterType(characterType);
 		}
 	}
 
-	ToggleConfirmButton(true);
-
-
-	ShowPreviewImage(ECharacterType::Postman);
-}
-
-void UCharacterSelectUIWidget::ShowPreviewImage(ECharacterType characterType)
-{
-	bool showRedCowboy = characterType == ECharacterType::Cowboy_Red;
-	bool showPurpleCowboy = characterType == ECharacterType::Cowboy_Purple;
-	bool showScrooge = characterType == ECharacterType::Scrooge;
-	bool showCow = characterType == ECharacterType::Cow;
-	bool showEgg = characterType == ECharacterType::Egg;
-	bool showPostman = characterType == ECharacterType::Postman;
-	bool showScroogeWife = characterType == ECharacterType::ScroogeWife;
-
-	Character1PreviewImage->SetVisibility(showRedCowboy ? ESlateVisibility::Visible : ESlateVisibility::Hidden);
-	Character2PreviewImage->SetVisibility(showPurpleCowboy ? ESlateVisibility::Visible : ESlateVisibility::Hidden);
-	Character3PreviewImage->SetVisibility(showScrooge ? ESlateVisibility::Visible : ESlateVisibility::Hidden);
-	Character4PreviewImage->SetVisibility(showCow ? ESlateVisibility::Visible : ESlateVisibility::Hidden);
-	Character5PreviewImage->SetVisibility(showEgg ? ESlateVisibility::Visible : ESlateVisibility::Hidden);
-	Character6PreviewImage->SetVisibility(showPostman ? ESlateVisibility::Visible : ESlateVisibility::Hidden);
-	Character7PreviewImage->SetVisibility(showScroogeWife ? ESlateVisibility::Visible : ESlateVisibility::Hidden);
-
-	RefreshCharacterFlavourText(characterType);
-}
-
-
-void UCharacterSelectUIWidget::RefreshCharacterFlavourText(ECharacterType characterType)
-{
-	const FText* FoundText = CharacterFlavourText_LUT.Find(characterType);
-
-	if (FoundText)
-	{
-		FlavourTextBlock->SetText(*FoundText);
-	}
-	else
-	{
-
-		FlavourTextBlock->SetText(FText::GetEmpty());
-	}
+	CurrentSelectedCharacter = characterType;
+	RefreshShownInfoPanel();
 }
 
 void UCharacterSelectUIWidget::OnStartGameDelayComplete()
