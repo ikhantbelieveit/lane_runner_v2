@@ -36,15 +36,6 @@ struct FPlayerCharacterDataItem
 };
 
 USTRUCT(BlueprintType)
-struct FPlayerCharacterData
-{
-	GENERATED_BODY()
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	TMap<ECharacterType, FPlayerCharacterDataItem> CharacterDataMap;
-};
-
-USTRUCT(BlueprintType)
 struct FPlayerInputAssets
 {
 	GENERATED_BODY()
@@ -246,6 +237,4 @@ public:
 	FPlayerShoot ShootConfig;
 	UPROPERTY(EditAnywhere)
 	FPlayerMisc MiscConfig;
-	UPROPERTY(EditAnywhere)
-	FPlayerCharacterData CharacterDataConfig;
 };

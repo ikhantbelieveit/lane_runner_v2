@@ -11,6 +11,7 @@
 #include "Projectile.h"
 #include "ECollectibleType.h"
 #include "BaseCollectible.h"
+#include "PlayerCharacterData.h"
 #include "GI_ConfigData.generated.h"
 
 USTRUCT(BlueprintType)
@@ -80,6 +81,16 @@ public:
 	TArray<FCollectiblePoolConfigEntry> Entries;
 };
 
+UCLASS(BlueprintType)
+class UCharacterDataSystemConfigData : public UDataAsset
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(EditAnywhere)
+	TMap<ECharacterType, UPlayerCharacterData*> CharacterDefinitions;
+};
+
 UCLASS()
 class LANERUNNERPROJECT_API UGI_ConfigData : public UDataAsset
 {
@@ -101,4 +112,6 @@ public:
 	UPROPERTY(EditAnywhere)
 	UProjectileSystemConfigData* ProjectileSystemConfig;
 	
+	UPROPERTY(EditAnywhere)
+	UCharacterDataSystemConfigData* CharacterDataSystemConfig;
 };

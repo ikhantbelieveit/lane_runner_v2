@@ -991,22 +991,15 @@ void APlayerCharacter::OnExitBlockJump()
 	}
 }
 
-void APlayerCharacter::SetCharacterType(ECharacterType type)
+void APlayerCharacter::RefreshCharacterVisuals(FPlayerVisualsData visualsData)
 {
-	FPlayerCharacterDataItem* data = ConfigData->CharacterDataConfig.CharacterDataMap.Find(type);
+	Flipbook_Stand = visualsData.StandingFlipbook;
+	Flipbook_Jump = visualsData.JumpingFlipbook;
+	Flipbook_JumpStart = visualsData.JumpStartFlipbook;
+	Flipbook_JumpLand = visualsData.JumpLandFlipbook;
 
-	if (data)
-	{
-		Flipbook_Stand = data->StandingFlipbook;
-		Flipbook_Jump = data->JumpingFlipbook;
-		Flipbook_JumpStart = data->JumpStartFlipbook;
-		Flipbook_JumpLand = data->JumpLandFlipbook;
-
-		CharacterType = type;
-
-		SetFlipbookVisuals(Flipbook_Stand);
-		RefreshVisualScale();
-	}
+	SetFlipbookVisuals(Flipbook_Stand);
+	RefreshVisualScale();
 }
 
 void APlayerCharacter::RefreshVisualScale()

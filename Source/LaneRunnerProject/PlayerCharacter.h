@@ -21,6 +21,7 @@
 #include "SpriteToggleComponent.h"
 #include "Components/DecalComponent.h"
 #include "ECharacterAnimState.h"
+#include "PlayerCharacterData.h"
 #include "PlayerCharacter.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FPlayerCharacterEvent);
@@ -319,7 +320,7 @@ public:
 	void OnExitBlockJump();
 
 	UFUNCTION(BlueprintCallable)
-	void SetCharacterType(ECharacterType type);
+	void RefreshCharacterVisuals(FPlayerVisualsData visualsData);
 
 	void SetFlipbookVisuals(UPaperFlipbook* flipbook);
 

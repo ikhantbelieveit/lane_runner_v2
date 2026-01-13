@@ -6,6 +6,7 @@
 #include "GI_LevelSystem.h"
 #include "Kismet/GameplayStatics.h"
 #include "Blueprint/WidgetTree.h"
+#include "GI_CharacterDataSystem.h"
 #include "PlayerCharacter.h"
 
 void UCharacterSelectUIWidget::Initialise()
@@ -242,17 +243,11 @@ void UCharacterSelectUIWidget::RefreshShownInfoPanel()
 
 void UCharacterSelectUIWidget::SetSelectedCharacter(ECharacterType characterType)
 {
-	AActor* playerActor = UGameplayStatics::GetActorOfClass(GetWorld(), APlayerCharacter::StaticClass());
-
-	if (playerActor)
+	UGI_CharacterDataSystem* characterDataSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGI_CharacterDataSystem>();
+	if (characterDataSystem)
 	{
-		APlayerCharacter* playerRef = Cast<APlayerCharacter>(playerActor);
-		if (playerRef)
-		{
-			playerRef->SetCharacterType(characterType);
-		}
+		characterDataSystem->SetCharacterType(characterType);
 	}
-
 	CurrentSelectedCharacter = characterType;
 	RefreshShownInfoPanel();
 }
