@@ -84,7 +84,6 @@ void UCharacterSelectUIWidget::InitialiseInfoPanelLUT()
 	TArray<UWidget*> AllWidgets;
 	WidgetTree->GetAllWidgets(AllWidgets);
 
-	// 1) Collect panels, set them Visible briefly so they can compute desired size
 	TArray<UCharacterSelectInfoPanel*> Panels;
 	Panels.Reserve(AllWidgets.Num());
 
@@ -104,11 +103,9 @@ void UCharacterSelectUIWidget::InitialiseInfoPanelLUT()
 		InfoPanel_LUT.Add(Panel->CharacterType, Panel);
 		Panels.Add(Panel);
 
-		// Make visible for warm-up pass
 		Panel->SetVisibility(ESlateVisibility::Visible);
 	}
 
-	// 2) Force layout now that they're visible (desired sizes become valid)
 	ForceLayoutPrepass();
 }
 
@@ -123,12 +120,6 @@ void UCharacterSelectUIWidget::OnScreenShown()
 	DefaultSelection = CharacterButton1;
 	CharacterButton1->SetKeyboardFocus();
 }
-
-//void UCharacterSelectUIWidget::OnScreenHidden()
-//{
-//	CurrentSelectedCharacter = ECharacterType::None;
-//	RefreshShownInfoPanel();
-//}
 
 void UCharacterSelectUIWidget::Tick(float DeltaTime)
 {
@@ -236,13 +227,6 @@ void UCharacterSelectUIWidget::OnCharacterButton6Pressed()
 
 void UCharacterSelectUIWidget::RefreshShownInfoPanel()
 {
-	/*if (!InfoPanelSwitcher) return;
-
-	if (UCharacterSelectInfoPanel* Panel = InfoPanel_LUT.FindRef(CurrentSelectedCharacter))
-	{
-		InfoPanelSwitcher->SetActiveWidget(Panel);
-		InfoPanelSwitcher->ForceLayoutPrepass();
-	}*/
 	for (const TPair<ECharacterType, TObjectPtr<UCharacterSelectInfoPanel>>& Pair : InfoPanel_LUT)
 	{
 		UCharacterSelectInfoPanel* Panel = Pair.Value;
@@ -253,15 +237,7 @@ void UCharacterSelectUIWidget::RefreshShownInfoPanel()
 
 		const bool bShouldBeVisible = (Pair.Key == CurrentSelectedCharacter);
 		Panel->SetRenderOpacity(bShouldBeVisible ? 1.0f : 0.0f);
-		//Panel->SetIsEnabled(bShouldBeVisible);
-		/*Panel->SetVisibility(bShouldBeVisible ? ESlateVisibility::Visible : ESlateVisibility::Hidden);
-		if (bShouldBeVisible)
-		{
-			Panel->ForceLayoutPrepass();
-		}*/
 	}
-
-	//ForceLayoutPrepass();
 }
 
 void UCharacterSelectUIWidget::SetSelectedCharacter(ECharacterType characterType)

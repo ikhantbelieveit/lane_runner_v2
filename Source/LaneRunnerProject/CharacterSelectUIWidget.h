@@ -115,9 +115,6 @@ public:
 
 	void ToggleConfirmButton(bool active);
 
-	UPROPERTY(meta = (BindWidget))
-	UWidgetSwitcher* InfoPanelSwitcher;
-
 private:
 	FTimerHandle StartGameDelayHandle;
 	void OnStartGameDelayComplete();
