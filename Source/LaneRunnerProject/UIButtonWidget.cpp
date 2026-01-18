@@ -62,14 +62,14 @@ void UUIButtonWidget::SynchronizeProperties()
 FReply UUIButtonWidget::NativeOnFocusReceived(const FGeometry& InGeometry, const FFocusEvent& InFocusEvent)
 {
 	ShowArrow(true);
-	BroadcastFocusGain.Broadcast();
+	BroadcastFocusGain.Broadcast(this);
 	return Super::NativeOnFocusReceived(InGeometry, InFocusEvent);
 }
 
 void UUIButtonWidget::NativeOnFocusLost(const FFocusEvent& InFocusEvent)
 {
 	ShowArrow(false);
-	BroadcastFocusLost.Broadcast();
+	BroadcastFocusLost.Broadcast(this);
 	Super::NativeOnFocusLost(InFocusEvent);
 }
 
@@ -127,7 +127,7 @@ void UUIButtonWidget::ShowArrow(bool bShow)
 
 void UUIButtonWidget::OnRootButtonClick()
 {
-	BroadcastButtonClick.Broadcast();
+	BroadcastButtonClick.Broadcast(this);
 
 	if (auto* audioSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGI_AudioSystem>())
 	{

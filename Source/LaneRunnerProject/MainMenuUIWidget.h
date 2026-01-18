@@ -37,13 +37,13 @@ public:
 	UUIButtonWidget* QuitButton;
 
 	UFUNCTION()
-	void OnStartButtonPressed();
+	void OnStartButtonPressed(UUIButtonWidget* button);
 
 	UFUNCTION()
-	void OnPlayButtonPressed();
+	void OnPlayButtonPressed(UUIButtonWidget* button);
 
 	UFUNCTION()
-	void OnQuitButtonPressed();
+	void OnQuitButtonPressed(UUIButtonWidget* button);
 
 	UPROPERTY(meta = (BindWidget))
 	UTextBlock* VersionNumberDisplay;

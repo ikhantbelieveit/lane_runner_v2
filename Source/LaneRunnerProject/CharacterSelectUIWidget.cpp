@@ -14,112 +14,168 @@ void UCharacterSelectUIWidget::Initialise()
 	if (ConfirmButton)
 	{
 		ConfirmButton->BroadcastButtonClick.AddDynamic(this, &UCharacterSelectUIWidget::OnConfirmButtonPressed);
+		ConfirmButton->BroadcastFocusGain.AddDynamic(this, &UCharacterSelectUIWidget::SetDefaultSelection);
 	}
 
 	if (BackButton)
 	{
 		BackButton->BroadcastButtonClick.AddDynamic(this, &UCharacterSelectUIWidget::OnBackButtonPressed);
+		BackButton->BroadcastFocusGain.AddDynamic(this, &UCharacterSelectUIWidget::SetDefaultSelection);
+	}
+}
+
+void UCharacterSelectUIWidget::InitialiseCharacterEntries()
+{
+	if (bCharacterEntriesInitialised) { return; }
+
+	InfoPanel_LUT.Empty();
+	CharacterButton_LUT.Empty();
+	CharacterButtonList.Empty();
+	DefaultSelection = nullptr;
+
+	if (!CharacterButtonContainer || !InfoPanelSwitcher)
+	{
+		UE_LOG(LogTemp, Error, TEXT("CharacterSelectUIWidget: Containers not bound. Check your widget BP."));
+		return;
 	}
 
-	if (CharacterButton1)
+	if (!CharacterButtonClass || !InfoPanelClass)
 	{
-		DefaultSelection = CharacterButton1;
-		CharacterButton1->BroadcastButtonClick.AddDynamic(this, &UCharacterSelectUIWidget::OnCharacterButton1Pressed);
-		CharacterButton1->BroadcastFocusGain.AddDynamic(this, &UCharacterSelectUIWidget::OnCharFocus1);
+		UE_LOG(LogTemp, Error, TEXT("CharacterSelectUIWidget: CharacterButtonClass / InfoPanelClass not set."));
+		return;
 	}
 
-	if (CharacterButton2)
+	CharacterButtonContainer->ClearChildren();
+	InfoPanelSwitcher->ClearChildren();
+
+	UGI_CharacterDataSystem* charDataSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGI_CharacterDataSystem>();
+	if (!charDataSystem) { return; }
+
+	TArray<FPlayerCharacterDefinition> allDefs = charDataSystem->GetAllCharacterDefs();
+	if (allDefs.Num() == 0) { return; }
+
+	for (const FPlayerCharacterDefinition& charDef : allDefs)
 	{
-		CharacterButton2->BroadcastButtonClick.AddDynamic(this, &UCharacterSelectUIWidget::OnCharacterButton2Pressed);
-		CharacterButton2->BroadcastFocusGain.AddDynamic(this, &UCharacterSelectUIWidget::OnCharFocus2);
+		ECharacterType charType = charDef.CharacterType;
+
+		//create character button
+		UUIButtonWidget* newButton = CreateWidget<UUIButtonWidget>(this, CharacterButtonClass);
+		if (!newButton) { continue; }
+
+		newButton->SetLabelText(charDef.DisplayData.PlayerName);
+		newButton->BroadcastButtonClick.AddDynamic(this, &UCharacterSelectUIWidget::OnCharacterButtonPressed);
+		newButton->BroadcastFocusGain.AddDynamic(this, &UCharacterSelectUIWidget::OnCharacterButtonFocused);
+		newButton->SetPadding(FMargin(0, 0, 0, 20));
+
+		newButton->BroadcastFocusGain.AddDynamic(this, &UCharacterSelectUIWidget::SetDefaultSelection);
+
+		CharacterButtonContainer->AddChild(newButton);
+
+		CharacterButton_LUT.Add(charType, newButton);
+		CharacterButtonList.Add(newButton);
+
+
+		//create info panel
+		UCharacterSelectInfoPanel* infoPanel = CreateWidget<UCharacterSelectInfoPanel>(this, InfoPanelClass);
+		if (!infoPanel) { continue; }
+
+		infoPanel->CharacterType = charType;
+		infoPanel->SetNameText(charDef.DisplayData.PlayerName);
+		infoPanel->SetFlavourText(charDef.DisplayData.FlavourText);
+		infoPanel->SetPlayerImageTexture(charDef.DisplayData.InfoPanelPortrait);
+
+		InfoPanelSwitcher->AddChild(infoPanel);
+		InfoPanel_LUT.Add(charType, infoPanel);
 	}
 
-	if (CharacterButton3)
+	ForceLayoutPrepass();
+
+	const ECharacterType initialType = ECharacterType::Cowboy_Red;
+
+	SetSelectedCharacter(initialType);
+	DefaultSelection = CharacterButtonList[0];
+
+	SetupButtonNavigation();
+
+	bCharacterEntriesInitialised = true;
+}
+
+void UCharacterSelectUIWidget::SetupButtonNavigation()
+{
+	if (!BackButton)
 	{
-		CharacterButton3->BroadcastButtonClick.AddDynamic(this, &UCharacterSelectUIWidget::OnCharacterButton3Pressed);
-		CharacterButton3->BroadcastFocusGain.AddDynamic(this, &UCharacterSelectUIWidget::OnCharFocus3);
+		UE_LOG(LogTemp, Warning, TEXT("CharacterSelectUIWidget: BackButton is null; cannot set Left navigation."));
+		return;
 	}
 
-	if (CharacterButton4)
+	int buttonCount = CharacterButtonList.Num();
+
+	for (UUIButtonWidget* button : CharacterButtonList)
 	{
-		CharacterButton4->BroadcastButtonClick.AddDynamic(this, &UCharacterSelectUIWidget::OnCharacterButton4Pressed);
-		CharacterButton4->BroadcastFocusGain.AddDynamic(this, &UCharacterSelectUIWidget::OnCharFocus4);
+		int index = CharacterButtonList.IndexOfByKey(button);
+
+		button->SetNavigationRuleExplicit(EUINavigation::Left, BackButton);
+
+		const int32 UpIndex = (index == 0) ? (buttonCount - 1) : (index - 1);
+		if (UUIButtonWidget* UpBtn = CharacterButtonList.IsValidIndex(UpIndex) ? CharacterButtonList[UpIndex] : nullptr)
+		{
+			button->SetNavigationRuleExplicit(EUINavigation::Up, UpBtn);
+		}
+
+		const int32 DownIndex = (index == buttonCount - 1) ? 0 : (index + 1);
+		if (UUIButtonWidget* DownBtn = CharacterButtonList.IsValidIndex(DownIndex) ? CharacterButtonList[DownIndex] : nullptr)
+		{
+			button->SetNavigationRuleExplicit(EUINavigation::Down, DownBtn);
+		}
 	}
 
-	if (CharacterButton5)
+	if (DefaultSelection)
 	{
-		CharacterButton5->BroadcastButtonClick.AddDynamic(this, &UCharacterSelectUIWidget::OnCharacterButton5Pressed);
-		CharacterButton5->BroadcastFocusGain.AddDynamic(this, &UCharacterSelectUIWidget::OnCharFocus5);
+		BackButton->SetNavigationRuleExplicit(EUINavigation::Right, DefaultSelection);
+		BackButton->SetNavigationRuleExplicit(EUINavigation::Down, DefaultSelection);
 	}
-
-	if (CharacterButton6)
+	if (ConfirmButton)
 	{
-		CharacterButton6->BroadcastButtonClick.AddDynamic(this, &UCharacterSelectUIWidget::OnCharacterButton6Pressed);
-		CharacterButton6->BroadcastFocusGain.AddDynamic(this, &UCharacterSelectUIWidget::OnCharFocus6);
-	}
-
-	if (CharacterButton7)
-	{
-		CharacterButton7->BroadcastButtonClick.AddDynamic(this, &UCharacterSelectUIWidget::OnCharacterButton7Pressed);
-		CharacterButton7->BroadcastFocusGain.AddDynamic(this, &UCharacterSelectUIWidget::OnCharFocus7);
+		ConfirmButton->SetNavigationRuleExplicit(EUINavigation::Left, CharacterButtonList[buttonCount - 1]);
+		ConfirmButton->SetNavigationRuleExplicit(EUINavigation::Up, CharacterButtonList[buttonCount - 1]);
 	}
 }
 
 void UCharacterSelectUIWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
-
-	InitialiseInfoPanelLUT();
-	RefreshShownInfoPanel();
-}
-
-void UCharacterSelectUIWidget::InitialiseInfoPanelLUT()
-{
-	InfoPanel_LUT.Empty();
-
-	if (!WidgetTree)
-	{
-		return;
-	}
-
-	TArray<UWidget*> AllWidgets;
-	WidgetTree->GetAllWidgets(AllWidgets);
-
-	TArray<UCharacterSelectInfoPanel*> Panels;
-	Panels.Reserve(AllWidgets.Num());
-
-	for (UWidget* W : AllWidgets)
-	{
-		UCharacterSelectInfoPanel* Panel = Cast<UCharacterSelectInfoPanel>(W);
-		if (!Panel)
-		{
-			continue;
-		}
-
-		if (InfoPanel_LUT.Contains(Panel->CharacterType))
-		{
-			continue;
-		}
-
-		InfoPanel_LUT.Add(Panel->CharacterType, Panel);
-		Panels.Add(Panel);
-
-		Panel->SetVisibility(ESlateVisibility::Visible);
-	}
-
-	ForceLayoutPrepass();
 }
 
 void UCharacterSelectUIWidget::SetupBeforeShow()
 {
+	if (!bCharacterEntriesInitialised)
+	{
+		InitialiseCharacterEntries();
+	}
+
+	bDidWarmUpLayout = false;
+
+	if (InfoPanelSizeBox)
+	{
+		InfoPanelSizeBox->SetRenderOpacity(0.0f);
+		InfoPanelSizeBox->SetVisibility(ESlateVisibility::Visible);
+	}
+
 	ToggleConfirmButton(false);
 	SetSelectedCharacter(ECharacterType::Cowboy_Red);
 }
 
 void UCharacterSelectUIWidget::OnScreenShown()
 {
-	DefaultSelection = CharacterButton1;
-	CharacterButton1->SetKeyboardFocus();
+	CharacterButtonList[0]->SetKeyboardFocus();
+
+	if (!bDidWarmUpLayout)
+	{
+		if (UWorld* World = GetWorld())
+		{
+			World->GetTimerManager().SetTimerForNextTick(this, &UCharacterSelectUIWidget::WarmUpInfoPanelsLayout);
+		}
+	}
 }
 
 void UCharacterSelectUIWidget::Tick(float DeltaTime)
@@ -128,7 +184,45 @@ void UCharacterSelectUIWidget::Tick(float DeltaTime)
 
 }
 
-void UCharacterSelectUIWidget::OnBackButtonPressed()
+void UCharacterSelectUIWidget::WarmUpInfoPanelsLayout()
+{
+	if (bDidWarmUpLayout) return;
+	bDidWarmUpLayout = true;
+
+	if (!InfoPanelSwitcher)
+	{
+		return;
+	}
+
+	const int32 NumPanels = InfoPanelSwitcher->GetChildrenCount();
+	if (NumPanels <= 0)
+	{
+		return;
+	}
+
+	const ECharacterType SavedType = CurrentSelectedCharacter;
+
+	for (int32 i = 0; i < NumPanels; ++i)
+	{
+		InfoPanelSwitcher->SetActiveWidgetIndex(i);
+
+		InfoPanelSwitcher->ForceLayoutPrepass();
+		ForceLayoutPrepass();
+	}
+
+	CurrentSelectedCharacter = SavedType;
+	RefreshShownInfoPanel();
+
+	InfoPanelSwitcher->ForceLayoutPrepass();
+	ForceLayoutPrepass();
+
+	if (InfoPanelSizeBox)
+	{
+		InfoPanelSizeBox->SetRenderOpacity(1.0f);
+	}
+}
+
+void UCharacterSelectUIWidget::OnBackButtonPressed(UUIButtonWidget* Button)
 {
 	auto* uiStateSystem = GetGameInstance()->GetSubsystem<UGI_UIStateSystem>();
 	if (uiStateSystem)
@@ -137,7 +231,7 @@ void UCharacterSelectUIWidget::OnBackButtonPressed()
 	}
 }
 
-void UCharacterSelectUIWidget::OnConfirmButtonPressed()
+void UCharacterSelectUIWidget::OnConfirmButtonPressed(UUIButtonWidget* Button)
 {
 	GetWorld()->GetTimerManager().SetTimer(
 		StartGameDelayHandle,
@@ -149,95 +243,47 @@ void UCharacterSelectUIWidget::OnConfirmButtonPressed()
 	);
 }
 
-void UCharacterSelectUIWidget::OnCharacterButton1Pressed()
+void UCharacterSelectUIWidget::OnCharacterButtonPressed(UUIButtonWidget* button)
 {
-	ToggleConfirmButton(true);
-	SetSelectedCharacter(ECharacterType::Cowboy_Red);
+	for (const auto& Pair : CharacterButton_LUT)
+	{
+		if (Pair.Value == button)
+		{
+			ToggleConfirmButton(true);
+			SetSelectedCharacter(Pair.Key);
+			return;
+		}
+	}
 }
 
-void UCharacterSelectUIWidget::OnCharacterButton7Pressed()
+void UCharacterSelectUIWidget::OnCharacterButtonFocused(UUIButtonWidget* button)
 {
-	ToggleConfirmButton(true);
-	SetSelectedCharacter(ECharacterType::ScroogeWife);
+	for (const auto& Pair : CharacterButton_LUT)
+	{
+		if (Pair.Value == button)
+		{
+			SetSelectedCharacter(Pair.Key);
+			return;
+		}
+	}
 }
 
-void UCharacterSelectUIWidget::OnCharFocus1()
+//in case navigation is lost when player clicks outside button
+void UCharacterSelectUIWidget::SetDefaultSelection(UUIButtonWidget* button)
 {
-	SetSelectedCharacter(ECharacterType::Cowboy_Red);
-}
-
-void UCharacterSelectUIWidget::OnCharFocus2()
-{
-	SetSelectedCharacter(ECharacterType::Cowboy_Purple);
-}
-
-void UCharacterSelectUIWidget::OnCharFocus3()
-{
-	SetSelectedCharacter(ECharacterType::Scrooge);
-}
-
-void UCharacterSelectUIWidget::OnCharFocus4()
-{
-	SetSelectedCharacter(ECharacterType::Cow);
-}
-
-void UCharacterSelectUIWidget::OnCharFocus5()
-{
-	SetSelectedCharacter(ECharacterType::Egg);
-}
-
-void UCharacterSelectUIWidget::OnCharFocus6()
-{
-	SetSelectedCharacter(ECharacterType::Postman);
-}
-
-void UCharacterSelectUIWidget::OnCharFocus7()
-{
-	SetSelectedCharacter(ECharacterType::ScroogeWife);
-}
-
-void UCharacterSelectUIWidget::OnCharacterButton2Pressed()
-{
-	ToggleConfirmButton(true);
-	SetSelectedCharacter(ECharacterType::Cowboy_Purple);
-}
-
-void UCharacterSelectUIWidget::OnCharacterButton3Pressed()
-{
-	ToggleConfirmButton(true);
-	SetSelectedCharacter(ECharacterType::Scrooge);
-}
-
-void UCharacterSelectUIWidget::OnCharacterButton4Pressed()
-{
-	ToggleConfirmButton(true);
-	SetSelectedCharacter(ECharacterType::Cow);
-}
-
-void UCharacterSelectUIWidget::OnCharacterButton5Pressed()
-{
-	ToggleConfirmButton(true);
-	SetSelectedCharacter(ECharacterType::Egg);
-}
-
-void UCharacterSelectUIWidget::OnCharacterButton6Pressed()
-{
-	ToggleConfirmButton(true);
-	SetSelectedCharacter(ECharacterType::Postman);
+	DefaultSelection = button;
 }
 
 void UCharacterSelectUIWidget::RefreshShownInfoPanel()
 {
-	for (const TPair<ECharacterType, TObjectPtr<UCharacterSelectInfoPanel>>& Pair : InfoPanel_LUT)
-	{
-		UCharacterSelectInfoPanel* Panel = Pair.Value;
-		if (!Panel)
-		{
-			continue;
-		}
+	if (!InfoPanelSwitcher) { return; }
 
-		const bool bShouldBeVisible = (Pair.Key == CurrentSelectedCharacter);
-		Panel->SetRenderOpacity(bShouldBeVisible ? 1.0f : 0.0f);
+	if (TObjectPtr<UCharacterSelectInfoPanel>* Found = InfoPanel_LUT.Find(CurrentSelectedCharacter))
+	{
+		if (UCharacterSelectInfoPanel* Panel = Found->Get())
+		{
+			InfoPanelSwitcher->SetActiveWidget(Panel);
+		}
 	}
 }
 
@@ -269,33 +315,32 @@ void UCharacterSelectUIWidget::OnStartGameDelayComplete()
 
 void UCharacterSelectUIWidget::ToggleConfirmButton(bool active)
 {
+	if (!ConfirmButton)
+	{
+		return;
+	}
+
+	ConfirmButton->SetVisibility(active ? ESlateVisibility::Visible : ESlateVisibility::Hidden);
+
+	for (UUIButtonWidget* Button : CharacterButtonList)
+	{
+		if (!Button)
+		{
+			continue;
+		}
+
+		if (active)
+		{
+			Button->SetNavigationRuleExplicit(EUINavigation::Right, ConfirmButton);
+		}
+		else
+		{
+			Button->SetNavigationRuleBase(EUINavigation::Right, EUINavigationRule::Escape);
+		}
+	}
+
 	if (active)
 	{
-		ConfirmButton->SetVisibility(ESlateVisibility::Visible);
 		ConfirmButton->SetKeyboardFocus();
-
-		CharacterButton1->SetNavigationRuleExplicit(EUINavigation::Right, ConfirmButton);
-		CharacterButton2->SetNavigationRuleExplicit(EUINavigation::Right, ConfirmButton);
-		CharacterButton3->SetNavigationRuleExplicit(EUINavigation::Right, ConfirmButton);
-		CharacterButton4->SetNavigationRuleExplicit(EUINavigation::Right, ConfirmButton);
-		CharacterButton5->SetNavigationRuleExplicit(EUINavigation::Right, ConfirmButton);
-		CharacterButton6->SetNavigationRuleExplicit(EUINavigation::Right, ConfirmButton);
-		CharacterButton7->SetNavigationRuleExplicit(EUINavigation::Right, ConfirmButton);
-
-		CharacterButton7->SetNavigationRuleExplicit(EUINavigation::Down, ConfirmButton);
-	}
-	else
-	{
-		ConfirmButton->SetVisibility(ESlateVisibility::Hidden);
-
-		CharacterButton1->SetNavigationRuleBase(EUINavigation::Right, EUINavigationRule::Escape);
-		CharacterButton2->SetNavigationRuleBase(EUINavigation::Right, EUINavigationRule::Escape);
-		CharacterButton3->SetNavigationRuleBase(EUINavigation::Right, EUINavigationRule::Escape);
-		CharacterButton4->SetNavigationRuleBase(EUINavigation::Right, EUINavigationRule::Escape);
-		CharacterButton5->SetNavigationRuleBase(EUINavigation::Right, EUINavigationRule::Escape);
-		CharacterButton6->SetNavigationRuleBase(EUINavigation::Right, EUINavigationRule::Escape);
-		CharacterButton7->SetNavigationRuleBase(EUINavigation::Right, EUINavigationRule::Escape);
-
-		CharacterButton7->SetNavigationRuleBase(EUINavigation::Down, EUINavigationRule::Escape);
 	}
 }

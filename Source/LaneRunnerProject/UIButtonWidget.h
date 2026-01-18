@@ -11,7 +11,7 @@ class UTextBlock;
 class UImage;
 class UTexture2D;
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FUIButtonEvent);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FUIButtonEvent, UUIButtonWidget*, Button);
 UCLASS()
 class LANERUNNERPROJECT_API UUIButtonWidget : public UUserWidget
 {

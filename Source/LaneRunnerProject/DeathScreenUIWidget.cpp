@@ -38,7 +38,7 @@ void UDeathScreenUIWidget::Tick(float DeltaTime)
 
 }
 
-void UDeathScreenUIWidget::OnRespawnButtonPressed()
+void UDeathScreenUIWidget::OnRespawnButtonPressed(UUIButtonWidget* button)
 {
 	GetWorld()->GetTimerManager().SetTimer(
 		RespawnDelayHandle,
@@ -50,7 +50,7 @@ void UDeathScreenUIWidget::OnRespawnButtonPressed()
 	);
 }
 
-void UDeathScreenUIWidget::OnMenuButtonPressed()
+void UDeathScreenUIWidget::OnMenuButtonPressed(UUIButtonWidget* button)
 {
 	auto* levelSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGI_LevelSystem>();
 	if (levelSystem)
@@ -111,7 +111,7 @@ void UDeathScreenUIWidget::OnRespawnDelayComplete()
 	}
 }
 
-void UDeathScreenUIWidget::OnQuitButtonPressed()
+void UDeathScreenUIWidget::OnQuitButtonPressed(UUIButtonWidget* button)
 {
 	auto* uiStateSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGI_UIStateSystem>();
 	if (uiStateSystem)

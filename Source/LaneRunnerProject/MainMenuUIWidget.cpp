@@ -62,7 +62,7 @@ void UMainMenuUIWidget::OnScreenShown()
 	}
 }
 
-void UMainMenuUIWidget::OnStartButtonPressed()
+void UMainMenuUIWidget::OnStartButtonPressed(UUIButtonWidget* button)
 {
 	StartButton->SetVisibility(ESlateVisibility::Hidden);
 	PlayButton->SetVisibility(ESlateVisibility::Visible);
@@ -72,7 +72,7 @@ void UMainMenuUIWidget::OnStartButtonPressed()
 	PlayButton->SetKeyboardFocus();
 }
 
-void UMainMenuUIWidget::OnPlayButtonPressed()
+void UMainMenuUIWidget::OnPlayButtonPressed(UUIButtonWidget* button)
 {
 	auto* uiStateSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGI_UIStateSystem>();
 	if (uiStateSystem)
@@ -81,7 +81,7 @@ void UMainMenuUIWidget::OnPlayButtonPressed()
 	}
 }
 
-void UMainMenuUIWidget::OnQuitButtonPressed()
+void UMainMenuUIWidget::OnQuitButtonPressed(UUIButtonWidget* button)
 {
 	auto* uiStateSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGI_UIStateSystem>();
 	if (uiStateSystem)

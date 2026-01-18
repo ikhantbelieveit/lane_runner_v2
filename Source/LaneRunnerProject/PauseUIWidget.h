@@ -40,19 +40,19 @@ public:
 	void Initialise();
 
 	UFUNCTION()
-	void OnResumeButtonPressed();
+	void OnResumeButtonPressed(UUIButtonWidget* button);
 
 	UFUNCTION()
-	void OnRestartButtonPressed();
+	void OnRestartButtonPressed(UUIButtonWidget* button);
 
 	UFUNCTION()
-	void OnSettingsButtonPressed();
+	void OnSettingsButtonPressed(UUIButtonWidget* button);
 
 	UFUNCTION()
-	void OnQuitToMenuButtonPressed();
+	void OnQuitToMenuButtonPressed(UUIButtonWidget* button);
 
 	UFUNCTION()
-	void OnQuitToDesktopButtonPressed();
+	void OnQuitToDesktopButtonPressed(UUIButtonWidget* button);
 
 
 };

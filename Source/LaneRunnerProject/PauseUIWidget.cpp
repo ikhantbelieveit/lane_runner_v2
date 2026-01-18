@@ -33,7 +33,7 @@ void UPauseUIWidget::Initialise()
 	}
 }
 
-void UPauseUIWidget::OnResumeButtonPressed()
+void UPauseUIWidget::OnResumeButtonPressed(UUIButtonWidget* button)
 {
 	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("resume"));
 	if (auto* levelSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGI_LevelSystem>())
@@ -42,7 +42,7 @@ void UPauseUIWidget::OnResumeButtonPressed()
 	}
 }
 
-void UPauseUIWidget::OnRestartButtonPressed()
+void UPauseUIWidget::OnRestartButtonPressed(UUIButtonWidget* button)
 {
 	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("restart"));
 	if (auto* levelSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGI_LevelSystem>())
@@ -51,12 +51,12 @@ void UPauseUIWidget::OnRestartButtonPressed()
 	}
 }
 
-void UPauseUIWidget::OnSettingsButtonPressed()
+void UPauseUIWidget::OnSettingsButtonPressed(UUIButtonWidget* button)
 {
 	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("settings"));
 }
 
-void UPauseUIWidget::OnQuitToMenuButtonPressed()
+void UPauseUIWidget::OnQuitToMenuButtonPressed(UUIButtonWidget* button)
 {
 	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("quit to menu"));
 	if (auto* levelSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGI_LevelSystem>())
@@ -71,7 +71,7 @@ void UPauseUIWidget::OnQuitToMenuButtonPressed()
 	}
 }
 
-void UPauseUIWidget::OnQuitToDesktopButtonPressed()
+void UPauseUIWidget::OnQuitToDesktopButtonPressed(UUIButtonWidget* button)
 {
 	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("quit to desktop"));
 	if (auto* uiSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGI_UIStateSystem>())

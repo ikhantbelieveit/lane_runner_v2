@@ -27,13 +27,13 @@ public:
 	UUIButtonWidget* RespawnButton;
 
 	UFUNCTION()
-	void OnRespawnButtonPressed();
+	void OnRespawnButtonPressed(UUIButtonWidget* button);
 
 	UPROPERTY(meta = (BindWidget))
 	UUIButtonWidget* QuitButton;
 
 	UFUNCTION()
-	void OnQuitButtonPressed();
+	void OnQuitButtonPressed(UUIButtonWidget* button);
 
 	virtual void OnScreenShown() override;
 	virtual void OnScreenHidden() override;
@@ -69,7 +69,7 @@ public:
 	UUIButtonWidget* MenuButton;
 
 	UFUNCTION()
-	void OnMenuButtonPressed();
+	void OnMenuButtonPressed(UUIButtonWidget* button);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float RespawnDelay = 0.5f;

@@ -8,8 +8,10 @@
 #include "Components/TextBlock.h"
 #include "Components/Image.h"
 #include "Components/WidgetSwitcher.h"
+#include "Components/SizeBox.h"
 #include "ECharacterType.h"
 #include "UIButtonWidget.h"
+#include "GI_CharacterDataSystem.h"
 #include "CharacterSelectInfoPanel.h"
 #include "CharacterSelectUIWidget.generated.h"
 
@@ -28,7 +30,6 @@ public:
 
 	virtual void SetupBeforeShow() override;
 	virtual void OnScreenShown() override;
-	//virtual void OnScreenHidden() override;
 
 	virtual void Tick(float DeltaTime) override;
 
@@ -36,84 +37,42 @@ public:
 	UUIButtonWidget* BackButton;
 
 	UFUNCTION()
-	void OnBackButtonPressed();
+	void OnBackButtonPressed(UUIButtonWidget* button);
 
 	UPROPERTY(meta = (BindWidget))
 	UUIButtonWidget* ConfirmButton;
 
 	UFUNCTION()
-	void OnConfirmButtonPressed();
+	void OnConfirmButtonPressed(UUIButtonWidget* button);
+
+	UFUNCTION()
+	void OnCharacterButtonPressed(UUIButtonWidget* button);
+
+	UFUNCTION()
+	void OnCharacterButtonFocused(UUIButtonWidget* button);
+
+	UFUNCTION()
+	void SetDefaultSelection(UUIButtonWidget* button);
 
 	UPROPERTY(meta = (BindWidget))
-	UTextBlock* FlavourTextBlock;
+	UPanelWidget* CharacterButtonContainer;
 
-	UPROPERTY(meta = (BindWidget))
-	UUIButtonWidget* CharacterButton1;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TSubclassOf<UUIButtonWidget> CharacterButtonClass;
 
-	UFUNCTION()
-	void OnCharacterButton1Pressed();
-
-	UFUNCTION()
-	void OnCharFocus1();
-
-	UPROPERTY(meta = (BindWidget))
-	UUIButtonWidget* CharacterButton2;
-
-	UFUNCTION()
-	void OnCharacterButton2Pressed();
-
-	UFUNCTION()
-	void OnCharFocus2();
-
-	UPROPERTY(meta = (BindWidget))
-	UUIButtonWidget* CharacterButton3;
-
-	UFUNCTION()
-	void OnCharacterButton3Pressed();
-
-	UFUNCTION()
-	void OnCharFocus3();
-
-	UPROPERTY(meta = (BindWidget))
-	UUIButtonWidget* CharacterButton4;
-
-	UFUNCTION()
-	void OnCharacterButton4Pressed();
-
-	UFUNCTION()
-	void OnCharFocus4();
-
-	UPROPERTY(meta = (BindWidget))
-	UUIButtonWidget* CharacterButton5;
-
-	UFUNCTION()
-	void OnCharacterButton5Pressed();
-
-	UFUNCTION()
-	void OnCharFocus5();
-
-	UPROPERTY(meta = (BindWidget))
-	UUIButtonWidget* CharacterButton6;
-
-	UFUNCTION()
-	void OnCharacterButton6Pressed();
-
-	UFUNCTION()
-	void OnCharFocus6();
-
-	UPROPERTY(meta = (BindWidget))
-	UUIButtonWidget* CharacterButton7;
-
-	UFUNCTION()
-	void OnCharacterButton7Pressed();
-
-	UFUNCTION()
-	void OnCharFocus7();
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TSubclassOf<UCharacterSelectInfoPanel> InfoPanelClass;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float StartGameDelay = 0.5f;
 
 	void ToggleConfirmButton(bool active);
+
+	UPROPERTY(meta = (BindWidget))
+	UWidgetSwitcher* InfoPanelSwitcher;
+
+	UPROPERTY(meta = (BindWidget))
+	USizeBox* InfoPanelSizeBox;
 
 private:
 	FTimerHandle StartGameDelayHandle;
@@ -121,10 +80,19 @@ private:
 
 	TMap<ECharacterType, TObjectPtr<UCharacterSelectInfoPanel>> InfoPanel_LUT;
 
-	void InitialiseInfoPanelLUT();
+	void InitialiseCharacterEntries();
+	void SetupButtonNavigation();
 
 	void RefreshShownInfoPanel();
 
 	void SetSelectedCharacter(ECharacterType characterType);
 	ECharacterType CurrentSelectedCharacter;
+
+	TArray<TObjectPtr<UUIButtonWidget>> CharacterButtonList;
+	TMap<ECharacterType, TObjectPtr<UUIButtonWidget>> CharacterButton_LUT;
+
+	bool bCharacterEntriesInitialised;
+
+	bool bDidWarmUpLayout = false;
+	void WarmUpInfoPanelsLayout();
 };
