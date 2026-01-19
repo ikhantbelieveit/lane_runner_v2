@@ -97,16 +97,16 @@ protected:
 
 	float GameOverDelay = 0.75f;
 
-	int PointsHealThreshold = 500;	//how many points the player needs to get a heal
+	//int PointsHealThreshold = 500;	//how many points the player needs to get a heal
 
-	int PointsUntilNextThreshold = PointsHealThreshold;
+	//int PointsUntilNextThreshold = PointsHealThreshold;
 
 	void ExecuteSingleEvent(const FLevelEventData& Event);
 
 	FLevelScoreResult ScoreResult;
 
 	void CalculateScoreResult(FLevelScoreResult& result);
-	
+
 
 public:
 	FLevelScoreResult GetScoreResult() const {
@@ -182,4 +182,7 @@ public:
 
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FLevelSystemEvent OnLevelRestart;
+
+	UFUNCTION(BlueprintCallable)
+	void HealPlayerFromItem(int healValue);
 };

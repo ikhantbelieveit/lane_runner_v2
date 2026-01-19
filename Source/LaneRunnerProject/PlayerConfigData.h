@@ -104,18 +104,8 @@ struct FPlayerVisuals
 	GENERATED_BODY()
 
 public:
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Visuals", meta = (AllowPrivateAccess = "true"))
-	UPaperSprite* PlayerSprite;
-
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Shadow")
 	UMaterialInterface* DropShadowMaterial;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Shadow")
-	UMaterialInterface* SpriteGhostMaterial;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Shadow")
-	UMaterialInterface* SpriteDefaultMaterial;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Visual", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<class AOneShotAnim> MuzzleShot_Right;

@@ -127,6 +127,18 @@ void ABaseCollectible::Collect()
 		}
 	}
 
+	if (HealPlayer)
+	{
+		auto* levelSystem = GetGameInstance()->GetSubsystem<UGI_LevelSystem>();
+		if (levelSystem)
+		{
+			if (levelSystem->GetGameState() == EGameState::Active)
+			{
+				levelSystem->HealPlayerFromItem(HealValue);
+			}
+		}
+	}
+
 	USpawnComponent* spawn = GetComponentByClass<USpawnComponent>();
 	if (spawn)
 	{

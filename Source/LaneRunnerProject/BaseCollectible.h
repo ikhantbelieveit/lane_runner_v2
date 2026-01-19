@@ -59,6 +59,12 @@ public:
 	bool GivePoints = true;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	int HealValue = 0;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	bool HealPlayer = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	bool bIsPooledInstance = true;
 
 	//bool ResetAsSpawned = true;

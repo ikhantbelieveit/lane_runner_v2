@@ -16,6 +16,12 @@ class LANERUNNERPROJECT_API UDamageFlashComponent : public UActorComponent
 public:
     UDamageFlashComponent();
 
+    UFUNCTION(BlueprintCallable)
+    void Initialise();
+
+    UFUNCTION(BlueprintCallable)
+    void SetupMaterial(UActorComponent* visualsComp);
+
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     FLinearColor FlashColor = FLinearColor::Red;
 
@@ -29,7 +35,8 @@ protected:
     virtual void BeginPlay() override;
 
 private:
-    UMaterialInstanceDynamic* DynamicMaterial = nullptr;
+    UPROPERTY()
+    TObjectPtr<UMaterialInstanceDynamic> DynamicMaterial = nullptr;
     FTimerHandle FlashTimerHandle;
 
 		

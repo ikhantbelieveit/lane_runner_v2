@@ -20,14 +20,12 @@ void UCharacterSelectInfoPanel::SetPlayerImageTexture(UTexture2D* NewTexture)
 {
 	CharacterImage->SetBrushFromTexture(NewTexture);
 
-	// Height override is your constant (set in the asset / BP as 300)
 	const float Height = ImageSizeBox->GetHeightOverride();
 	if (Height <= 0.0f)
 	{
 		return;
 	}
 
-	// Prefer the texture's real dimensions (most reliable)
 	float TexW = 0.0f;
 	float TexH = 0.0f;
 
@@ -37,7 +35,6 @@ void UCharacterSelectInfoPanel::SetPlayerImageTexture(UTexture2D* NewTexture)
 		TexH = static_cast<float>(NewTexture->GetSizeY());
 	}
 
-	// Fallback: brush image size (can be zero in some cases)
 	if (TexW <= 0.0f || TexH <= 0.0f)
 	{
 		TexW = CharacterImage->GetBrush().GetImageSize().X;

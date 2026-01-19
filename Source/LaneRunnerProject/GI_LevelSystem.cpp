@@ -133,7 +133,7 @@ void UGI_LevelSystem::OnPlayerTouchHazard(bool oneHitKill, bool overrideInvincib
 void UGI_LevelSystem::ResetLevelStats()
 {
 	SetScore(0);
-	PointsUntilNextThreshold = PointsHealThreshold;
+	//PointsUntilNextThreshold = PointsHealThreshold;
 }
 
 void UGI_LevelSystem::ResetFromLose()
@@ -187,7 +187,7 @@ void UGI_LevelSystem::AddToScore(int addValue)
 {
 	SetScore(CurrentScore + addValue);
 
-	PointsUntilNextThreshold -= addValue;
+	/*PointsUntilNextThreshold -= addValue;
 
 	if (PointsUntilNextThreshold <= 0)
 	{
@@ -203,7 +203,21 @@ void UGI_LevelSystem::AddToScore(int addValue)
 		}
 
 		PointsUntilNextThreshold = PointsHealThreshold + PointsUntilNextThreshold;
-	}
+	}*/
+}
+
+void UGI_LevelSystem::HealPlayerFromItem(int healValue)
+{
+    APlayerCharacter* player = Cast<APlayerCharacter>(UGameplayStatics::GetActorOfClass(GetWorld(), APlayerCharacter::StaticClass()));
+    if (player)
+    {
+        player->TryAddHealth(healValue);
+        auto* audioSystem = GetGameInstance()->GetSubsystem<UGI_AudioSystem>();
+        if (audioSystem)
+        {
+            audioSystem->Play(EAudioKey::HealPlayer);
+        }
+    }
 }
 
 int UGI_LevelSystem::GetScore()
@@ -213,8 +227,6 @@ int UGI_LevelSystem::GetScore()
 
 void UGI_LevelSystem::EnterLevel()
 {
-    
-
 	APlayerCharacter* player = Cast<APlayerCharacter>(UGameplayStatics::GetActorOfClass(GetWorld(), APlayerCharacter::StaticClass()));
 	if (player)
 	{

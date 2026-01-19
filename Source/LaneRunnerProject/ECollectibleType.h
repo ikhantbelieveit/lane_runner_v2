@@ -13,5 +13,6 @@ enum class ECollectibleType : uint8
 {
 	None UMETA(DisplayName = "None"),
 	Star_Basic UMETA(DisplayName = "Star Basic"),
-	Star_Big UMETA(DisplayName = "Star Big")
+	Star_Big UMETA(DisplayName = "Star Big"),
+	Beans_Heal UMETA(DisplayName = "Beans Healing")
 };

@@ -12,6 +12,7 @@
 #include "GI_AudioSystem.h"
 #include "BlockJumpSurface.h"
 #include "BaseCollectible.h"
+#include "DamageFlashComponent.h"
 
 
 // Sets default values
@@ -251,7 +252,6 @@ void APlayerCharacter::BeginPlay_SetupFromConfig()
 		if (ScrollTriggerBox)
 		{
 			FString boxSize = ScrollTriggerBox->GetRelativeScale3D().ToString();
-			//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, boxSize);
 		}
 
 		FName playerAreaTag = FName("PlayerArea");
@@ -274,17 +274,6 @@ void APlayerCharacter::BeginPlay_SetupFromConfig()
 
 		StartHealth = ConfigData->MiscConfig.StartHealth;
 		MaxHealth = ConfigData->MiscConfig.MaxHealth;
-
-		UPaperFlipbookComponent* flipbookComp = GetComponentByClass<UPaperFlipbookComponent>();
-		if (flipbookComp)
-		{
-			flipbookComp->SetMaterial(0, ConfigData->VisualsConfig.SpriteDefaultMaterial);
-		}
-
-	}
-	else
-	{
-
 	}
 }
 
@@ -932,7 +921,6 @@ void APlayerCharacter::StartMercyInvincibility()
 
 	if (UPaperFlipbookComponent* flipbookComp = GetComponentByClass<UPaperFlipbookComponent>())
 	{
-		flipbookComp->SetMaterial(0, ConfigData->VisualsConfig.SpriteDefaultMaterial);
 		flipbookComp->SetVisibility(true);
 	}
 }
@@ -944,7 +932,6 @@ void APlayerCharacter::CancelMercyInvincibility()
 
 	if (UPaperFlipbookComponent* flipbookComp = GetComponentByClass<UPaperFlipbookComponent>())
 	{
-		flipbookComp->SetMaterial(0, ConfigData->VisualsConfig.SpriteDefaultMaterial);
 		flipbookComp->SetVisibility(true);
 	}
 }
@@ -1054,13 +1041,24 @@ void APlayerCharacter::SetFlipbookVisuals(UPaperFlipbook* flipbook)
 void APlayerCharacter::TryAddHealth(int addHealth)
 {
 	int newHealth = CurrentHealth + addHealth;
+	bool bIncreasesHealth = true;
 
 	if (newHealth > MaxHealth)
 	{
 		newHealth = MaxHealth;
+		bIncreasesHealth = false;
 	}
 
 	SetCurrentHealth(newHealth);
+
+	if (bIncreasesHealth)
+	{
+		UDamageFlashComponent* FlashComp = GetComponentByClass<UDamageFlashComponent>();
+		if (FlashComp)
+		{
+			FlashComp->TriggerFlash();
+		}
+	}
 }
 
 

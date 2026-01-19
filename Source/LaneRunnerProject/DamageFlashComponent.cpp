@@ -1,6 +1,7 @@
 #include "DamageFlashComponent.h"
 #include "PaperSpriteComponent.h"
 #include "PaperFlipbookComponent.h"
+#include "PlayerCharacter.h"
 #include "TimerManager.h"
 
 UDamageFlashComponent::UDamageFlashComponent()
@@ -12,6 +13,11 @@ void UDamageFlashComponent::BeginPlay()
 {
     Super::BeginPlay();
 
+    Initialise();
+}
+
+void UDamageFlashComponent::Initialise()
+{
     UPaperSpriteComponent* foundMainVisualsSprite = nullptr;
 
     UPaperFlipbookComponent* foundMainVisualsFlipbook = nullptr;
@@ -63,47 +69,33 @@ void UDamageFlashComponent::BeginPlay()
         }
     }
 
-    // Check for tagged flipbook
-    //for (UPaperFlipbookComponent* FlipbookComp : GetOwner()->GetComponentsByClass<UPaperFlipbookComponent>())
-    //{
-    //    if (FlipbookComp && FlipbookComp->ComponentHasTag("MainVisuals"))
-    //    {
-    //        VisualComp = FlipbookComp;
-    //        break;
-    //    }
-    //}
-
-    //// If no tagged flipbook found, check for tagged sprite
-    //if (!VisualComp)
-    //{
-    //    for (UPaperSpriteComponent* SpriteComp : GetOwner()->GetComponentsByClass<UPaperSpriteComponent>())
-    //    {
-    //        if (SpriteComp && SpriteComp->ComponentHasTag("MainVisuals"))
-    //        {
-    //            VisualComp = SpriteComp;
-    //            break;
-    //        }
-    //    }
-    //}
-
     if (VisualComp)
     {
-        UMeshComponent* MeshComp = Cast<UMeshComponent>(VisualComp);
-        if (MeshComp && MeshComp->GetMaterial(0))
+        SetupMaterial(VisualComp);
+    }
+}
+
+void UDamageFlashComponent::SetupMaterial(UActorComponent* visualsComp)
+{
+    UMeshComponent* MeshComp = Cast<UMeshComponent>(visualsComp);
+    if (MeshComp && MeshComp->GetMaterial(0))
+    {
+        DynamicMaterial = MeshComp->CreateDynamicMaterialInstance(0);
+        if (DynamicMaterial)
         {
-            DynamicMaterial = MeshComp->CreateDynamicMaterialInstance(0);
-            if (DynamicMaterial)
-            {
-                DynamicMaterial->SetScalarParameterValue("FlashAmount", 0.0f);
-                DynamicMaterial->SetVectorParameterValue("FlashColor", FlashColor);
-            }
+            DynamicMaterial->SetScalarParameterValue("FlashAmount", 0.0f);
+            DynamicMaterial->SetVectorParameterValue("FlashColor", FlashColor);
+            MeshComp->SetMaterial(0, DynamicMaterial);
         }
     }
 }
 
 void UDamageFlashComponent::TriggerFlash()
 {
-    if (!DynamicMaterial) return;
+    if (!DynamicMaterial)
+    {
+        return;
+    }
 
     DynamicMaterial->SetVectorParameterValue("FlashColor", FlashColor);
     DynamicMaterial->SetScalarParameterValue("FlashAmount", 1.0f);
