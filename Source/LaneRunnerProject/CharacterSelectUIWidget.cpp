@@ -233,6 +233,12 @@ void UCharacterSelectUIWidget::OnBackButtonPressed(UUIButtonWidget* Button)
 
 void UCharacterSelectUIWidget::OnConfirmButtonPressed(UUIButtonWidget* Button)
 {
+	UGI_CharacterDataSystem* characterDataSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGI_CharacterDataSystem>();
+	if (characterDataSystem)
+	{
+		characterDataSystem->SetCharacterType(CurrentSelectedCharacter);
+	}
+
 	GetWorld()->GetTimerManager().SetTimer(
 		StartGameDelayHandle,
 		this,
@@ -289,11 +295,7 @@ void UCharacterSelectUIWidget::RefreshShownInfoPanel()
 
 void UCharacterSelectUIWidget::SetSelectedCharacter(ECharacterType characterType)
 {
-	UGI_CharacterDataSystem* characterDataSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGI_CharacterDataSystem>();
-	if (characterDataSystem)
-	{
-		characterDataSystem->SetCharacterType(characterType);
-	}
+	
 	CurrentSelectedCharacter = characterType;
 	RefreshShownInfoPanel();
 }
