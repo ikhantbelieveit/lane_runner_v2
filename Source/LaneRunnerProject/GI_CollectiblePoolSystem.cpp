@@ -62,6 +62,8 @@ bool UGI_CollectiblePoolSystem::InitialiseFromConfig()
 
     UCollectiblePoolConfigData* Config = GI->ConfigData->CollectiblePoolConfig;
 
+    CommonSet = Config->CommonSet;
+
     ClassLUT.Empty();
     Pools.Empty();
 
@@ -136,8 +138,6 @@ ABaseCollectible* UGI_CollectiblePoolSystem::RequestCollectible(const FCollectib
                 SpawnComp->Spawn(true, Request.bShouldScroll, true);
             }
 
-            //GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("Spawn collectible from request"));
-
             return Col;
         }
         else
@@ -206,8 +206,22 @@ void UGI_CollectiblePoolSystem::ResetAllPools()
 
         Pool.Active.Empty();
     }
+}
 
-    
+ABaseCollectible* UGI_CollectiblePoolSystem::RequestRandomCollectibleFromCommonSet(const FCollectibleRequest& Request)
+{
+    FRandomStream random(FMath::Rand());
+    ECollectibleType type;
+    if (!CommonSet->GetRandomCollectibleType(random, type))
+    {
+        //complain here
+        return nullptr;
+    }
 
-    
+    FCollectibleRequest randomTypeRequest;
+    randomTypeRequest.bShouldScroll = Request.bShouldScroll;
+    randomTypeRequest.SpawnLocation = Request.SpawnLocation;
+    randomTypeRequest.Type = type;
+
+    return RequestCollectible(randomTypeRequest);
 }

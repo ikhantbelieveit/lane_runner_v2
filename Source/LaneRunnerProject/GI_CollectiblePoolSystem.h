@@ -7,6 +7,7 @@
 #include "ECollectibleType.h"
 #include "CollectibleRequest.h"
 #include "BaseCollectible.h"
+#include "CollectibleSet.h"
 #include "GI_CollectiblePoolSystem.generated.h"
 
 USTRUCT()
@@ -38,6 +39,8 @@ public:
     void ReturnCollectible(ABaseCollectible* Collectible);
     void ResetAllPools();
 
+    ABaseCollectible* RequestRandomCollectibleFromCommonSet(const FCollectibleRequest& Request);
+
 private:
     bool bInitialisedFromConfig = false;
 
@@ -50,4 +53,6 @@ private:
     TMap<ECollectibleType, FCollectiblePool> Pools;
 
     ABaseCollectible* CreateNewCollectible(ECollectibleType Type);
+
+    TObjectPtr<UCollectibleSet> CommonSet;
 };

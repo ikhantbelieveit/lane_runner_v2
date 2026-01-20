@@ -62,6 +62,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flags")
 	bool SpawnItemOnDestroy = true;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	bool bSpawnCommonCollectible = true;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	ECollectibleType SpawnItemType = ECollectibleType::Star_Basic;
 

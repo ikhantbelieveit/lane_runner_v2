@@ -11,6 +11,7 @@
 #include "Projectile.h"
 #include "ECollectibleType.h"
 #include "BaseCollectible.h"
+#include "CollectibleSet.h"
 #include "PlayerCharacterData.h"
 #include "GI_ConfigData.generated.h"
 
@@ -79,6 +80,9 @@ class UCollectiblePoolConfigData : public UDataAsset
 public:
 	UPROPERTY(EditAnywhere)
 	TArray<FCollectiblePoolConfigEntry> Entries;
+
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<UCollectibleSet> CommonSet;
 };
 
 UCLASS(BlueprintType)

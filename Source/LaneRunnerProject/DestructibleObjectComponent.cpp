@@ -162,7 +162,14 @@ void UDestructibleObjectComponent::DestroyFromComp()
 
             Req.bShouldScroll = itemShouldScroll;
 
-            Pool->RequestCollectible(Req);
+            if (bSpawnCommonCollectible)
+            {
+                Pool->RequestRandomCollectibleFromCommonSet(Req);
+            }
+            else
+            {
+                Pool->RequestCollectible(Req);
+            }
         }
     }
 
