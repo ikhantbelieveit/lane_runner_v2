@@ -84,7 +84,7 @@ void UDamageFlashComponent::SetupMaterial(UActorComponent* visualsComp)
         if (DynamicMaterial)
         {
             DynamicMaterial->SetScalarParameterValue("FlashAmount", 0.0f);
-            DynamicMaterial->SetVectorParameterValue("FlashColor", FlashColor);
+            //DynamicMaterial->SetVectorParameterValue("FlashColor", FlashColor);
             MeshComp->SetMaterial(0, DynamicMaterial);
         }
     }
@@ -97,7 +97,7 @@ void UDamageFlashComponent::TriggerFlash()
         return;
     }
 
-    DynamicMaterial->SetVectorParameterValue("FlashColor", FlashColor);
+    //DynamicMaterial->SetVectorParameterValue("FlashColor", FlashColor);
     DynamicMaterial->SetScalarParameterValue("FlashAmount", 1.0f);
 
     // Fade back after duration
