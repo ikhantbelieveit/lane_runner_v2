@@ -56,6 +56,4 @@ public:
 	FSpawnEvent OnDespawn;
 
 	bool GetCurrentSpawned();
-
-	bool bTrackDebugTEMP = false;
 };

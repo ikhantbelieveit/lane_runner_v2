@@ -70,7 +70,6 @@ void ABullseyeGroup::Initialise()
             if (!StartSpawned)
             {
                 GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("Start Despawned"));
-                childSpawnComp->bTrackDebugTEMP = true;
                 childSpawnComp->Despawn();
             }
         }
