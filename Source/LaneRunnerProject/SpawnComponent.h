@@ -38,6 +38,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool ResetAsSpawned = true;
 
+	bool VariantPreventsSpawn = false;
+
 	UFUNCTION(BlueprintCallable)
 	void Reset();
 
@@ -54,4 +56,6 @@ public:
 	FSpawnEvent OnDespawn;
 
 	bool GetCurrentSpawned();
+
+	bool bTrackDebugTEMP = false;
 };

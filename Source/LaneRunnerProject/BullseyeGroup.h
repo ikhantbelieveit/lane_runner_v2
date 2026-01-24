@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "ChunkInitializable.h"
+#include "EProjectileDirection.h"
 #include "BullseyeGroup.generated.h"
 
 UCLASS()
@@ -24,4 +25,20 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 	virtual void InitializeFromChunkData_Implementation(const FChunkSpawnEntry& Entry) override;
+	void Initialise();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GroupBehaviour")
+	bool StartScrollEnabled;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GroupBehaviour")
+	float ScrollXPos;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GroupBehaviour")
+	bool StartSpawned = true;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GroupBehaviour")
+	bool ScrollOnPlayerDetect;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GroupBehaviour")
+	EProjectileDirection AdvanceDirection;
 };

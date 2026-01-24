@@ -17,7 +17,7 @@ USpawnComponent::USpawnComponent()
 {
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
-	PrimaryComponentTick.bCanEverTick = true;
+	PrimaryComponentTick.bCanEverTick = false;
 
 	// ...
 }
@@ -54,7 +54,8 @@ void USpawnComponent::BeginPlay()
 
 void USpawnComponent::Reset()
 {
-	if (ResetAsSpawned)
+	//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Magenta, TEXT("Spawn Reset"));
+	if (ResetAsSpawned && !VariantPreventsSpawn)
 	{
 		Spawn(false, false, false);
 	}

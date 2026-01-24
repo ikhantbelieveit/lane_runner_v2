@@ -8,6 +8,7 @@
 #include "FloorComponent.h"
 #include "PaperSpriteComponent.h"
 #include "PaperFlipbookComponent.h"
+#include "BullseyeGroup.h"
 #include "SpawnComponent.h"
 
 
@@ -15,7 +16,7 @@
 ALevelChunkActor::ALevelChunkActor()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 
 }
 
@@ -24,9 +25,37 @@ void ALevelChunkActor::BeginPlay()
 {
 	Super::BeginPlay();
     
-    //init bounds box
-    BoundsBox = nullptr;
+    InitialiseBoundsBox();
+    InitialiseActorID_LUT();
+}
 
+void ALevelChunkActor::InitialiseActorID_LUT()
+{
+    ActorID_LUT.Empty();
+
+    TArray<AActor*> childActors;
+    GetAttachedActors(childActors);
+
+    for (AActor* child : childActors)
+    {
+        for (const FName& Tag : child->Tags)
+        {
+            FString TagStr = Tag.ToString();
+
+            if (TagStr.StartsWith("ID_"))
+            {
+                FString Remainder = TagStr.RightChop(3);
+
+                ActorID_LUT.Add(FName(Remainder), child);
+            }
+        }
+    }
+
+}
+
+void ALevelChunkActor::InitialiseBoundsBox()
+{
+    BoundsBox = nullptr;
 
     TArray<UBoxComponent*> boxComps;
     GetComponents<UBoxComponent>(boxComps);
@@ -229,7 +258,7 @@ void ALevelChunkActor::DeactivateActor(AActor* Actor) const
     USpawnComponent* spawnComp = Cast<USpawnComponent>(Actor->GetComponentByClass(USpawnComponent::StaticClass()));
     if (spawnComp)
     {
-        spawnComp->ResetAsSpawned = false;
+        spawnComp->VariantPreventsSpawn = true;
         spawnComp->Despawn();
     }
     else
@@ -255,7 +284,7 @@ void ALevelChunkActor::ReactivateActor(AActor* Actor) const
     USpawnComponent* spawnComp = Cast<USpawnComponent>(Actor->GetComponentByClass(USpawnComponent::StaticClass()));
     if (spawnComp)
     {
-        spawnComp->ResetAsSpawned = true;
+        spawnComp->VariantPreventsSpawn = false;
         //spawning handled by reset callback later
     }
     else
@@ -263,6 +292,8 @@ void ALevelChunkActor::ReactivateActor(AActor* Actor) const
         Actor->SetActorHiddenInGame(false);
     }
 }
+
+
 
 
 void ALevelChunkActor::OnBoundsBoxBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
@@ -341,6 +372,16 @@ void ALevelChunkActor::ApplyVariant()
 void ALevelChunkActor::InitializeFromLayoutData(const FLevelChunkData& InChunkData)
 {
     ChunkID = InChunkData.ChunkID;
+
+    for (const TPair<FName, TWeakObjectPtr<AActor>>& pair : ActorID_LUT)
+    {
+        ABullseyeGroup* group = Cast<ABullseyeGroup>(pair.Value);
+
+        if (group)
+        {
+            group->Initialise();
+        }
+    }
 
     ActiveVariants.Empty();
 

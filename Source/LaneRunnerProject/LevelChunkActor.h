@@ -55,9 +55,13 @@ protected:
 	TArray<AActor*> SpawnedActors;
 
 	TMap<FName, FName> ActiveVariants;
+	TMap<FName, TWeakObjectPtr<AActor>> ActorID_LUT;
+
 	bool IsActorVariantActive(const AActor* Actor) const;
 	void DeactivateActor(AActor* Actor) const;
 	void ReactivateActor(AActor* Actor) const;
+	void InitialiseActorID_LUT();
+	void InitialiseBoundsBox();
 
 	UBoxComponent* BoundsBox = nullptr;
 
