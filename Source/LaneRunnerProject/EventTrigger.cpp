@@ -28,6 +28,20 @@ void AEventTrigger::Tick(float DeltaTime)
 
 }
 
+void AEventTrigger::InitialiseFromChunk_Implementation()
+{
+	EventsToTrigger.Empty();
+
+	for (const FEventTriggerData setupData : EventTriggerSetupData)
+	{
+		FLevelEventData eventData;
+		eventData.EventType = setupData.EventType;
+		eventData.TargetActorIDs = setupData.TargetActorIDs;
+		EventsToTrigger.Add(eventData);
+		GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Magenta, TEXT("Add event data"));
+	}
+}
+
 void AEventTrigger::InitializeFromChunkData_Implementation(const FChunkSpawnEntry& Entry)
 {
 	if (Entry.Metadata.IsEmpty()) return;
@@ -114,6 +128,7 @@ void AEventTrigger::InitializeFromChunkData_Implementation(const FChunkSpawnEntr
 		}
 	}
 }
+
 
 void AEventTrigger::ResolveTargetActorIDs(ALevelChunkActor* parentChunk)
 {

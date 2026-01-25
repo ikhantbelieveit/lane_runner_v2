@@ -15,6 +15,7 @@
 #include "GI_LevelGenerationSystem.h"
 #include "GameInit.h"
 #include "BaseEnemy.h"
+#include "BullseyeGroup.h"
 #include "BaseCollectible.h"
 #include "GroupOwnerComponent.h"
 
@@ -457,6 +458,31 @@ void UGI_LevelSystem::ExecuteSingleEvent(const FLevelEventData& Event)
         break;
     }
 
+    case ELevelEventType::StartDynamicMovement:
+    {
+        for (TObjectPtr<AActor> TargetPtr : Event.TargetActors)
+        {
+            AActor* Target = TargetPtr.Get();
+            if (!IsValid(Target)) continue;
+
+            ABullseyeGroup* group = Cast<ABullseyeGroup>(Target);
+            if (!IsValid(group)) continue;
+
+            FDynamicMoveData moveData = group->DynamicMoveData;
+
+            EProjectileDirection moveDir = moveData.MoveFromSpawnDirection;
+            float moveSpeed = moveData.MoveFromSpawnSpeed;
+            bool stopOnscreen = moveData.ShouldStopOnscreen;
+            FVector stopCoords = moveData.MoveFromSpawnStopCoords;
+
+            if (ULocationManagerComponent* LocationComp = group->FindComponentByClass<ULocationManagerComponent>())
+            {
+                LocationComp->StartAutoMove(moveDir, moveSpeed, stopOnscreen, stopCoords, !stopOnscreen);
+            }
+        }
+        break;
+    }
+
     case ELevelEventType::MoveToDespawn:
     {
         for (TObjectPtr<AActor> TargetPtr : Event.TargetActors)
@@ -464,9 +490,18 @@ void UGI_LevelSystem::ExecuteSingleEvent(const FLevelEventData& Event)
             AActor* Target = TargetPtr.Get();
             if (!IsValid(Target)) continue;
 
-            if (ULocationManagerComponent* LocationComp = Target->FindComponentByClass<ULocationManagerComponent>())
+            ABullseyeGroup* group = Cast<ABullseyeGroup>(Target);
+            if (!IsValid(group)) continue;
+
+            FDynamicMoveData moveData = group->DynamicMoveData;
+
+            EProjectileDirection moveDir = moveData.MoveToDespawnDirection;
+            float moveSpeed = moveData.MoveToDespawnSpeed;
+            FVector stopCoords = moveData.MoveToDespawnStopCoords;
+
+            if (ULocationManagerComponent* LocationComp = group->FindComponentByClass<ULocationManagerComponent>())
             {
-                LocationComp->StartAutoMove(Event.DirectionParam, Event.NumericParam, Event.BoolParam, Event.VectorParam, true);
+                LocationComp->StartAutoMove(moveDir, moveSpeed, true, stopCoords, true);
             }
         }
         break;

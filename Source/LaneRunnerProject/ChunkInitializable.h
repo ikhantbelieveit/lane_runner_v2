@@ -28,4 +28,7 @@ class LANERUNNERPROJECT_API IChunkInitializable
 public:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Chunk")
 	void InitializeFromChunkData(const FChunkSpawnEntry& Entry);
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Chunk")
+	void InitialiseFromChunk();
 };

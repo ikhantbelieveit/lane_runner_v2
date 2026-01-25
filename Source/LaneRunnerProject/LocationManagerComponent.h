@@ -6,14 +6,6 @@
 #include "EProjectileDirection.h"
 #include "LocationManagerComponent.generated.h"
 
-UENUM(BlueprintType)
-enum class EPathFollowMode : uint8
-{
-	Clamp    UMETA(DisplayName = "Clamp"),
-	Loop     UMETA(DisplayName = "Loop"),
-	PingPong UMETA(DisplayName = "Ping-Pong")
-};
-
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FLocationEvent);
 
 

@@ -29,7 +29,7 @@ void ABullseyeGroup::Tick(float DeltaTime)
 
 }
 
-void ABullseyeGroup::Initialise()
+void ABullseyeGroup::InitialiseFromChunk_Implementation()
 {
     TArray<AActor*> AttachedActors;
     GetAttachedActors(AttachedActors);

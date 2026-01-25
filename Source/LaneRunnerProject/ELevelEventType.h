@@ -31,5 +31,6 @@ enum class ELevelEventType : uint8
 	MoveToDespawn UMETA(DisplayName = "Move to Despawn"),
 	SetAlert UMETA(DisplayName = "Set Alert"),
 	MoveToAlert UMETA(DisplayName = "Move to Alert"),
-	SetIdle UMETA(DisplayName = "Set Idle")
+	SetIdle UMETA(DisplayName = "Set Idle"),
+	StartDynamicMovement UMETA(DisplayName = "Start Dynamic Movement")
 };

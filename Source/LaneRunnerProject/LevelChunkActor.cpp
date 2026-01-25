@@ -50,7 +50,6 @@ void ALevelChunkActor::InitialiseActorID_LUT()
             }
         }
     }
-
 }
 
 void ALevelChunkActor::InitialiseBoundsBox()
@@ -103,21 +102,34 @@ AActor* ALevelChunkActor::GetChildActorByID(FName childID, bool& success)
 {
     success = false;
 
-    if (childID.IsNone())
-        return nullptr;
-
-    for (AActor* Child : SpawnedActors)
+    if (ActorID_LUT.IsEmpty())  //TODO: remove condition once refactor complete
     {
-        if (!Child)
-            continue;
+        if (childID.IsNone())
+            return nullptr;
 
-        for (const FName& Tag : Child->Tags)
+        for (AActor* Child : SpawnedActors)
         {
-            if (Tag == childID)
+            if (!Child)
+                continue;
+
+            for (const FName& Tag : Child->Tags)
             {
-                success = true;
-                return Child;
+                if (Tag == childID)
+                {
+                    success = true;
+                    return Child;
+                }
             }
+        }
+    }
+
+    else
+    {
+        AActor* foundChild = ActorID_LUT.Find(childID)->Get();
+        if (foundChild)
+        {
+            success = true;
+            return foundChild;
         }
     }
 
@@ -375,11 +387,14 @@ void ALevelChunkActor::InitializeFromLayoutData(const FLevelChunkData& InChunkDa
 
     for (const TPair<FName, TWeakObjectPtr<AActor>>& pair : ActorID_LUT)
     {
-        ABullseyeGroup* group = Cast<ABullseyeGroup>(pair.Value);
-
-        if (group)
+        if (pair.Value->GetClass()->ImplementsInterface(UChunkInitializable::StaticClass()))
         {
-            group->Initialise();
+            IChunkInitializable::Execute_InitialiseFromChunk(pair.Value.Get());
+        }
+
+        if (AEventTrigger* EventTrigger = Cast<AEventTrigger>(pair.Value))
+        {
+            EventTrigger->ResolveTargetActorIDs(this);
         }
     }
 
