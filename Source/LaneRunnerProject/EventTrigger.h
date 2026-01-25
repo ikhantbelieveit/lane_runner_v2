@@ -41,7 +41,7 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 	virtual void InitializeFromChunkData_Implementation(const FChunkSpawnEntry& Entry) override;
-	virtual void InitialiseFromChunk_Implementation() override;
+	virtual void InitialiseFromChunk_Implementation(const FVector& ParentChunkLocation) override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Level Event")
 	TArray<FEventTriggerData> EventTriggerSetupData;

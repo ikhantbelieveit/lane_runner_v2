@@ -201,7 +201,8 @@ void ALevelChunkActor::SpawnChunkElements()
 
         if (NewActor->GetClass()->ImplementsInterface(UChunkInitializable::StaticClass()))
         {
-            IChunkInitializable::Execute_InitializeFromChunkData(NewActor, Entry);
+            //REMOVED HERE (eventually this will all get removed)
+            //IChunkInitializable::Execute_InitializeFromChunkData(NewActor, Entry);
         }
 
         SpawnedActors.Add(NewActor);
@@ -389,7 +390,7 @@ void ALevelChunkActor::InitializeFromLayoutData(const FLevelChunkData& InChunkDa
     {
         if (pair.Value->GetClass()->ImplementsInterface(UChunkInitializable::StaticClass()))
         {
-            IChunkInitializable::Execute_InitialiseFromChunk(pair.Value.Get());
+            IChunkInitializable::Execute_InitialiseFromChunk(pair.Value.Get(), GetActorLocation());
         }
 
         if (AEventTrigger* EventTrigger = Cast<AEventTrigger>(pair.Value))

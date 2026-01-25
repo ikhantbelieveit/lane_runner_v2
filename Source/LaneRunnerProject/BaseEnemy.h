@@ -31,6 +31,7 @@ enum class EEnemyTimedActionType: uint8
 	Shoot UMETA(DisplayName = "Shoot")
 };
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FEnemyKilledEvent);
 UCLASS()
 class LANERUNNERPROJECT_API ABaseEnemy : public AActor, public IGroupMemberInterface, public IChunkInitializable
 {
@@ -141,6 +142,9 @@ public:
 	float TimedActionOffset = 0.0f;
 
 	void SetIdle();
+
+	UPROPERTY(BlueprintAssignable)
+	FEnemyKilledEvent OnEnemyKilled;
 
 
 protected:

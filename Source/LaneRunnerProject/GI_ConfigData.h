@@ -13,6 +13,7 @@
 #include "BaseCollectible.h"
 #include "CollectibleSet.h"
 #include "PlayerCharacterData.h"
+#include "WarningSign.h"
 #include "GI_ConfigData.generated.h"
 
 USTRUCT(BlueprintType)
@@ -95,6 +96,19 @@ public:
 	TMap<ECharacterType, UPlayerCharacterData*> CharacterDefinitions;
 };
 
+UCLASS(BlueprintType)
+class UWarningSignSystemConfigData : public UDataAsset
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(EditAnywhere)
+	int PrewarmSignCount;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class AWarningSign> WarningSignClass;
+};
+
 UCLASS()
 class LANERUNNERPROJECT_API UGI_ConfigData : public UDataAsset
 {
@@ -118,4 +132,7 @@ public:
 	
 	UPROPERTY(EditAnywhere)
 	UCharacterDataSystemConfigData* CharacterDataSystemConfig;
+
+	UPROPERTY(EditAnywhere)
+	UWarningSignSystemConfigData* WarningSignSystemConfig;
 };

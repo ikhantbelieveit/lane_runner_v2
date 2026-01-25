@@ -23,9 +23,6 @@ void ABaseEnemy::BeginPlay()
 {
 	Super::BeginPlay();
 
-	
-	
-
 	ULineOfSightComponent* lineOfSight = GetComponentByClass<ULineOfSightComponent>();
 	if (lineOfSight)
 	{
@@ -333,6 +330,8 @@ void ABaseEnemy::OnKilled()
 	{
 		AlertVFX->SetVisibility(false);
 	}
+
+	OnEnemyKilled.Broadcast();
 }
 
 void ABaseEnemy::OnAddedToGroup_Implementation(AActor* InGroupActor, ULocationManagerComponent* Manager)

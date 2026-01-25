@@ -30,5 +30,5 @@ public:
 	void InitializeFromChunkData(const FChunkSpawnEntry& Entry);
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Chunk")
-	void InitialiseFromChunk();
+	void InitialiseFromChunk(const FVector& ParentChunkLocation);
 };

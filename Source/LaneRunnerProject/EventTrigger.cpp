@@ -28,7 +28,7 @@ void AEventTrigger::Tick(float DeltaTime)
 
 }
 
-void AEventTrigger::InitialiseFromChunk_Implementation()
+void AEventTrigger::InitialiseFromChunk_Implementation(const FVector& ParentChunkLocation)
 {
 	EventsToTrigger.Empty();
 
@@ -38,7 +38,6 @@ void AEventTrigger::InitialiseFromChunk_Implementation()
 		eventData.EventType = setupData.EventType;
 		eventData.TargetActorIDs = setupData.TargetActorIDs;
 		EventsToTrigger.Add(eventData);
-		GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Magenta, TEXT("Add event data"));
 	}
 }
 

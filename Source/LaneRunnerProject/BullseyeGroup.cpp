@@ -5,6 +5,7 @@
 #include "Bullseye.h"
 #include "LocationManagerComponent.h"
 #include "SpawnComponent.h"
+#include "BaseEnemy.h"
 #include "PlayerDetectComponent.h"
 
 // Sets default values
@@ -29,8 +30,11 @@ void ABullseyeGroup::Tick(float DeltaTime)
 
 }
 
-void ABullseyeGroup::InitialiseFromChunk_Implementation()
+void ABullseyeGroup::InitialiseFromChunk_Implementation(const FVector& ParentChunkLocation)
 {
+    GroupMemberActors.Empty();
+    WarningSigns.Empty();
+
     TArray<AActor*> AttachedActors;
     GetAttachedActors(AttachedActors);
 
@@ -58,6 +62,7 @@ void ABullseyeGroup::InitialiseFromChunk_Implementation()
 
     for (AActor* Child : AttachedActors)
     {
+        GroupMemberActors.Add(Child);
         IGroupMemberInterface::Execute_OnAddedToGroup(Child, this, locManager);
 
         USpawnComponent* childSpawnComp = Child->FindComponentByClass<USpawnComponent>();
@@ -69,10 +74,20 @@ void ABullseyeGroup::InitialiseFromChunk_Implementation()
                 childSpawnComp->Despawn();
             }
         }
+
+        if (ABaseEnemy* childEnemy = Cast<ABaseEnemy>(Child))
+        {
+            FWarningSignData signItemData;
+            FVector signItemLocation = ParentChunkLocation + DynamicMoveData.MoveFromSpawnStopCoords + Child->GetActorTransform().GetRelativeTransform(GetActorTransform()).GetLocation();
+            signItemData.SignPosition = signItemLocation;
+            signItemData.EnemyRef = childEnemy;
+            signItemData.GroupRef = this;
+            WarningSigns.Add(signItemData);
+        }
     }
 }
 
 void ABullseyeGroup::InitializeFromChunkData_Implementation(const FChunkSpawnEntry& Entry)
 {
-
+    
 }

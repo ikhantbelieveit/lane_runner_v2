@@ -262,8 +262,6 @@ void ULocationManagerComponent::StopAutoMove(bool clampToEnd)
 
 	if (clampToEnd)
 	{
-		
-
 		FVector currentLoc = TargetActor->GetActorLocation();
 
 		switch (CurrentAutoMoveDirection)

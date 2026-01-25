@@ -13,6 +13,7 @@
 #include "SpawnComponent.h"
 #include "GI_ChunkManagerSystem.h"
 #include "GI_LevelGenerationSystem.h"
+#include "GI_WarningSignSystem.h"
 #include "GameInit.h"
 #include "BaseEnemy.h"
 #include "BullseyeGroup.h"
@@ -22,7 +23,6 @@
 void UGI_LevelSystem::OnGameOverDelayComplete()
 {
 	auto* uiStateSystem = GetGameInstance()->GetSubsystem<UGI_UIStateSystem>();
-	//auto* audioSystem = GetGameInstance()->GetSubsystem<UGI_AudioSystem>();
 
 	if (uiStateSystem)
 	{
@@ -134,7 +134,6 @@ void UGI_LevelSystem::OnPlayerTouchHazard(bool oneHitKill, bool overrideInvincib
 void UGI_LevelSystem::ResetLevelStats()
 {
 	SetScore(0);
-	//PointsUntilNextThreshold = PointsHealThreshold;
 }
 
 void UGI_LevelSystem::ResetFromLose()
@@ -187,24 +186,6 @@ void UGI_LevelSystem::SetScore(int newScore)
 void UGI_LevelSystem::AddToScore(int addValue)
 {
 	SetScore(CurrentScore + addValue);
-
-	/*PointsUntilNextThreshold -= addValue;
-
-	if (PointsUntilNextThreshold <= 0)
-	{
-		APlayerCharacter* player = Cast<APlayerCharacter>(UGameplayStatics::GetActorOfClass(GetWorld(), APlayerCharacter::StaticClass()));
-		if (player)
-		{
-			player->TryAddHealth(1);
-            auto* audioSystem = GetGameInstance()->GetSubsystem<UGI_AudioSystem>();
-            if (audioSystem)
-            {
-                audioSystem->Play(EAudioKey::HealPlayer);
-            }
-		}
-
-		PointsUntilNextThreshold = PointsHealThreshold + PointsUntilNextThreshold;
-	}*/
 }
 
 void UGI_LevelSystem::HealPlayerFromItem(int healValue)
@@ -478,6 +459,15 @@ void UGI_LevelSystem::ExecuteSingleEvent(const FLevelEventData& Event)
             if (ULocationManagerComponent* LocationComp = group->FindComponentByClass<ULocationManagerComponent>())
             {
                 LocationComp->StartAutoMove(moveDir, moveSpeed, stopOnscreen, stopCoords, !stopOnscreen);
+            }
+
+            for (FWarningSignData signData : group->WarningSigns)
+            {
+                auto* warningSignSystem = GetGameInstance()->GetSubsystem<UGI_WarningSignSystem>();
+                if (warningSignSystem)
+                {
+                    warningSignSystem->RequestWarningSign(signData);
+                }
             }
         }
         break;
