@@ -142,7 +142,10 @@ void ULocationManagerComponent::Reset()
 	SetAutoMoveSpeed(StartAutoMoveSpeed);
 	SetAutoMoveDirection(StartAutoMoveDirection);
 
-	StopAutoMove(false);
+	if (IsAutoMoving)
+	{
+		StopAutoMove(false);
+	}
 
 	TargetActor->SetActorLocation(StartPos);
 }
@@ -243,6 +246,11 @@ void ULocationManagerComponent::StartAutoMove(EProjectileDirection direction, fl
 
 	// Apply immediately
 	ApplyAutoMove();
+
+	if (despawnOnEnd)
+	{
+		OnMoveToDespawnStart.Broadcast();
+	}
 }
 
 void ULocationManagerComponent::StopAutoMove(bool clampToEnd)

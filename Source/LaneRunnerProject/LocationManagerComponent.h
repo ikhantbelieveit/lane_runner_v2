@@ -84,6 +84,9 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FLocationEvent OnAutoMoveEnd;
 
+	UPROPERTY(BlueprintAssignable)
+	FLocationEvent OnMoveToDespawnStart;
+
 private:
 	// Scroll
 	class APlayerCharacter* PlayerRef = nullptr;

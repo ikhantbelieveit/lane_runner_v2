@@ -41,14 +41,14 @@ public:
 	float MoveFromSpawnSpeed = 250.0f;	
 
 	UPROPERTY(EditAnywhere)
-	float MoveToDespawnSpeed = 700.0f;
+	float MoveToDespawnSpeed = 800.0f;
 
 	//on objects that don't stop onscreen this is the only one they use
 	UPROPERTY(EditAnywhere)
 	EProjectileDirection MoveFromSpawnDirection;
 
 	UPROPERTY(EditAnywhere)
-	EProjectileDirection MoveToDespawnDirection;
+	EProjectileDirection MoveToDespawnDirection = EProjectileDirection::Up;
 };
 
 UCLASS()

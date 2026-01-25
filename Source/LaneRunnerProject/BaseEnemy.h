@@ -132,6 +132,12 @@ public:
 	UFUNCTION()
 	void PerformTimedAction();
 
+	UFUNCTION()
+	void OnAutoMoveEnd();
+
+	UFUNCTION()
+	void OnMoveToDespawnStart();
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<FName> TimedActionShootNames;
 
@@ -145,6 +151,14 @@ public:
 
 	UPROPERTY(BlueprintAssignable)
 	FEnemyKilledEvent OnEnemyKilled;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool SetAlertOnAutoMoveEnd;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool SetIdleOnMoveToDespawn;
+
+	bool IsAlert;
 
 
 protected:

@@ -315,6 +315,8 @@ void ABaseEnemy::OnDetectPlayer(bool bPlayAlertSound)
 			locManager->bScrollEnabled = true;
 		}
 	}
+
+	IsAlert = true;
 }
 
 bool ABaseEnemy::IsEnemyAlive()
@@ -339,6 +341,9 @@ void ABaseEnemy::OnAddedToGroup_Implementation(AActor* InGroupActor, ULocationMa
 	GroupActorRef = InGroupActor;
 	GroupManagerRef = Manager;
 
+	GroupManagerRef->OnMoveToDespawnStart.AddDynamic(this, &ABaseEnemy::OnMoveToDespawnStart);
+	GroupManagerRef->OnAutoMoveEnd.AddDynamic(this, &ABaseEnemy::OnAutoMoveEnd);
+
 	UE_LOG(LogTemp, Log, TEXT("%s added to group %s"), *GetName(), *InGroupActor->GetName());
 }
 
@@ -351,66 +356,7 @@ void ABaseEnemy::OnRemovedFromGroup_Implementation()
 
 void ABaseEnemy::InitializeFromChunkData_Implementation(const FChunkSpawnEntry& Entry)
 {
-	//if (Entry.Metadata.IsEmpty()) return;
 
-	//// Parse JSON
-	//TSharedPtr<FJsonObject> JsonObject;
-	//TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(Entry.Metadata);
-
-	//if (FJsonSerializer::Deserialize(Reader, JsonObject) && JsonObject.IsValid())
-	//{
-	//	bool bScrollEnabled = false;
-	//	if (JsonObject->HasField(TEXT("ScrollEnabled")))
-	//	{
-	//		bScrollEnabled = JsonObject->GetBoolField(TEXT("ScrollEnabled"));
-
-	//	}
-
-
-	//	float ScrollXPos = 0.0f;
-	//	if (JsonObject->HasField(TEXT("ScrollXPos")))
-	//	{
-	//		ScrollXPos = JsonObject->GetNumberField(TEXT("ScrollXPos"));
-	//	}
-
-	//	bool bStartSpawned = false;
-	//	if (JsonObject->HasField(TEXT("StartSpawned")))
-	//	{
-	//		bStartSpawned = JsonObject->GetBoolField(TEXT("StartSpawned"));
-	//	}
-
-	//	bool bSetAdvanceDirection = false;
-	//	EProjectileDirection newAdvanceDir = EProjectileDirection::None;
-
-	//	if (JsonObject->HasField(TEXT("AdvanceDirection")))
-	//	{
-	//		//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Magenta, FString::Printf(TEXT("%s SET ADANCE DIRECTION FROM CONFIG"), *GetName()));
-	//		bSetAdvanceDirection = true;
-	//		
-
-	//		// JSON numbers come back as double
-	//		int32 RawValue = static_cast<int32>(JsonObject->GetNumberField(TEXT("AdvanceDirection")));
-	//		newAdvanceDir = static_cast<EProjectileDirection>(RawValue);
-	//	}
-
-	//	if (bSetAdvanceDirection)
-	//	{
-	//		AdvanceDirection = newAdvanceDir;
-	//	}
-
-
-	//	if (ULocationManagerComponent* locManager = FindComponentByClass<ULocationManagerComponent>())
-	//	{
-	//		locManager->bStartScrollActive = bScrollEnabled;
-	//		locManager->bScrollEnabled = bScrollEnabled;
-	//		locManager->ScrollWithXPos = ScrollXPos;
-	//	}
-
-	//	if (USpawnComponent* spawnComp = FindComponentByClass<USpawnComponent>())
-	//	{
-	//		spawnComp->ResetAsSpawned = bStartSpawned;
-	//	}
-	//}
 }
 
 void ABaseEnemy::PerformJump()
@@ -497,12 +443,31 @@ void ABaseEnemy::PerformTimedAction()
 	}
 }
 
+void ABaseEnemy::OnAutoMoveEnd()
+{
+	if (SetAlertOnAutoMoveEnd && !IsAlert)
+	{
+		OnDetectPlayer(true);
+		SetAnim("Alert");
+	}
+}
+
+void ABaseEnemy::OnMoveToDespawnStart()
+{
+	if (SetIdleOnMoveToDespawn && IsAlert)
+	{
+		SetIdle();
+	}
+}
+
 void ABaseEnemy::SetIdle()
 {
 	if (!IsAlive)
 	{
 		return;
 	}
+
+	IsAlert = false;
 
 	// Reset alert visuals only (not full enemy reset)
 	if (AlertVFX)
