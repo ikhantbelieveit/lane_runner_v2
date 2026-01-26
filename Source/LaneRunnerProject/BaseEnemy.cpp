@@ -242,6 +242,12 @@ void ABaseEnemy::OnDetectPlayer(bool bPlayAlertSound)
 		return;
 	}
 
+	USpawnComponent* spawnComp = GetComponentByClass<USpawnComponent>();
+	if (!spawnComp->GetCurrentSpawned())
+	{
+		return;
+	}
+
 	ULocationManagerComponent* locManager = GetComponentByClass<ULocationManagerComponent>();
 	ULineOfSightComponent* lineOfSight = GetComponentByClass<ULineOfSightComponent>();
 
@@ -447,7 +453,7 @@ void ABaseEnemy::OnAutoMoveEnd()
 {
 	if (SetAlertOnAutoMoveEnd && !IsAlert)
 	{
-		OnDetectPlayer(true);
+		OnDetectPlayer(false);
 		SetAnim("Alert");
 	}
 }
