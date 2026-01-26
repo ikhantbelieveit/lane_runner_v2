@@ -125,11 +125,48 @@ AActor* ALevelChunkActor::GetChildActorByID(FName childID, bool& success)
 
     else
     {
-        AActor* foundChild = ActorID_LUT.Find(childID)->Get();
-        if (foundChild)
+        AActor* foundChild = nullptr;
+
+        if (TWeakObjectPtr<AActor>* FoundPtr = ActorID_LUT.Find(childID))
         {
-            success = true;
-            return foundChild;
+            // Found an entry in the map; now check if the weak pointer is still valid
+            if (FoundPtr->IsValid())
+            {
+                foundChild = FoundPtr->Get();
+                success = true;
+                return foundChild;
+            }
+            else
+            {
+                if (GEngine)
+                {
+                    GEngine->AddOnScreenDebugMessage(
+                        -1,
+                        5.f,
+                        FColor::Cyan,
+                        FString::Printf(
+                            TEXT("ActorID_LUT: Entry for id '%s' is invalid (actor was destroyed or GC'd)"),
+                            *childID.ToString()
+                        )
+                    );
+                }
+            }
+        }
+        else
+        {
+            // No entry in the map for this id
+            if (GEngine)
+            {
+                GEngine->AddOnScreenDebugMessage(
+                    -1,
+                    5.f,
+                    FColor::Cyan,
+                    FString::Printf(
+                        TEXT("ActorID_LUT: No actor found for id '%s'"),
+                        *childID.ToString()
+                    )
+                );
+            }
         }
     }
 
@@ -378,7 +415,7 @@ void ALevelChunkActor::ApplyVariant()
     }
 
 
-    SpawnChunkElements();
+    //SpawnChunkElements();
 }
 
 
