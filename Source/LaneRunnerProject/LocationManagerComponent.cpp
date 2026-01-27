@@ -294,6 +294,7 @@ void ULocationManagerComponent::StopAutoMove(bool clampToEnd)
 		if (UGroupOwnerComponent* ownerComp = TargetActor->GetComponentByClass<UGroupOwnerComponent>())
 		{
 			ownerComp->DespawnGroupMembers();
+			bScrollEnabled = false;
 		}
 	}
 

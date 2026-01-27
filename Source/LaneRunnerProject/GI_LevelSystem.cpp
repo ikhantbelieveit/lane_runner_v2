@@ -368,7 +368,7 @@ void UGI_LevelSystem::ExecuteSingleEvent(const FLevelEventData& Event)
 
             if (ULocationManagerComponent* LocationComp = Target->FindComponentByClass<ULocationManagerComponent>())
             {
-                LocationComp->bScrollEnabled = Event.BoolParam;
+                LocationComp->bScrollEnabled = true;
             }
         }
         break;
