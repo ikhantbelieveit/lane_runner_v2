@@ -169,6 +169,7 @@ void AEventTrigger::ResolveTargetActorIDs(ALevelChunkActor* parentChunk)
 
 void AEventTrigger::TriggerEvents()
 {
+	//GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Cyan, TEXT("TRIGGER EVENT"));
 	if (UGameInstance* GI = GetWorld()->GetGameInstance())
 	{
 		if (auto* levelSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGI_LevelSystem>())

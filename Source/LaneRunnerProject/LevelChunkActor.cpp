@@ -267,22 +267,27 @@ bool ALevelChunkActor::IsActorVariantActive(const AActor* Actor) const
             // Remove VAR_ prefix
             FString Remainder = TagStr.RightChop(4); // 4 = length of "VAR_"
 
-            FString SetName, OptionName;
-            if (!Remainder.Split(TEXT("_"), &SetName, &OptionName))
+            FString SetNameString, OptionNameString;
+            if (!Remainder.Split(TEXT("_"), &SetNameString, &OptionNameString))
             {
                 UE_LOG(LogTemp, Warning, TEXT("Malformed variant tag: %s"), *TagStr);
                 continue;
             }
 
-            const FName* ActiveValue = ActiveVariants.Find(FName(*SetName));
+            const FName* ActiveValue = ActiveVariants.Find(FName(*SetNameString));
             if (!ActiveValue)
             {
-                UE_LOG(LogTemp, Warning, TEXT("No active variant entry for set: %s"), *SetName);
+                UE_LOG(LogTemp, Warning, TEXT("No active variant entry for set: %s"), *SetNameString);
                 return false;
             }
 
-            if (*ActiveValue != FName(*OptionName))
+            const FName OptionName = FName(*OptionNameString);
+            if (*ActiveValue != OptionName)
             {
+                UE_LOG(LogTemp, Warning,
+                    TEXT("Option tag %s does not match actor tag %s, return false"),
+                    *ActiveValue->ToString(),
+                    *OptionName.ToString());
                 return false; // this variant is not active
             }
         }
@@ -384,7 +389,7 @@ void ALevelChunkActor::ApplyVariant()
         if (!Child) continue;
 
         // Skip if this is already in SpawnedActors (avoid double processing)
-        if (SpawnedActors.Contains(Child)) continue;
+        //if (SpawnedActors.Contains(Child)) continue;
 
         if (IsActorVariantActive(Child))
         {

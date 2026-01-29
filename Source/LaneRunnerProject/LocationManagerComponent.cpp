@@ -226,6 +226,8 @@ void ULocationManagerComponent::SetAutoMoveDirection(EProjectileDirection newDir
 void ULocationManagerComponent::StartAutoMove(EProjectileDirection direction, float Speed, bool bUseStop, FVector stopCoords, bool despawnOnEnd)
 {
 
+	//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Magenta, TEXT("START AUTO MOVE"));
+
 	if (IsAutoMoving)
 	{
 		StopAutoMove(false);
