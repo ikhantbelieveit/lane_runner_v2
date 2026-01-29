@@ -85,9 +85,6 @@ public:
 	bool ScrollOnPlayerDetect;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GroupBehaviour")
-	EProjectileDirection AdvanceDirection;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GroupBehaviour")
 	FDynamicMoveData DynamicMoveData;
 
 	TArray<FWarningSignData> WarningSigns;
