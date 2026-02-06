@@ -52,16 +52,32 @@ void UFloorComponent::InitialiseFloor(ULevelChunkConfigData* configData)
 		break;
 	}
 
+	bool bUseSlopeMaterial = GetOwner()->ActorHasTag("Slope");
 	UStaticMeshComponent* meshComp = GetOwner()->GetComponentByClass<UStaticMeshComponent>();
 	if (meshComp)
 	{
 		if (LaneIndex % 2 == 0)
 		{
-			meshComp->SetMaterial(0, configData->LaneMaterial_1);	//this is line 59
+			if (bUseSlopeMaterial)
+			{
+				meshComp->SetMaterial(0, configData->SlopeMaterial_1);
+			}
+			else
+			{
+				meshComp->SetMaterial(0, configData->LaneMaterial_1);
+			}
+			
 		}
 		if (LaneIndex % 2 == 1)
 		{
-			meshComp->SetMaterial(0, configData->LaneMaterial_2);
+			if (bUseSlopeMaterial)
+			{
+				meshComp->SetMaterial(0, configData->SlopeMaterial_2);
+			}
+			else
+			{
+				meshComp->SetMaterial(0, configData->LaneMaterial_2);
+			}
 		}
 	}
 }

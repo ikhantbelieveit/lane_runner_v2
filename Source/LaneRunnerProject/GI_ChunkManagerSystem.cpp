@@ -92,14 +92,11 @@ void UGI_ChunkManagerSystem::ClearChunks()
 	{
 		if (ChunkActor)
 		{
-			ChunkActor->Teardown();
 			ChunkActor->Destroy();
 		}
 	}
 
 	ActiveChunkActors.Empty();
-
-	//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, TEXT("CLEAR THE CHUNKZ"));
 }
 
 float UGI_ChunkManagerSystem::GetChunkLength(ALevelChunkActor* chunkActor)

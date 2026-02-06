@@ -22,4 +22,10 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Visuals")
 	UMaterialInterface* LaneMaterial_2;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Visuals")
+	UMaterialInterface* SlopeMaterial_1;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Visuals")
+	UMaterialInterface* SlopeMaterial_2;
 };

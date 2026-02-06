@@ -35,14 +35,8 @@ public:
 	UFUNCTION(BlueprintCallable)
 	AActor* GetChildActorByID(FName childID, bool& success);
 
-    UFUNCTION(BlueprintCallable)
-    void SpawnChunkElements();
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	ULevelChunkConfigData* ConfigData;
-
-	UFUNCTION(BlueprintCallable)
-	void Teardown();
 
 	UFUNCTION(BlueprintCallable)
 	void ApplyVariant();
@@ -52,8 +46,6 @@ public:
 
 
 protected:
-	TArray<AActor*> SpawnedActors;
-
 	TMap<FName, FName> ActiveVariants;
 	TMap<FName, TWeakObjectPtr<AActor>> ActorID_LUT;
 

@@ -102,59 +102,19 @@ AActor* ALevelChunkActor::GetChildActorByID(FName childID, bool& success)
 {
     success = false;
 
-    if (ActorID_LUT.IsEmpty())  //TODO: remove condition once refactor complete
+    AActor* foundChild = nullptr;
+
+    if (TWeakObjectPtr<AActor>* FoundPtr = ActorID_LUT.Find(childID))
     {
-        if (childID.IsNone())
-            return nullptr;
-
-        for (AActor* Child : SpawnedActors)
+        // Found an entry in the map; now check if the weak pointer is still valid
+        if (FoundPtr->IsValid())
         {
-            if (!Child)
-                continue;
-
-            for (const FName& Tag : Child->Tags)
-            {
-                if (Tag == childID)
-                {
-                    success = true;
-                    return Child;
-                }
-            }
-        }
-    }
-
-    else
-    {
-        AActor* foundChild = nullptr;
-
-        if (TWeakObjectPtr<AActor>* FoundPtr = ActorID_LUT.Find(childID))
-        {
-            // Found an entry in the map; now check if the weak pointer is still valid
-            if (FoundPtr->IsValid())
-            {
-                foundChild = FoundPtr->Get();
-                success = true;
-                return foundChild;
-            }
-            else
-            {
-                if (GEngine)
-                {
-                    GEngine->AddOnScreenDebugMessage(
-                        -1,
-                        5.f,
-                        FColor::Cyan,
-                        FString::Printf(
-                            TEXT("ActorID_LUT: Entry for id '%s' is invalid (actor was destroyed or GC'd)"),
-                            *childID.ToString()
-                        )
-                    );
-                }
-            }
+            foundChild = FoundPtr->Get();
+            success = true;
+            return foundChild;
         }
         else
         {
-            // No entry in the map for this id
             if (GEngine)
             {
                 GEngine->AddOnScreenDebugMessage(
@@ -162,96 +122,31 @@ AActor* ALevelChunkActor::GetChildActorByID(FName childID, bool& success)
                     5.f,
                     FColor::Cyan,
                     FString::Printf(
-                        TEXT("ActorID_LUT: No actor found for id '%s'"),
+                        TEXT("ActorID_LUT: Entry for id '%s' is invalid (actor was destroyed or GC'd)"),
                         *childID.ToString()
                     )
                 );
             }
         }
     }
+    else
+    {
+        // No entry in the map for this id
+        if (GEngine)
+        {
+            GEngine->AddOnScreenDebugMessage(
+                -1,
+                5.f,
+                FColor::Cyan,
+                FString::Printf(
+                    TEXT("ActorID_LUT: No actor found for id '%s'"),
+                    *childID.ToString()
+                )
+            );
+        }
+    }
 
     return nullptr;
-}
-
-void ALevelChunkActor::SpawnChunkElements()
-{
-    UWorld* World = GetWorld();
-    if (!World || !ConfigData) return;
-
-    // Cleanup
-    for (AActor* OldActor : SpawnedActors)
-    {
-        if (OldActor)
-            OldActor->Destroy();
-    }
-    SpawnedActors.Empty();
-
-    for (const FChunkSpawnEntry& Entry : ConfigData->SpawnActorEntries)
-    {
-        if (!Entry.ActorClass) continue;
-
-        if (!Entry.VariantSet.IsNone() && !Entry.VariantOption.IsNone())
-        {
-            FName ActiveOption = ActiveVariants.FindRef(Entry.VariantSet);
-            if (ActiveOption.IsValid() && ActiveOption != Entry.VariantOption)
-            {
-                continue; // skip this spawn entirely
-            }
-        }
-
-        FTransform SpawnTransform = Entry.RelativeTransform * GetActorTransform();
-
-        AActor* NewActor = World->SpawnActorDeferred<AActor>(
-            Entry.ActorClass,
-            SpawnTransform,
-            this,
-            nullptr,
-            ESpawnActorCollisionHandlingMethod::AlwaysSpawn
-        );
-
-        if (!NewActor) continue;
-
-        // Assign ID tag
-        if (!Entry.ActorID.IsNone())
-        {
-            NewActor->Tags.Add(Entry.ActorID);
-        }
-
-        // Assign variant tag if specified
-        if (!Entry.VariantSet.IsNone() && !Entry.VariantOption.IsNone())
-        {
-            FString VariantTag = FString::Printf(TEXT("VAR_%s_%s"), *Entry.VariantSet.ToString(), *Entry.VariantOption.ToString());
-            NewActor->Tags.Add(FName(*VariantTag));
-        }
-
-        // Preserve default scale if not overridden
-        if (!Entry.bSetScale)
-        {
-            if (const AActor* DefaultActor = Cast<AActor>(Entry.ActorClass->GetDefaultObject()))
-            {
-                SpawnTransform.SetScale3D(DefaultActor->GetActorScale3D());
-            }
-        }
-
-        NewActor->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
-        UGameplayStatics::FinishSpawningActor(NewActor, SpawnTransform);
-
-        if (NewActor->GetClass()->ImplementsInterface(UChunkInitializable::StaticClass()))
-        {
-            //REMOVED HERE (eventually this will all get removed)
-            //IChunkInitializable::Execute_InitializeFromChunkData(NewActor, Entry);
-        }
-
-        SpawnedActors.Add(NewActor);
-    }
-
-    for (AActor* Child : SpawnedActors)
-    {
-        if (AEventTrigger* EventTrigger = Cast<AEventTrigger>(Child))
-        {
-            EventTrigger->ResolveTargetActorIDs(this);
-        }
-    }
 }
 
 bool ALevelChunkActor::IsActorVariantActive(const AActor* Actor) const
@@ -367,18 +262,6 @@ void ALevelChunkActor::OnBoundsBoxBeginOverlap(UPrimitiveComponent* OverlappedCo
     }
 }
 
-
-void ALevelChunkActor::Teardown()
-{
-    for (AActor* Child : SpawnedActors)
-    {
-        if (!Child)
-            continue;
-
-        Child->Destroy();
-    }
-}
-
 void ALevelChunkActor::ApplyVariant()
 {
     TArray<AActor*> ChildActors;
@@ -418,9 +301,6 @@ void ALevelChunkActor::ApplyVariant()
             DeactivateActor(Child);
         }
     }
-
-
-    //SpawnChunkElements();
 }
 
 
