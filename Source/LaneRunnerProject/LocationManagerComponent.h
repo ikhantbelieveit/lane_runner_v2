@@ -4,6 +4,7 @@
 #include "Components/ActorComponent.h"
 #include "Components/SplineComponent.h"
 #include "EProjectileDirection.h"
+#include "Components/BoxComponent.h"
 #include "LocationManagerComponent.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FLocationEvent);
@@ -32,9 +33,6 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Scroll")
 	bool bStartScrollActive = false;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Scroll")
-	bool bScrollInterp = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gravity")
 	bool bGravityEnabled = false;
@@ -100,9 +98,11 @@ private:
 
 	// Helpers
 	void UpdateScroll(FVector& InOutLocation, bool& bOutHasScroll);
-	void UpdateGravity(float DeltaTime);
 
 	AActor* TargetActor;
 
 	bool bDespawnOnAutoMoveEnd = false;
+
+	UBoxComponent* BoxComp;
+	bool bPhysicsDriven = false;
 };

@@ -22,9 +22,6 @@ public:
     UFUNCTION(BlueprintCallable)
     void SetupMaterial(UActorComponent* visualsComp);
 
-    /*UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    FLinearColor FlashColor = FLinearColor::Red;*/
-
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     float FlashDuration = 0.2f;
 

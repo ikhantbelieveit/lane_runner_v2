@@ -23,6 +23,13 @@ void ULocationManagerComponent::BeginPlay()
 		PlayerRef = Cast<APlayerCharacter>(FoundPlayer);
 		bHasPlayerRef = (PlayerRef != nullptr);
 	}
+
+	UBoxComponent* box = Cast<UBoxComponent>(GetOwner()->GetComponentByClass(UBoxComponent::StaticClass()));
+	if (box)
+	{
+		BoxComp = box;
+		bPhysicsDriven = BoxComp->IsSimulatingPhysics();
+	}
 	
 	auto* levelSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGI_LevelSystem>();
 	if (levelSystem)
@@ -31,6 +38,7 @@ void ULocationManagerComponent::BeginPlay()
 	}
 
 	TargetActor = GetOwner();
+	TargetActor->GetComponentByClass(UBoxComponent::StaticClass());
 
 	StartPos = TargetActor->GetActorLocation();
 
@@ -42,21 +50,8 @@ void ULocationManagerComponent::TickComponent(float DeltaTime, ELevelTick TickTy
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 	if (!TargetActor) return;
 
-	if (bScrollInterp)
-	{
-		FVector CurrentLoc = TargetActor->GetActorLocation();
-		FVector TargetLoc = FVector(PlayerRef->GetActorLocation().X + ScrollWithXPos, CurrentLoc.Y, CurrentLoc.Z);
-		TargetActor->SetActorLocation(FMath::VInterpTo(CurrentLoc, TargetLoc, DeltaTime, 10.0f));
-		return;
-	}
-
 	FVector NewLoc = TargetActor->GetActorLocation();
 	FRotator NewRot = TargetActor->GetActorRotation();
-
-	if (bGravityEnabled)
-	{
-		UpdateGravity(DeltaTime);
-	}
 
 	UpdateAutoMove(DeltaTime);
 
@@ -82,57 +77,6 @@ void ULocationManagerComponent::UpdateScroll(FVector& InOutLocation, bool& bOutH
 	bOutHasScroll = true;
 }
 
-void ULocationManagerComponent::UpdateGravity(float DeltaTime)
-{
-	if (!bGravityEnabled) return;
-
-	if (UProjectileMovementComponent* ProjMove = TargetActor->FindComponentByClass<UProjectileMovementComponent>())
-	{
-		bool bCheckForGround = false;
-
-		// If velocity is near zero vertically, check for ground
-		if (FMath::IsNearlyZero(ProjMove->Velocity.Z, KINDA_SMALL_NUMBER))
-		{
-			bCheckForGround = true;
-		}
-
-		if (bCheckForGround)
-		{
-			UWorld* World = GetWorld();
-			if (World)
-			{
-				FVector Start = TargetActor->GetActorLocation();
-				FVector End = Start - FVector(0.f, 0.f, GroundCheckDistance);
-
-				FCollisionObjectQueryParams ObjParams;
-				ObjParams.AddObjectTypesToQuery(ECC_WorldStatic);
-
-				FCollisionQueryParams Params;
-				Params.AddIgnoredActor(GetOwner());
-
-				FHitResult Hit;
-				bool bOnGround = World->LineTraceSingleByObjectType(
-					Hit, Start, End, ObjParams, Params);
-
-				if (bOnGround)
-				{
-					ECollisionChannel ObjType = Hit.Component->GetCollisionObjectType();
-					if (ObjType == ECC_GameTraceChannel1) // ignore collectible channel
-					{
-						bOnGround = false;
-					}
-				}
-
-				if (!bOnGround)
-				{
-					// Not grounded so force gravity active
-					SetGravityEnabled(true);
-				}
-			}
-		}
-	}
-}
-
 void ULocationManagerComponent::Reset()
 {
 	bScrollEnabled = bStartScrollActive;
@@ -152,6 +96,15 @@ void ULocationManagerComponent::Reset()
 
 void ULocationManagerComponent::SetGravityEnabled(bool bEnabled)
 {
+	bGravityEnabled = bEnabled;
+
+
+	if (bPhysicsDriven && BoxComp)
+	{
+		BoxComp->SetEnableGravity(bGravityEnabled);
+		return;
+	}
+
 	if (UProjectileMovementComponent* ProjMove = TargetActor->FindComponentByClass<UProjectileMovementComponent>())
 	{
 		if (!ProjMove->UpdatedComponent)
@@ -171,8 +124,6 @@ void ULocationManagerComponent::SetGravityEnabled(bool bEnabled)
 			ProjMove->ProjectileGravityScale = 0.0f;
 		}
 	}
-
-	bGravityEnabled = bEnabled;
 }
 
 void ULocationManagerComponent::ApplyAutoMove()
