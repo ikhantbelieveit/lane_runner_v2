@@ -203,7 +203,7 @@ public:
 	void UpdateSpeedFromInput();
 	void UpdateJumpFromInput();
 	void UpdateJumpState(float DeltaTime);
-	void UpdateCameraPos();
+	void UpdateCameraPos(float DeltaTime);
 	void UpdateShootValues(float DeltaTime);
 	void UpdateShootFromInput();
 	void UpdateCheckForPit();
@@ -382,4 +382,9 @@ public:
 		int Offset = laneIndex - MiddleLane;
 		return Offset * LaneDistance;
 	}
+
+private:
+	float PlayerInitialZPos;
+	float CameraZPosOnLeaveGround;
+	float PlayerZPosOnLeaveGround;
 };

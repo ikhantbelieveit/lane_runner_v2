@@ -80,12 +80,12 @@ void APlayerCharacter::BeginPlay()
 
 	//assign camera FOV
 	CameraComponent->SetFieldOfView(CameraFOV);
-	
 
 	//set lane to middle
 	SetLane(2);
 
 	SpawnPos = GetActorLocation();
+	PlayerInitialZPos = GetActorLocation().Z;
 
 	auto* levelSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGI_LevelSystem>();
 	if (levelSystem)
@@ -128,7 +128,7 @@ void APlayerCharacter::Tick(float DeltaTime)
 			UpdateShootValues(DeltaTime);
 			UpdateShootFromInput();
 
-			UpdateCameraPos();
+			UpdateCameraPos(DeltaTime);
 
 			UpdateMercyInvincibility(DeltaTime);
 
@@ -157,10 +157,7 @@ void APlayerCharacter::Tick(float DeltaTime)
 			}
 			break;
 		case EGameState::Lose:
-			UpdateCameraPos();
-			break;
-		case EGameState::AwaitContinue:
-			UpdateCameraPos();
+			UpdateCameraPos(DeltaTime);
 			break;
 		}
 	}
@@ -685,7 +682,7 @@ void APlayerCharacter::SetJumpState(EPlayerJumpState newState)
 	{
 		return;
 	}
-
+	EPlayerJumpState prevState = CurrentJumpState;
 	CurrentJumpState = newState;
 	TimeSinceJumpStateChange = 0.0f;
 	
@@ -694,8 +691,12 @@ void APlayerCharacter::SetJumpState(EPlayerJumpState newState)
 	switch (CurrentJumpState)
 	{
 	case EPlayerJumpState::Rise:
-		
 		characterMovement->GravityScale = JumpRiseGravity;
+		if (prevState == EPlayerJumpState::Grounded)
+		{
+			PlayerZPosOnLeaveGround = GetActorLocation().Z;
+			CameraZPosOnLeaveGround = CameraComponent->GetRelativeLocation().Z;
+		}
 		break;
 	case EPlayerJumpState::Apex:
 		CancelVerticalSpeed();
@@ -703,6 +704,11 @@ void APlayerCharacter::SetJumpState(EPlayerJumpState newState)
 		break;
 	case EPlayerJumpState::Fall:
 		characterMovement->GravityScale = JumpFallGravity;
+		if (prevState == EPlayerJumpState::Grounded)
+		{
+			PlayerZPosOnLeaveGround = GetActorLocation().Z;
+			CameraZPosOnLeaveGround = CameraComponent->GetRelativeLocation().Z;
+		}
 		break;
 	case EPlayerJumpState::Grounded:
 		characterMovement->GravityScale = JumpRiseGravity;
@@ -718,16 +724,20 @@ void APlayerCharacter::DebugPrintJumpState()
 	{
 	case EPlayerJumpState::Rise:
 		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("Rise"));
+		UE_LOG(LogTemp, Warning, TEXT("Rise"));
 		break;
 	case EPlayerJumpState::Apex:
 		CancelVerticalSpeed();
 		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("Apex"));
+		UE_LOG(LogTemp, Warning, TEXT("Apex"));
 		break;
 	case EPlayerJumpState::Fall:
 		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("Fall"));
+		UE_LOG(LogTemp, Warning, TEXT("Fall"));
 		break;
 	case EPlayerJumpState::Grounded:
 		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("Grounded"));
+		UE_LOG(LogTemp, Warning, TEXT("Grounded"));
 		break;
 	}
 }
@@ -1263,13 +1273,23 @@ void APlayerCharacter::UpdateJumpState(float DeltaTime)
 	}
 }
 
-void APlayerCharacter::UpdateCameraPos()
-{
-	//clamp camera Z pos
-	FVector CameraClampZPos = FVector(CameraComponent->GetComponentLocation().X, 0.0f, CameraHeight);
-	CameraComponent->SetWorldLocation(CameraClampZPos);
+void APlayerCharacter::UpdateCameraPos(float DeltaTime)
+{	
+	float playerZPos = GetActorLocation().Z;
+	float newZPos;
+	if (CurrentJumpState == EPlayerJumpState::Grounded && !FMath::IsNearlyEqual(playerZPos, PlayerZPosOnLeaveGround, 2))
+	{
+		float currentZPos = CameraComponent->GetRelativeLocation().Z;
+		float targetZPos = CameraHeight;
+		newZPos = FMath::FInterpTo(currentZPos, targetZPos, DeltaTime, 10);
+	}
+	else
+	{
+		newZPos = CameraHeight - (GetActorLocation().Z - PlayerZPosOnLeaveGround);
+	}
+	FVector newCameraPos = FVector(-420.0, -GetActorLocation().Y, newZPos);
+	CameraComponent->SetRelativeLocation(newCameraPos);
 }
-
 
 void APlayerCharacter::Shoot(EProjectileDirection direction, bool holdNotTap)
 {
@@ -1287,14 +1307,8 @@ void APlayerCharacter::Shoot(EProjectileDirection direction, bool holdNotTap)
 
 		shootItem.Direction = direction;
 		shootItem.Type = EProjectileType::PlayerBullet;
-		//shootItem.ShootPos = GetActorLocation();
 
 		FVector shootPos = GetActorLocation();
-
-		/*requestData.Direction = direction;
-		requestData.ProjectileClass = ProjectileClass;*/
-
-		//shootItem.ShootPos = GetActorLocation();
 
 		float shootPosOffset = 100.0f;
 
@@ -1391,8 +1405,6 @@ bool APlayerCharacter::DelayPreventsShootInDirection(EProjectileDirection direct
 {
 	if (holdNotTap)
 	{
-		
-
 		switch (direction)
 		{
 		case EProjectileDirection::Forward:
@@ -1680,7 +1692,7 @@ void APlayerCharacter::UpdateDropShadow()
 
 	if (bHit && HitResult.GetActor()->ActorHasTag(FName("Floor")))
 	{
-		ShadowPlaneMesh->SetWorldLocation(HitResult.ImpactPoint + FVector(0, 0, 0.1f));
+		ShadowPlaneMesh->SetWorldLocation(HitResult.ImpactPoint + FVector(0, 0, 1.0f));
 
 		FRotator ShadowRotation = HitResult.ImpactNormal.Rotation();
 		ShadowRotation.Pitch -= 90.0f;
@@ -1777,11 +1789,6 @@ void APlayerCharacter::UpdateLaneTransition(float DeltaTime)
 
 	FRotator NewRot = FMath::RInterpTo(CurrentRot, TargetRot, DeltaTime, LaneSwitch_LeanInterpSpeed);
 	MainVisualsFlipbookComponent->SetRelativeRotation(NewRot);
-
-	// Also smoothly align camera
-	FVector CamPos = CameraComponent->GetComponentLocation();
-	CamPos.Y = FMath::FInterpTo(CamPos.Y, 0.0f, DeltaTime, 12.f);
-	CameraComponent->SetWorldLocation(CamPos);
 
 	//if transition finished
 	if (Alpha >= 1.0f)
