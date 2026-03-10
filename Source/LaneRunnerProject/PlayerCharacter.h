@@ -195,6 +195,8 @@ public:
 	int HoldShotsRemaining_Up;
 	int HoldShotsRemaining_Forward;
 
+	float CameraTargetZPos;
+
 	void ClearInputValues();
 
 	//character update methods
@@ -204,6 +206,7 @@ public:
 	void UpdateJumpFromInput();
 	void UpdateJumpState(float DeltaTime);
 	void UpdateCameraPos(float DeltaTime);
+	void UpdateCameraTargetPos(float DeltaTime);
 	void UpdateShootValues(float DeltaTime);
 	void UpdateShootFromInput();
 	void UpdateCheckForPit();

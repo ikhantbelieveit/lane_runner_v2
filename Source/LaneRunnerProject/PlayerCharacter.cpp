@@ -21,11 +21,11 @@ APlayerCharacter::APlayerCharacter()
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	BeginPlay_SetupFromConfig();
 
-	// Camera
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("PlayerCamera"));
 	CameraComponent->SetupAttachment(GetRootComponent());
-	CameraComponent->SetRelativeLocation(FVector(-420.0f, 0.0f, 175.0f)); // eye height
+	CameraComponent->SetRelativeLocation(FVector(-420.0f, 0.0f, CameraHeight)); // eye height
 	CameraComponent->SetRelativeRotation(FRotator(-10.0f, 0.0f, 0.0f)); // slight downward tilt
 
 	//Scroll Trigger Box
@@ -128,6 +128,7 @@ void APlayerCharacter::Tick(float DeltaTime)
 			UpdateShootValues(DeltaTime);
 			UpdateShootFromInput();
 
+			UpdateCameraTargetPos(DeltaTime);
 			UpdateCameraPos(DeltaTime);
 
 			UpdateMercyInvincibility(DeltaTime);
@@ -695,7 +696,7 @@ void APlayerCharacter::SetJumpState(EPlayerJumpState newState)
 		if (prevState == EPlayerJumpState::Grounded)
 		{
 			PlayerZPosOnLeaveGround = GetActorLocation().Z;
-			CameraZPosOnLeaveGround = CameraComponent->GetRelativeLocation().Z;
+			CameraZPosOnLeaveGround = CameraComponent->GetComponentLocation().Z;
 		}
 		break;
 	case EPlayerJumpState::Apex:
@@ -707,7 +708,7 @@ void APlayerCharacter::SetJumpState(EPlayerJumpState newState)
 		if (prevState == EPlayerJumpState::Grounded)
 		{
 			PlayerZPosOnLeaveGround = GetActorLocation().Z;
-			CameraZPosOnLeaveGround = CameraComponent->GetRelativeLocation().Z;
+			CameraZPosOnLeaveGround = CameraComponent->GetComponentLocation().Z;
 		}
 		break;
 	case EPlayerJumpState::Grounded:
@@ -777,6 +778,7 @@ void APlayerCharacter::ResetPlayer()
 	FVector CamPos = CameraComponent->GetComponentLocation();
 	CamPos.Y = 0.f;
 	CameraComponent->SetWorldLocation(CamPos);
+	CameraTargetZPos = CamPos.Z;
 
 	ResetHealth();
 	CancelMercyInvincibility();
@@ -1175,12 +1177,14 @@ void APlayerCharacter::UpdateJumpFromInput()
 
 			if (jumpAllowed)
 			{
+				UE_LOG(LogTemp, Warning, TEXT("JUMP - current camera pos %f"), CameraComponent->GetComponentLocation().Z);
+				SetJumpState(EPlayerJumpState::Rise);
 				FVector Vel = GetCharacterMovement()->Velocity;
 				Vel.Z = GetCharacterMovement()->JumpZVelocity; // use your config value
 				GetCharacterMovement()->Velocity = Vel;
 				
 				bPressedJump = true;
-				SetJumpState(EPlayerJumpState::Rise);
+				
 				JumpedThisFrame = true;
 				LaneMovementBlocked = false;
 				HasJumpAvailable = false;
@@ -1275,20 +1279,32 @@ void APlayerCharacter::UpdateJumpState(float DeltaTime)
 
 void APlayerCharacter::UpdateCameraPos(float DeltaTime)
 {	
-	float playerZPos = GetActorLocation().Z;
-	float newZPos;
+	/*float currentZPos = CameraComponent->GetComponentLocation().Z;
+	float newZPos = FMath::FInterpTo(currentZPos, CameraTargetZPos, DeltaTime, 10);
+
+	DebugPrintJumpState();
+	UE_LOG(LogTemp, Warning, TEXT("current pos %f target pos %f new pos %f"), currentZPos, CameraTargetZPos, newZPos);
+
+	FVector newCameraPos = FVector(CameraComponent->GetComponentLocation().X, 0.0f, newZPos);
+	CameraComponent->SetWorldLocation(newCameraPos);*/
+	float newZPos = CameraTargetZPos;
+	FVector newCameraPos = FVector(CameraComponent->GetComponentLocation().X, 0.0f, newZPos);
+	CameraComponent->SetWorldLocation(newCameraPos);
+}
+
+void APlayerCharacter::UpdateCameraTargetPos(float DeltaTime)
+{
+	CameraTargetZPos = CameraHeight;
+
+	/*float playerZPos = GetActorLocation().Z;
 	if (CurrentJumpState == EPlayerJumpState::Grounded && !FMath::IsNearlyEqual(playerZPos, PlayerZPosOnLeaveGround, 2))
 	{
-		float currentZPos = CameraComponent->GetRelativeLocation().Z;
-		float targetZPos = CameraHeight;
-		newZPos = FMath::FInterpTo(currentZPos, targetZPos, DeltaTime, 10);
+		CameraTargetZPos = (playerZPos - PlayerInitialZPos) + CameraHeight;
 	}
 	else
 	{
-		newZPos = CameraHeight - (GetActorLocation().Z - PlayerZPosOnLeaveGround);
-	}
-	FVector newCameraPos = FVector(-420.0, -GetActorLocation().Y, newZPos);
-	CameraComponent->SetRelativeLocation(newCameraPos);
+		CameraTargetZPos = CameraZPosOnLeaveGround;
+	}*/
 }
 
 void APlayerCharacter::Shoot(EProjectileDirection direction, bool holdNotTap)
