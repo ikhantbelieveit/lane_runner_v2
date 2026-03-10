@@ -38,7 +38,7 @@ void ULocationManagerComponent::BeginPlay()
 	}
 
 	TargetActor = GetOwner();
-	TargetActor->GetComponentByClass(UBoxComponent::StaticClass());
+	//TargetActor->GetComponentByClass(UBoxComponent::StaticClass());
 
 	StartPos = TargetActor->GetActorLocation();
 

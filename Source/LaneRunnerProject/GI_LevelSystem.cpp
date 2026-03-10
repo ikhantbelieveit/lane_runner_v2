@@ -248,14 +248,14 @@ void UGI_LevelSystem::RegenerateLevel()
         switch (gameInit->InitType)
         {
         case EInitLevelType::None:
-            GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("[LEVEL] Level Init type set to None - returning!"));
+            //GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("[LEVEL] Level Init type set to None - returning!"));
             return;
         case EInitLevelType::UsePremadeLevel:
         {
             levelLayoutData = gameInit->PremadeLevelAsset->Layout;
             auto* generationSystem = GetGameInstance()->GetSubsystem<UGI_LevelGenerationSystem>();
             int seed = gameInit->LevelGenSettingsAsset->GetSeed();
-            GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, FString::Printf(TEXT("[LEVEL] Applying random elements to premade level with seed: %d"), seed));
+           // GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, FString::Printf(TEXT("[LEVEL] Applying random elements to premade level with seed: %d"), seed));
             UE_LOG(LogTemp, Log, TEXT("[LEVEL] Randomizing level with seed: %d"), seed);
             FRandomStream random(seed);
             generationSystem->ResolveMissingChunkVariants(random, levelLayoutData);
@@ -265,12 +265,12 @@ void UGI_LevelSystem::RegenerateLevel()
         case EInitLevelType::GenerateFromSettings:
             auto* generationSystem = GetGameInstance()->GetSubsystem<UGI_LevelGenerationSystem>();
             int seed = gameInit->LevelGenSettingsAsset->GetSeed();
-            GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, FString::Printf(TEXT("[LEVEL] Generating level with seed: %d"), seed));
+            //GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, FString::Printf(TEXT("[LEVEL] Generating level with seed: %d"), seed));
             UE_LOG(LogTemp, Log, TEXT("[LEVEL] Generating level with seed: %d"), seed);
             FRandomStream random(seed);
             if (!generationSystem->GenerateLevelLayout(gameInit->LevelGenSettingsAsset->Definition, random, levelLayoutData))
             {
-                GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("[LEVEL] failed to generate level - returning!"));
+                //GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("[LEVEL] failed to generate level - returning!"));
                 return;
             }
         }

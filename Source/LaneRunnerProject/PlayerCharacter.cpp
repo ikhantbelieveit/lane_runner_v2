@@ -42,9 +42,7 @@ void APlayerCharacter::BeginPlay()
 	
 	check(GEngine != nullptr);
 
-	// Display a debug message for five seconds. 
-	// The -1 "Key" value argument prevents the message from being updated or refreshed.
-	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("PlayerCharacter start."));
+	//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("PlayerCharacter start."));
 
 
 	//load serialized data from config asset
@@ -537,7 +535,7 @@ void APlayerCharacter::Input_ContinueCancel(const FInputActionValue& Value)
 
 void APlayerCharacter::Input_DebugResetStart(const FInputActionValue& Value)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("SHOULD DEBUG RESET"));
+	//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("SHOULD DEBUG RESET"));
 }
 
 
@@ -599,7 +597,7 @@ void APlayerCharacter::UpdateLaneFromInput()
 	{
 		if (SolidBlockingLeftLane())
 		{
-			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("Erm, left movement denied?"));
+			//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("Erm, left movement denied?"));
 		}
 		else
 		{
@@ -621,7 +619,7 @@ void APlayerCharacter::UpdateLaneFromInput()
 	{
 		if (SolidBlockingRightLane())
 		{
-			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("Erm, right movement denied?"));
+			//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("Erm, right movement denied?"));
 		}
 		else
 		{
@@ -721,7 +719,7 @@ void APlayerCharacter::SetJumpState(EPlayerJumpState newState)
 
 void APlayerCharacter::DebugPrintJumpState()
 {
-	switch (CurrentJumpState)
+	/*switch (CurrentJumpState)
 	{
 	case EPlayerJumpState::Rise:
 		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("Rise"));
@@ -740,7 +738,7 @@ void APlayerCharacter::DebugPrintJumpState()
 		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("Grounded"));
 		UE_LOG(LogTemp, Warning, TEXT("Grounded"));
 		break;
-	}
+	}*/
 }
 
 void APlayerCharacter::CancelVerticalSpeed()
