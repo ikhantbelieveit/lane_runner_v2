@@ -196,6 +196,7 @@ public:
 	int HoldShotsRemaining_Forward;
 
 	float CameraTargetZPos;
+	float LastGroundedZPos;
 
 	void ClearInputValues();
 
@@ -206,7 +207,6 @@ public:
 	void UpdateJumpFromInput();
 	void UpdateJumpState(float DeltaTime);
 	void UpdateCameraPos(float DeltaTime);
-	void UpdateCameraTargetPos(float DeltaTime);
 	void UpdateShootValues(float DeltaTime);
 	void UpdateShootFromInput();
 	void UpdateCheckForPit();
@@ -219,6 +219,7 @@ public:
 	void UpdateLaneSwitchCooldown(float DeltaTime);
 	void UpdateLaneTransition(float DeltaTime);
 	void UpdateLean_LaneSwitchEnd(float DeltaTime);
+	void UpdateFloorState();
 
 	//lane
 	bool MoveLane_Left();
@@ -388,6 +389,4 @@ public:
 
 private:
 	float PlayerInitialZPos;
-	float CameraZPosOnLeaveGround;
-	float PlayerZPosOnLeaveGround;
 };

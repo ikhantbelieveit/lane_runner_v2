@@ -25,8 +25,8 @@ APlayerCharacter::APlayerCharacter()
 
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("PlayerCamera"));
 	CameraComponent->SetupAttachment(GetRootComponent());
-	CameraComponent->SetRelativeLocation(FVector(-420.0f, 0.0f, CameraHeight)); // eye height
-	CameraComponent->SetRelativeRotation(FRotator(-10.0f, 0.0f, 0.0f)); // slight downward tilt
+	CameraComponent->SetRelativeLocation(FVector(-420.0f, 0.0f, CameraHeight));
+	CameraComponent->SetRelativeRotation(FRotator(-10.0f, 0.0f, 0.0f));
 
 	//Scroll Trigger Box
 	ScrollTriggerBox = CreateDefaultSubobject<UBoxComponent>(TEXT("ScrollTriggerBox"));
@@ -41,9 +41,6 @@ void APlayerCharacter::BeginPlay()
 	Super::BeginPlay();
 	
 	check(GEngine != nullptr);
-
-	//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("PlayerCharacter start."));
-
 
 	//load serialized data from config asset
 	BeginPlay_SetupFromConfig();
@@ -78,6 +75,8 @@ void APlayerCharacter::BeginPlay()
 
 	//assign camera FOV
 	CameraComponent->SetFieldOfView(CameraFOV);
+	FDetachmentTransformRules detachRules(EDetachmentRule::KeepWorld, EDetachmentRule::KeepWorld, EDetachmentRule::KeepRelative, true);
+	CameraComponent->DetachFromComponent(detachRules);
 
 	//set lane to middle
 	SetLane(2);
@@ -126,7 +125,6 @@ void APlayerCharacter::Tick(float DeltaTime)
 			UpdateShootValues(DeltaTime);
 			UpdateShootFromInput();
 
-			UpdateCameraTargetPos(DeltaTime);
 			UpdateCameraPos(DeltaTime);
 
 			UpdateMercyInvincibility(DeltaTime);
@@ -139,21 +137,7 @@ void APlayerCharacter::Tick(float DeltaTime)
 
 			UpdateAnimation();
 
-			if (CurrentJumpState == EPlayerJumpState::Grounded)
-			{
-				LaneMovementBlocked = false;
-				if (TouchingBlockJumpSurface)
-				{
-					LastSurfaceWasBlockJump = true;
-				}
-				else
-				{
-					if (IsTouchingSolidFloor())
-					{
-						LastSurfaceWasBlockJump = false;
-					}
-				}
-			}
+			UpdateFloorState();
 			break;
 		case EGameState::Lose:
 			UpdateCameraPos(DeltaTime);
@@ -691,11 +675,6 @@ void APlayerCharacter::SetJumpState(EPlayerJumpState newState)
 	{
 	case EPlayerJumpState::Rise:
 		characterMovement->GravityScale = JumpRiseGravity;
-		if (prevState == EPlayerJumpState::Grounded)
-		{
-			PlayerZPosOnLeaveGround = GetActorLocation().Z;
-			CameraZPosOnLeaveGround = CameraComponent->GetComponentLocation().Z;
-		}
 		break;
 	case EPlayerJumpState::Apex:
 		CancelVerticalSpeed();
@@ -703,11 +682,6 @@ void APlayerCharacter::SetJumpState(EPlayerJumpState newState)
 		break;
 	case EPlayerJumpState::Fall:
 		characterMovement->GravityScale = JumpFallGravity;
-		if (prevState == EPlayerJumpState::Grounded)
-		{
-			PlayerZPosOnLeaveGround = GetActorLocation().Z;
-			CameraZPosOnLeaveGround = CameraComponent->GetComponentLocation().Z;
-		}
 		break;
 	case EPlayerJumpState::Grounded:
 		characterMovement->GravityScale = JumpRiseGravity;
@@ -719,7 +693,7 @@ void APlayerCharacter::SetJumpState(EPlayerJumpState newState)
 
 void APlayerCharacter::DebugPrintJumpState()
 {
-	/*switch (CurrentJumpState)
+	switch (CurrentJumpState)
 	{
 	case EPlayerJumpState::Rise:
 		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("Rise"));
@@ -738,7 +712,7 @@ void APlayerCharacter::DebugPrintJumpState()
 		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("Grounded"));
 		UE_LOG(LogTemp, Warning, TEXT("Grounded"));
 		break;
-	}*/
+	}
 }
 
 void APlayerCharacter::CancelVerticalSpeed()
@@ -1218,6 +1192,27 @@ void APlayerCharacter::UpdateJumpFromInput()
 	}
 }
 
+void APlayerCharacter::UpdateFloorState()
+{
+	if (CurrentJumpState == EPlayerJumpState::Grounded)
+	{
+		LaneMovementBlocked = false;
+		if (TouchingBlockJumpSurface)
+		{
+			LastSurfaceWasBlockJump = true;
+		}
+		else
+		{
+			if (IsTouchingSolidFloor())
+			{
+				LastSurfaceWasBlockJump = false;
+			}
+		}
+		LastGroundedZPos = GetActorLocation().Z;
+		CameraTargetZPos = LastGroundedZPos + CameraHeight - 90;	
+	}
+}
+
 void APlayerCharacter::UpdateJumpState(float DeltaTime)
 {
 	bool apexToFall = false;
@@ -1277,32 +1272,19 @@ void APlayerCharacter::UpdateJumpState(float DeltaTime)
 
 void APlayerCharacter::UpdateCameraPos(float DeltaTime)
 {	
-	/*float currentZPos = CameraComponent->GetComponentLocation().Z;
-	float newZPos = FMath::FInterpTo(currentZPos, CameraTargetZPos, DeltaTime, 10);
+	float playerxPos = GetActorLocation().X;
+	float currentZPos = CameraComponent->GetComponentLocation().Z;
 
-	DebugPrintJumpState();
-	UE_LOG(LogTemp, Warning, TEXT("current pos %f target pos %f new pos %f"), currentZPos, CameraTargetZPos, newZPos);
-
-	FVector newCameraPos = FVector(CameraComponent->GetComponentLocation().X, 0.0f, newZPos);
-	CameraComponent->SetWorldLocation(newCameraPos);*/
-	float newZPos = CameraTargetZPos;
-	FVector newCameraPos = FVector(CameraComponent->GetComponentLocation().X, 0.0f, newZPos);
-	CameraComponent->SetWorldLocation(newCameraPos);
-}
-
-void APlayerCharacter::UpdateCameraTargetPos(float DeltaTime)
-{
-	CameraTargetZPos = CameraHeight;
-
-	/*float playerZPos = GetActorLocation().Z;
-	if (CurrentJumpState == EPlayerJumpState::Grounded && !FMath::IsNearlyEqual(playerZPos, PlayerZPosOnLeaveGround, 2))
+	if (FMath::IsNearlyEqual(currentZPos, CameraTargetZPos))
 	{
-		CameraTargetZPos = (playerZPos - PlayerInitialZPos) + CameraHeight;
+		FVector newCameraPos = FVector(playerxPos - 420, 0.0f, CameraTargetZPos);
+		CameraComponent->SetWorldLocation(newCameraPos);
+		return;
 	}
-	else
-	{
-		CameraTargetZPos = CameraZPosOnLeaveGround;
-	}*/
+
+	float newZPos = FMath::FInterpTo(currentZPos, CameraTargetZPos, DeltaTime, 10);
+	FVector newCameraPos = FVector(playerxPos - 420, 0.0f, newZPos);
+	CameraComponent->SetWorldLocation(newCameraPos);
 }
 
 void APlayerCharacter::Shoot(EProjectileDirection direction, bool holdNotTap)
