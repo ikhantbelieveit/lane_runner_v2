@@ -14,6 +14,7 @@
 #include "CollectibleSet.h"
 #include "PlayerCharacterData.h"
 #include "WarningSign.h"
+#include "LevelThemeData.h"
 #include "GI_ConfigData.generated.h"
 
 USTRUCT(BlueprintType)
@@ -97,6 +98,16 @@ public:
 };
 
 UCLASS(BlueprintType)
+class ULevelThemeDataSystemConfigData : public UDataAsset
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(EditAnywhere)
+	TMap<ELevelTheme, ULevelThemeDefinition*> LevelThemeDefinitions;
+};
+
+UCLASS(BlueprintType)
 class UWarningSignSystemConfigData : public UDataAsset
 {
 	GENERATED_BODY()
@@ -135,4 +146,7 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	UWarningSignSystemConfigData* WarningSignSystemConfig;
+
+	UPROPERTY(EditAnywhere)
+	ULevelThemeDataSystemConfigData* LevelThemeDataSystemConfig;
 };

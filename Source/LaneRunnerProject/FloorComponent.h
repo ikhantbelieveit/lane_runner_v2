@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "LevelChunkConfigData.h"
+#include "LevelThemeData.h"
 #include "FloorComponent.generated.h"
 
 
@@ -26,7 +26,7 @@ protected:
 public:	
 	// Called every frame
 	UFUNCTION(BlueprintCallable)
-	void InitialiseFloor(ULevelChunkConfigData* configData);
+	void InitialiseFloor(FLevelThemeVisuals themeVisuals);
 
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 

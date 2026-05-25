@@ -5,7 +5,6 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "ChunkSpawnEntry.h"
-#include "LevelChunkConfigData.h"
 #include "LevelLayoutData.h"
 #include "Components/BoxComponent.h"
 #include "LevelChunkActor.generated.h"
@@ -34,9 +33,6 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	AActor* GetChildActorByID(FName childID, bool& success);
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	ULevelChunkConfigData* ConfigData;
 
 	UFUNCTION(BlueprintCallable)
 	void ApplyVariant();

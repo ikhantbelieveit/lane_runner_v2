@@ -10,6 +10,8 @@
 #include "PaperFlipbookComponent.h"
 #include "BullseyeGroup.h"
 #include "SpawnComponent.h"
+#include "GI_LevelThemeDataSystem.h"
+#include "LevelThemeData.h"
 
 
 // Sets default values
@@ -267,6 +269,18 @@ void ALevelChunkActor::ApplyVariant()
     TArray<AActor*> ChildActors;
     GetAllChildActors(ChildActors, true);
 
+    FLevelThemeVisuals* levelVisualsData = nullptr;
+
+    auto* levelThemeDataSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGI_LevelThemeDataSystem>();
+    if (levelThemeDataSystem)
+    {
+        FLevelThemeData themeData;
+        if (levelThemeDataSystem->GetCurrentThemeData(themeData))
+        {
+            levelVisualsData = &themeData.VisualsData;
+        }
+    }
+
     for (AActor* Child : ChildActors)
     {
         if (!Child) continue;
@@ -293,7 +307,7 @@ void ALevelChunkActor::ApplyVariant()
             // Initialize floor components
             if (UFloorComponent* FloorComp = Child->FindComponentByClass<UFloorComponent>())
             {
-                FloorComp->InitialiseFloor(ConfigData);
+                FloorComp->InitialiseFloor(*levelVisualsData);
             }
         }
         else

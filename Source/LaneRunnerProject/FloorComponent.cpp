@@ -24,10 +24,8 @@ void UFloorComponent::BeginPlay()
 }
 
 
-void UFloorComponent::InitialiseFloor(ULevelChunkConfigData* configData)
+void UFloorComponent::InitialiseFloor(FLevelThemeVisuals themeVisuals)
 {
-	if (!configData) return;
-
 	int horizontalPos = GetOwner()->GetActorLocation().Y;
 
 	switch (horizontalPos)
@@ -48,7 +46,7 @@ void UFloorComponent::InitialiseFloor(ULevelChunkConfigData* configData)
 		LaneIndex = 4;
 		break;
 	default:
-		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, FString::Printf(TEXT("ERROR - floor has invalid Y pos %d"), horizontalPos));
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, FString::Printf(TEXT("ERROR - floor has invalid Y pos %d name %s"), horizontalPos, *GetOwner()->GetName()));
 		break;
 	}
 
@@ -60,11 +58,11 @@ void UFloorComponent::InitialiseFloor(ULevelChunkConfigData* configData)
 		{
 			if (bUseSlopeMaterial)
 			{
-				meshComp->SetMaterial(0, configData->SlopeMaterial_1);
+				meshComp->SetMaterial(0, themeVisuals.SlopeMaterial_Even);
 			}
 			else
 			{
-				meshComp->SetMaterial(0, configData->LaneMaterial_1);
+				meshComp->SetMaterial(0, themeVisuals.LaneMaterial_Even);
 			}
 			
 		}
@@ -72,11 +70,11 @@ void UFloorComponent::InitialiseFloor(ULevelChunkConfigData* configData)
 		{
 			if (bUseSlopeMaterial)
 			{
-				meshComp->SetMaterial(0, configData->SlopeMaterial_2);
+				meshComp->SetMaterial(0, themeVisuals.SlopeMaterial_Odd);
 			}
 			else
 			{
-				meshComp->SetMaterial(0, configData->LaneMaterial_2);
+				meshComp->SetMaterial(0, themeVisuals.LaneMaterial_Odd);
 			}
 		}
 	}

@@ -19,6 +19,7 @@
 #include "BullseyeGroup.h"
 #include "BaseCollectible.h"
 #include "GroupOwnerComponent.h"
+#include "GI_LevelThemeDataSystem.h"
 
 void UGI_LevelSystem::OnGameOverDelayComplete()
 {
@@ -214,6 +215,12 @@ void UGI_LevelSystem::EnterLevel()
 	{
 		player->ResetPlayer();
 	}
+
+    auto* levelthemeSystem = GetGameInstance()->GetSubsystem<UGI_LevelThemeDataSystem>();
+    if (levelthemeSystem)
+    {
+        levelthemeSystem->SetLevelTheme(ELevelTheme::Desert_Basic);
+    }
 
     RegenerateLevel();
     CleanupBeforeReset.Broadcast();
