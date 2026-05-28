@@ -68,8 +68,6 @@ protected:
 	bool TryPerformShoot(FName name);
 
 public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
 	virtual void InitializeFromChunkData_Implementation(const FChunkSpawnEntry& Entry) override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

@@ -97,10 +97,6 @@ protected:
 
 	float GameOverDelay = 0.75f;
 
-	//int PointsHealThreshold = 500;	//how many points the player needs to get a heal
-
-	//int PointsUntilNextThreshold = PointsHealThreshold;
-
 	void ExecuteSingleEvent(const FLevelEventData& Event);
 
 	FLevelScoreResult ScoreResult;
@@ -157,7 +153,6 @@ public:
 	FLevelSystemEvent OnPlayerLose;
 
 	FStatsData PrevSaveStatsCache;
-	//int HighScoreAtTimeOfDeath;
 
 	UFUNCTION(BlueprintCallable)
 	void TogglePause();

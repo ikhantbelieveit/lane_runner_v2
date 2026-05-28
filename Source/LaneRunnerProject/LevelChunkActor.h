@@ -40,7 +40,6 @@ public:
 
 	void InitializeFromLayoutData(const FLevelChunkData& InChunkData);
 
-
 protected:
 	TMap<FName, FName> ActiveVariants;
 	TMap<FName, TWeakObjectPtr<AActor>> ActorID_LUT;
