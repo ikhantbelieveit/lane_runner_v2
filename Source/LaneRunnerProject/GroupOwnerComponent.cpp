@@ -74,6 +74,38 @@ void UGroupOwnerComponent::DespawnGroupMembers()
 	}
 }
 
+void UGroupOwnerComponent::DeactivateForVariant()
+{
+	for (const TWeakObjectPtr<AActor>& WeakMember : GroupMembers)
+	{
+		if (AActor* Member = WeakMember.Get())
+		{
+			if (USpawnComponent* SpawnComp = Member->FindComponentByClass<USpawnComponent>())
+			{
+				SpawnComp->VariantPreventsSpawn = true;
+				SpawnComp->Despawn();
+				SpawnComp->ResetAsSpawned = false;
+
+			}
+		}
+	}
+}
+
+void UGroupOwnerComponent::ReactivateForVariant()
+{
+	for (const TWeakObjectPtr<AActor>& WeakMember : GroupMembers)
+	{
+		if (AActor* Member = WeakMember.Get())
+		{
+			if (USpawnComponent* SpawnComp = Member->FindComponentByClass<USpawnComponent>())
+			{
+				SpawnComp->VariantPreventsSpawn = false;
+				//spawning handled by reset callback later
+			}
+		}
+	}
+}
+
 void UGroupOwnerComponent::AlertAllGroupMembers()
 {
 	for (const TWeakObjectPtr<AActor>& WeakMember : GroupMembers)

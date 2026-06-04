@@ -12,6 +12,7 @@
 #include "SpawnComponent.h"
 #include "GI_LevelThemeDataSystem.h"
 #include "LevelThemeData.h"
+#include "GroupOwnerComponent.h"
 
 
 // Sets default values
@@ -206,16 +207,21 @@ void ALevelChunkActor::DeactivateActor(AActor* Actor) const
 
     Actor->SetActorEnableCollision(false);
     Actor->SetActorTickEnabled(false);
+    Actor->SetActorHiddenInGame(true);
+
+    UGroupOwnerComponent* groupComp = Cast<UGroupOwnerComponent>(Actor->GetComponentByClass(UGroupOwnerComponent::StaticClass()));
+    if (groupComp)
+    {
+        groupComp->DeactivateForVariant();
+        return;
+    }
 
     USpawnComponent* spawnComp = Cast<USpawnComponent>(Actor->GetComponentByClass(USpawnComponent::StaticClass()));
     if (spawnComp)
     {
         spawnComp->VariantPreventsSpawn = true;
         spawnComp->Despawn();
-    }
-    else
-    {
-        Actor->SetActorHiddenInGame(true);
+        return;
     }
 }
 
@@ -232,16 +238,20 @@ void ALevelChunkActor::ReactivateActor(AActor* Actor) const
 
     Actor->SetActorEnableCollision(true);
     Actor->SetActorTickEnabled(true);
+    Actor->SetActorHiddenInGame(false);
+
+    UGroupOwnerComponent* groupComp = Cast<UGroupOwnerComponent>(Actor->GetComponentByClass(UGroupOwnerComponent::StaticClass()));
+    if (groupComp)
+    {
+        groupComp->ReactivateForVariant();
+        return;
+    }
 
     USpawnComponent* spawnComp = Cast<USpawnComponent>(Actor->GetComponentByClass(USpawnComponent::StaticClass()));
     if (spawnComp)
     {
         spawnComp->VariantPreventsSpawn = false;
         //spawning handled by reset callback later
-    }
-    else
-    {
-        Actor->SetActorHiddenInGame(false);
     }
 }
 
@@ -255,10 +265,10 @@ void ALevelChunkActor::OnBoundsBoxBeginOverlap(UPrimitiveComponent* OverlappedCo
     if (OtherComp->ComponentHasTag(TEXT("PlayerColl")))
     {
 #pragma region DebugLogs
-        //FString debugMessage = FString::Printf(TEXT("[LEVEL] Player entered chunk bounds: %s"), *ChunkID.ToString());
+        FString debugMessage = FString::Printf(TEXT("[LEVEL] Player entered chunk bounds: %s"), *ChunkID.ToString());
 
-        //UE_LOG(LogTemp, Warning, TEXT("%s"), *debugMessage);
-        //GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, debugMessage);
+        UE_LOG(LogTemp, Warning, TEXT("%s"), *debugMessage);
+        GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, debugMessage);
 #pragma endregion
         
     }

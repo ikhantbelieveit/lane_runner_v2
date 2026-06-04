@@ -55,5 +55,11 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Group")
 	void UnAlertAllGroupMembers();
 
+	UFUNCTION(BlueprintCallable, Category = "Group")
+	void DeactivateForVariant();
+
+	UFUNCTION(BlueprintCallable, Category = "Group")
+	void ReactivateForVariant();
+
 		
 };

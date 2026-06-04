@@ -54,7 +54,6 @@ void USpawnComponent::BeginPlay()
 
 void USpawnComponent::Reset()
 {
-	//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Magenta, TEXT("Spawn Reset"));
 	if (ResetAsSpawned && !VariantPreventsSpawn)
 	{
 		Spawn(false, false, false);
