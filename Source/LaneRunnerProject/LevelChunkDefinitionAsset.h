@@ -35,6 +35,9 @@ struct FLevelChunkDefinition
 	float Weight = 1.0f;
 
 	UPROPERTY(EditAnywhere)
+	float Length;
+
+	UPROPERTY(EditAnywhere)
 	TSubclassOf<ALevelChunkActor> ChunkActor;
 
 	UPROPERTY(EditAnywhere)

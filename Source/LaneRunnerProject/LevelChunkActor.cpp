@@ -28,6 +28,7 @@ void ALevelChunkActor::BeginPlay()
 {
 	Super::BeginPlay();
     
+    InitialiseChildren();
     InitialiseBoundsBox();
     InitialiseActorID_LUT();
 }
@@ -77,6 +78,29 @@ void ALevelChunkActor::InitialiseBoundsBox()
     }
 
     BoundsBox->OnComponentBeginOverlap.AddDynamic(this, &ALevelChunkActor::OnBoundsBoxBeginOverlap);
+}
+
+void ALevelChunkActor::InitialiseChildren()
+{
+    TArray<AActor*> ChildActors;
+    GetAllChildActors(ChildActors);
+
+    for (AActor* Actor : ChildActors)
+    {
+        if (Actor->Implements<UChunkInitializable>())
+        {
+            IChunkInitializable::Execute_InitializeFromChunk(Actor);
+        }
+        TArray<UActorComponent*> ChildActorComps;
+        Actor->GetComponents(ChildActorComps);
+        for (UActorComponent* Comp : ChildActorComps)
+        {
+            if (Comp->Implements<UChunkInitializable>())
+            {
+                IChunkInitializable::Execute_InitializeFromChunk(Comp);
+            }
+        }
+    }
 }
 
 void ALevelChunkActor::OnConstruction(const FTransform& Transform)
@@ -205,10 +229,6 @@ void ALevelChunkActor::DeactivateActor(AActor* Actor) const
         return;
     }
 
-    Actor->SetActorEnableCollision(false);
-    Actor->SetActorTickEnabled(false);
-    Actor->SetActorHiddenInGame(true);
-
     UGroupOwnerComponent* groupComp = Cast<UGroupOwnerComponent>(Actor->GetComponentByClass(UGroupOwnerComponent::StaticClass()));
     if (groupComp)
     {
@@ -220,9 +240,13 @@ void ALevelChunkActor::DeactivateActor(AActor* Actor) const
     if (spawnComp)
     {
         spawnComp->VariantPreventsSpawn = true;
-        spawnComp->Despawn();
+        spawnComp->Reset();
         return;
     }
+
+    Actor->SetActorEnableCollision(false);
+    Actor->SetActorTickEnabled(false);
+    Actor->SetActorHiddenInGame(true);
 }
 
 void ALevelChunkActor::ReactivateActor(AActor* Actor) const
@@ -236,9 +260,7 @@ void ALevelChunkActor::ReactivateActor(AActor* Actor) const
         return;
     }
 
-    Actor->SetActorEnableCollision(true);
-    Actor->SetActorTickEnabled(true);
-    Actor->SetActorHiddenInGame(false);
+    UE_LOG(LogTemp, Log, TEXT("Reactivate actor %s"), *Actor->GetName());
 
     UGroupOwnerComponent* groupComp = Cast<UGroupOwnerComponent>(Actor->GetComponentByClass(UGroupOwnerComponent::StaticClass()));
     if (groupComp)
@@ -251,8 +273,13 @@ void ALevelChunkActor::ReactivateActor(AActor* Actor) const
     if (spawnComp)
     {
         spawnComp->VariantPreventsSpawn = false;
-        //spawning handled by reset callback later
+        spawnComp->Reset();
+        return;
     }
+
+    Actor->SetActorEnableCollision(true);
+    Actor->SetActorTickEnabled(true);
+    Actor->SetActorHiddenInGame(false);
 }
 
 
@@ -334,11 +361,6 @@ void ALevelChunkActor::InitializeFromLayoutData(const FLevelChunkData& InChunkDa
 
     for (const TPair<FName, TWeakObjectPtr<AActor>>& pair : ActorID_LUT)
     {
-        if (pair.Value->GetClass()->ImplementsInterface(UChunkInitializable::StaticClass()))
-        {
-            IChunkInitializable::Execute_InitialiseFromChunk(pair.Value.Get(), GetActorLocation());
-        }
-
         if (AEventTrigger* EventTrigger = Cast<AEventTrigger>(pair.Value))
         {
             EventTrigger->ResolveTargetActorIDs(this);

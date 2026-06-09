@@ -49,6 +49,7 @@ protected:
 	void ReactivateActor(AActor* Actor) const;
 	void InitialiseActorID_LUT();
 	void InitialiseBoundsBox();
+	void InitialiseChildren();
 
 	UBoxComponent* BoundsBox = nullptr;
 

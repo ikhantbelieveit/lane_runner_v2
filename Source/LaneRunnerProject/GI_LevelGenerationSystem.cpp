@@ -46,8 +46,6 @@ bool UGI_LevelGenerationSystem::GenerateLevelLayout(FLevelGenerationSettings set
 
 		outLevel.Chunks.Add(generalChunk);
 
-		excludeChunks.Empty();
-
 		if (settings.NoRepeatChunks)
 		{
 			excludeChunks.Add(generalChunkDef.ChunkID);	//prevent a chunk from appearing twice

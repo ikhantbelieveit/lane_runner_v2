@@ -40,6 +40,9 @@ protected:
 	bool HasBroadcastInitFinished;
 
 	void BroadcastInitFinished();
+	void TryAssignPlayerRef();
+
+	bool HasAssignedPlayerRef;
 
 public:	
 	// Called every frame

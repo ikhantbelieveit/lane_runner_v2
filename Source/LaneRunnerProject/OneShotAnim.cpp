@@ -3,6 +3,7 @@
 
 #include "OneShotAnim.h"
 #include "PaperFlipbookComponent.h"
+#include "LocationManagerComponent.h"
 
 // Sets default values
 AOneShotAnim::AOneShotAnim()
@@ -25,6 +26,14 @@ void AOneShotAnim::BeginPlay()
 		flipbook->SetLooping(false);
 		flipbook->PlayFromStart();
 		flipbook->OnFinishedPlaying.AddDynamic(this, &AOneShotAnim::OnAnimFinished);
+	}
+
+	if (ULocationManagerComponent* locManager = FindComponentByClass<ULocationManagerComponent>())
+	{
+		if (locManager->Implements<UChunkInitializable>())
+		{
+			IChunkInitializable::Execute_InitializeFromChunk(locManager);
+		}
 	}
 }
 

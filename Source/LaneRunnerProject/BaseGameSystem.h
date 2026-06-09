@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "SystemConfigData.h"
+#include "MyGameInstance.h"
 #include "BaseGameSystem.generated.h"
 
 UENUM(BlueprintType)

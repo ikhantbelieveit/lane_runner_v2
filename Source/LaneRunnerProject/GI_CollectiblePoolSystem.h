@@ -37,6 +37,8 @@ public:
 
     ABaseCollectible* RequestCollectible(const FCollectibleRequest& Request);
     void ReturnCollectible(ABaseCollectible* Collectible);
+
+    UFUNCTION()
     void ResetAllPools();
 
     ABaseCollectible* RequestRandomCollectibleFromCommonSet(const FCollectibleRequest& Request);

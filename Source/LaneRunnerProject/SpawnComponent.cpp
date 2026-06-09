@@ -22,18 +22,8 @@ USpawnComponent::USpawnComponent()
 	// ...
 }
 
-
-// Called when the game starts
-void USpawnComponent::BeginPlay()
+void USpawnComponent::InitializeFromChunk_Implementation()
 {
-	Super::BeginPlay();
-
-	auto* levelSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGI_LevelSystem>();
-	if (!levelSystem)
-	{
-		return;
-	}
-
 	AActor* Owner = GetOwner();
 	if (!Owner)
 	{
@@ -48,8 +38,14 @@ void USpawnComponent::BeginPlay()
 		}
 	}
 
-	levelSystem->CleanupBeforeReset.AddDynamic(this, &USpawnComponent::Reset);
-	
+	Reset();
+}
+
+
+// Called when the game starts
+void USpawnComponent::BeginPlay()
+{
+	Super::BeginPlay();
 }
 
 void USpawnComponent::Reset()
@@ -80,14 +76,16 @@ void USpawnComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActor
 
 void USpawnComponent::Spawn(bool drop, bool scrollInstant, bool scrollOnReach)
 {
-	UStaticMeshComponent* mesh = Cast<UStaticMeshComponent>(GetOwner()->GetComponentByClass(UStaticMeshComponent::StaticClass()));
+	AActor* Owner = GetOwner();
+
+	UStaticMeshComponent* mesh = Cast<UStaticMeshComponent>(Owner->GetComponentByClass(UStaticMeshComponent::StaticClass()));
 	if (mesh)
 	{
 		mesh->SetVisibility(true);
 	}
 
 	TArray<UBoxComponent*> Boxes;
-	GetOwner()->GetComponents<UBoxComponent>(Boxes);
+	Owner->GetComponents<UBoxComponent>(Boxes);
 
 	for (UBoxComponent* box : Boxes)
 	{
@@ -110,13 +108,13 @@ void USpawnComponent::Spawn(bool drop, bool scrollInstant, bool scrollOnReach)
 		box->SetGenerateOverlapEvents(true);
 	}
 
-	UPaperSpriteComponent* sprite = Cast<UPaperSpriteComponent>(GetOwner()->GetComponentByClass(UPaperSpriteComponent::StaticClass()));
+	UPaperSpriteComponent* sprite = Cast<UPaperSpriteComponent>(Owner->GetComponentByClass(UPaperSpriteComponent::StaticClass()));
 	if (sprite)
 	{
 		sprite->SetVisibility(true);
 	}
 
-	UPaperFlipbookComponent* flipbook = Cast<UPaperFlipbookComponent>(GetOwner()->GetComponentByClass(UPaperFlipbookComponent::StaticClass()));
+	UPaperFlipbookComponent* flipbook = Cast<UPaperFlipbookComponent>(Owner->GetComponentByClass(UPaperFlipbookComponent::StaticClass()));
 	if (flipbook)
 	{
 		flipbook->SetVisibility(true);
@@ -124,7 +122,7 @@ void USpawnComponent::Spawn(bool drop, bool scrollInstant, bool scrollOnReach)
 
 	if (drop)
 	{
-		ULocationManagerComponent* locManager = Cast<ULocationManagerComponent>(GetOwner()->GetComponentByClass(ULocationManagerComponent::StaticClass()));
+		ULocationManagerComponent* locManager = Cast<ULocationManagerComponent>(Owner->GetComponentByClass(ULocationManagerComponent::StaticClass()));
 		if (locManager)
 		{
 			locManager->SetGravityEnabled(true);
@@ -133,24 +131,22 @@ void USpawnComponent::Spawn(bool drop, bool scrollInstant, bool scrollOnReach)
 
 	if (scrollInstant)
 	{
-		ULocationManagerComponent* locManager = Cast<ULocationManagerComponent>(GetOwner()->GetComponentByClass(ULocationManagerComponent::StaticClass()));
+		ULocationManagerComponent* locManager = Cast<ULocationManagerComponent>(Owner->GetComponentByClass(ULocationManagerComponent::StaticClass()));
 		if (locManager)
 		{
 			locManager->bScrollEnabled = true;
 		}
-
-		
 	}
 
 	if (scrollOnReach)
 	{
-		UPlayerDetectComponent* detectComp = Cast<UPlayerDetectComponent>(GetOwner()->GetComponentByClass(UPlayerDetectComponent::StaticClass()));
+		UPlayerDetectComponent* detectComp = Cast<UPlayerDetectComponent>(Owner->GetComponentByClass(UPlayerDetectComponent::StaticClass()));
 		if (detectComp)
 		{
 			FLevelEventData NewEvent;
 			NewEvent.EventType = ELevelEventType::TogglePlayerScroll;
 
-			NewEvent.TargetActors.Add(GetOwner());
+			NewEvent.TargetActors.Add(Owner);
 
 			NewEvent.BoolParam = true;
 			detectComp->EventsToTrigger.Empty();
@@ -158,29 +154,25 @@ void USpawnComponent::Spawn(bool drop, bool scrollInstant, bool scrollOnReach)
 		}
 	}
 
-	AActor* Owner = GetOwner();
-	if (Owner)
-	{
-		Owner->SetActorHiddenInGame(false);
-		Owner->SetActorTickEnabled(true);
-	}
+	Owner->SetActorHiddenInGame(false);
+	Owner->SetActorTickEnabled(true);
 
 	CurrentSpawned = true;
-
 	OnSpawn.Broadcast();
 }
 
 void USpawnComponent::Despawn()
 {
-	UStaticMeshComponent* mesh = Cast<UStaticMeshComponent>(GetOwner()->GetComponentByClass(UStaticMeshComponent::StaticClass()));
+	AActor* Owner = GetOwner();
+
+	UStaticMeshComponent* mesh = Cast<UStaticMeshComponent>(Owner->GetComponentByClass(UStaticMeshComponent::StaticClass()));
 	if (mesh)
 	{
 		mesh->SetVisibility(false);
 	}
 
-
 	TArray<UBoxComponent*> Boxes;
-	GetOwner()->GetComponents<UBoxComponent>(Boxes);
+	Owner->GetComponents<UBoxComponent>(Boxes);
 
 	for (UBoxComponent* box : Boxes)
 	{
@@ -189,7 +181,7 @@ void USpawnComponent::Despawn()
 		box->SetCollisionProfileName(DespawnedCollisionTag);
 	}
 
-	UPaperSpriteComponent* sprite = Cast<UPaperSpriteComponent>(GetOwner()->GetComponentByClass(UPaperSpriteComponent::StaticClass()));
+	UPaperSpriteComponent* sprite = Cast<UPaperSpriteComponent>(Owner->GetComponentByClass(UPaperSpriteComponent::StaticClass()));
 	if (sprite)
 	{
 		sprite->SetVisibility(false);
@@ -201,12 +193,8 @@ void USpawnComponent::Despawn()
 		flipbook->SetVisibility(false);
 	}
 
-	AActor* Owner = GetOwner();
-	if (Owner)
-	{
-		Owner->SetActorHiddenInGame(true);
-		Owner->SetActorTickEnabled(false);
-	}
+	Owner->SetActorHiddenInGame(true);
+	Owner->SetActorTickEnabled(false);
 
 	CurrentSpawned = false;
 

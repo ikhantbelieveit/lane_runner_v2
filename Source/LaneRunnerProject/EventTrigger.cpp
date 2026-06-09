@@ -28,7 +28,7 @@ void AEventTrigger::Tick(float DeltaTime)
 
 }
 
-void AEventTrigger::InitialiseFromChunk_Implementation(const FVector& ParentChunkLocation)
+void AEventTrigger::InitializeFromChunk_Implementation()
 {
 	EventsToTrigger.Empty();
 
@@ -38,93 +38,6 @@ void AEventTrigger::InitialiseFromChunk_Implementation(const FVector& ParentChun
 		eventData.EventType = setupData.EventType;
 		eventData.TargetActorIDs = setupData.TargetActorIDs;
 		EventsToTrigger.Add(eventData);
-	}
-}
-
-void AEventTrigger::InitializeFromChunkData_Implementation(const FChunkSpawnEntry& Entry)
-{
-	if (Entry.Metadata.IsEmpty()) return;
-
-	EventsToTrigger.Empty();
-
-	TSharedPtr<FJsonObject> JsonObject;
-	TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(Entry.Metadata);
-
-	if (FJsonSerializer::Deserialize(Reader, JsonObject) && JsonObject.IsValid())
-	{
-		const TArray<TSharedPtr<FJsonValue>>* EventsJson;
-		if (JsonObject->TryGetArrayField(TEXT("Events"), EventsJson))
-		{
-			for (const TSharedPtr<FJsonValue>& EventValue : *EventsJson)
-			{
-				TSharedPtr<FJsonObject> EventObj = EventValue->AsObject();
-				if (!EventObj.IsValid()) continue;
-
-				FLevelEventData EventData;
-
-				// EventType
-				int eventTypeInt;
-				if (EventObj->TryGetNumberField(TEXT("EventType"), eventTypeInt))
-				{
-					EventData.EventType = static_cast<ELevelEventType>(eventTypeInt);
-				}
-
-				// TargetActorIDs
-				const TArray<TSharedPtr<FJsonValue>>* TargetIDs;
-				if (EventObj->TryGetArrayField(TEXT("TargetActorIDs"), TargetIDs))
-				{
-					for (const TSharedPtr<FJsonValue>& IDVal : *TargetIDs)
-					{
-						EventData.TargetActorIDs.Add(FName(*IDVal->AsString()));
-					}
-				}
-
-				// DirectionParam
-				int directionParamInt;
-				if (EventObj->TryGetNumberField(TEXT("DirectionParam"), directionParamInt))
-				{
-					EventData.DirectionParam = static_cast<EProjectileDirection>(directionParamInt);
-				}
-
-				// NumericParam
-				float numParam;
-				if (EventObj->TryGetNumberField(TEXT("NumericParam"), numParam))
-				{
-					EventData.NumericParam = numParam;
-				}
-
-				// BoolParam
-				bool boolParam;
-				if (EventObj->TryGetBoolField(TEXT("BoolParam"), boolParam))
-				{
-					EventData.BoolParam = boolParam;
-				}
-
-				if (EventObj->HasTypedField<EJson::Object>(TEXT("VectorParam")))
-				{
-					TSharedPtr<FJsonObject> VecObj = EventObj->GetObjectField(TEXT("VectorParam"));
-
-					FVector ParsedVector;
-					ParsedVector.X = VecObj->GetNumberField(TEXT("X"));
-					ParsedVector.Y = VecObj->GetNumberField(TEXT("Y"));
-					ParsedVector.Z = VecObj->GetNumberField(TEXT("Z"));
-
-					// Assign it to your struct or component
-					EventData.VectorParam = ParsedVector;
-
-					UE_LOG(LogTemp, Warning, TEXT("Parsed VectorParam: X=%f Y=%f Z=%f"),
-						ParsedVector.X, ParsedVector.Y, ParsedVector.Z);
-				}
-				
-				EventsToTrigger.Add(EventData);
-			}
-		}
-
-		FString detectCollName = "PlayerColl";
-		if (JsonObject->HasField(TEXT("DetectCollTag")))
-		{
-			detectCollName = JsonObject->GetStringField(TEXT("DetectCollTag"));
-		}
 	}
 }
 

@@ -69,8 +69,7 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-	virtual void InitializeFromChunkData_Implementation(const FChunkSpawnEntry& Entry) override;
-	virtual void InitialiseFromChunk_Implementation(const FVector& ParentChunkLocation) override;
+	virtual void InitializeFromChunk_Implementation() override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GroupBehaviour")
 	bool StartScrollEnabled;

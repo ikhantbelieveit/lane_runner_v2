@@ -277,14 +277,7 @@ void APlayerCharacter::Input_SetupFromConfig()
 
 		Input_Continue = ConfigData->InputConfig.Input_Continue;
 		Input_DebugReset = ConfigData->InputConfig.Input_DebugReset;
-
-		//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("set up input data."));
 	}
-	else
-	{
-		//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("set up input data EPIC FAIL."));
-	}
-
 }
 
 void APlayerCharacter::Input_LeftStart(const FInputActionValue& Value)
@@ -732,7 +725,7 @@ void APlayerCharacter::ResetPlayer()
 	CurrentLaneIndex = 2;
 
 
-	FVector ResetPos = SpawnPos;
+	FVector ResetPos = FVector(200, 0, 120);
 	ResetPos.Y = 0.f;
 	SetActorLocation(ResetPos);
 
@@ -868,7 +861,7 @@ void APlayerCharacter::SetCurrentHealth(int newHealth)
 {
 	CurrentHealth = newHealth;
 
-	OnHealthSet.Broadcast();
+	OnHealthSet.Broadcast(CurrentHealth);
 }
 
 int APlayerCharacter::GetCurrentHealth()
@@ -1737,7 +1730,7 @@ void APlayerCharacter::UpdateDistanceTravelled()
 
 	LastFramePos = CurrentPos;
 
-	OnDistanceSet.Broadcast();
+	OnDistanceSet.Broadcast(DistanceTravelled);
 }
 
 void APlayerCharacter::UpdateLaneSwitchCooldown(float DeltaTime)

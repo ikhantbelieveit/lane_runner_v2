@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Components/BoxComponent.h"
+#include "ChunkInitializable.h"
 #include "ECollectibleType.h"
 #include "BaseCollectible.generated.h"
 
@@ -35,9 +36,6 @@ public:
 
 	UFUNCTION()
 	void ResetCollectible();
-
-	UFUNCTION()
-	void OnLevelReset();
 
 	UFUNCTION()
 	void HandleBeginOverlap(

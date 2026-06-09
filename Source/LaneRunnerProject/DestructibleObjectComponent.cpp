@@ -33,19 +33,27 @@ void UDestructibleObjectComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	CurrentHealth = StartHealth;
+	
+}
 
-	// Cache collision
-	if (UBoxComponent* box = GetOwner()->FindComponentByClass<UBoxComponent>())
-	{
-		DefaultCollMode = box->GetCollisionEnabled();
-	}
 
-	// Listen for level reset
-	if (auto* levelSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGI_LevelSystem>())
-	{
-		levelSystem->CleanupBeforeReset.AddDynamic(this, &UDestructibleObjectComponent::OnLevelReset);
-	}
+// Called every frame
+void UDestructibleObjectComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+{
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	// ...
+}
+
+void UDestructibleObjectComponent::InitializeFromChunk_Implementation()
+{
+    CurrentHealth = StartHealth;
+
+    // Cache collision
+    if (UBoxComponent* box = GetOwner()->FindComponentByClass<UBoxComponent>())
+    {
+        DefaultCollMode = box->GetCollisionEnabled();
+    }
 
     TArray<USceneComponent*> sceneComponents;
     GetOwner()->GetComponents<USceneComponent>(sceneComponents);
@@ -64,15 +72,8 @@ void UDestructibleObjectComponent::BeginPlay()
             }
         }
     }
-}
 
-
-// Called every frame
-void UDestructibleObjectComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
-{
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-	// ...
+    ResetDestroy();
 }
 
 void UDestructibleObjectComponent::OnHit()
@@ -200,11 +201,6 @@ void UDestructibleObjectComponent::ResetDestroy()
 	CurrentHealth = StartHealth;
 
 	Destroyed = false;
-}
-
-void UDestructibleObjectComponent::OnLevelReset()
-{
-    ResetDestroy();
 }
 
 int UDestructibleObjectComponent::GetCurrentHealth()

@@ -30,7 +30,7 @@ void ABullseyeGroup::Tick(float DeltaTime)
 
 }
 
-void ABullseyeGroup::InitialiseFromChunk_Implementation(const FVector& ParentChunkLocation)
+void ABullseyeGroup::InitializeFromChunk_Implementation()
 {
     GroupMemberActors.Empty();
     WarningSigns.Empty();
@@ -65,29 +65,35 @@ void ABullseyeGroup::InitialiseFromChunk_Implementation(const FVector& ParentChu
         GroupMemberActors.Add(Child);
         IGroupMemberInterface::Execute_OnAddedToGroup(Child, this, locManager);
 
-        USpawnComponent* childSpawnComp = Child->FindComponentByClass<USpawnComponent>();
-        if (childSpawnComp)
+        TArray<UActorComponent*> ChildActorComps;
+        Child->GetComponents(ChildActorComps);
+        for (UActorComponent* Comp : ChildActorComps)
         {
-            childSpawnComp->ResetAsSpawned = StartSpawned;
-            if (!StartSpawned)
+            if (USpawnComponent* spawnComp = Cast<USpawnComponent>(Comp))
             {
-                childSpawnComp->Despawn();
+                spawnComp->ResetAsSpawned = StartSpawned;
+                IChunkInitializable::Execute_InitializeFromChunk(spawnComp);
+                if (!StartSpawned)
+                {
+                    UE_LOG(LogTemp, Log, TEXT("I want to despawn group member %s"), *Child->GetName());
+                    spawnComp->Despawn();
+                }
+                continue;
+            }
+            if (Comp->Implements<UChunkInitializable>())
+            {
+                IChunkInitializable::Execute_InitializeFromChunk(Comp);
             }
         }
 
         if (ABaseEnemy* childEnemy = Cast<ABaseEnemy>(Child))
         {
             FWarningSignData signItemData;
-            FVector signItemLocation = ParentChunkLocation + DynamicMoveData.MoveFromSpawnStopCoords + Child->GetActorTransform().GetRelativeTransform(GetActorTransform()).GetLocation();
+            FVector signItemLocation = DynamicMoveData.MoveFromSpawnStopCoords + Child->GetActorTransform().GetRelativeTransform(GetActorTransform()).GetLocation();
             signItemData.SignPosition = signItemLocation;
             signItemData.EnemyRef = childEnemy;
             signItemData.GroupRef = this;
             WarningSigns.Add(signItemData);
         }
     }
-}
-
-void ABullseyeGroup::InitializeFromChunkData_Implementation(const FChunkSpawnEntry& Entry)
-{
-    
 }

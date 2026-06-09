@@ -12,7 +12,7 @@ void UGI_WarningSignSystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
 
-	Collection.InitializeDependency<UGI_WarningSignSystem>();
+	Collection.InitializeDependency<UGI_LevelSystem>();
 
 	auto* levelSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGI_LevelSystem>();
 	if (levelSystem)
@@ -84,12 +84,22 @@ AWarningSign* UGI_WarningSignSystem::CreateNewWarningSign()
 
 	if (NewSign)
 	{
-		//NewCol->bIsPooledInstance = true;
-
 		if (USpawnComponent* SpawnComp = NewSign->FindComponentByClass<USpawnComponent>())
 		{
+			if (SpawnComp->Implements<UChunkInitializable>())
+			{
+				IChunkInitializable::Execute_InitializeFromChunk(SpawnComp);
+			}
 			SpawnComp->ResetAsSpawned = false;
 			SpawnComp->Despawn();
+		}
+
+		if (ULocationManagerComponent* locManager = NewSign->FindComponentByClass<ULocationManagerComponent>())
+		{
+			if (locManager->Implements<UChunkInitializable>())
+			{
+				IChunkInitializable::Execute_InitializeFromChunk(locManager);
+			}
 		}
 	}
 

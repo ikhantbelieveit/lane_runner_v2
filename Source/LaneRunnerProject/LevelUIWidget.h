@@ -6,6 +6,7 @@
 #include "BaseUIScreen.h"
 #include "Components/TextBlock.h"
 #include "PauseUIWidget.h"
+#include "MyGameInstance.h"
 #include "LevelUIWidget.generated.h"
 
 /**
@@ -32,10 +33,10 @@ public:
 	void OnScoreUpdate();
 
 	UFUNCTION()
-	void OnHealthUpdate();
+	void OnHealthUpdate(float health);
 
 	UFUNCTION()
-	void OnDistanceUpdate();
+	void OnDistanceUpdate(float distance);
 
 	UPROPERTY(meta = (BindWidget))
 	UPauseUIWidget* PauseUIOverlay;
@@ -45,4 +46,10 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void HidePauseUI();
+
+	UFUNCTION(BlueprintCallable)
+	void OnPlayerSet(APlayerCharacter* player);
+
+private:
+	UMyGameInstance* GI;
 };

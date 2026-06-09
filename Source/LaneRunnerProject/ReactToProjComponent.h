@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "Components/BoxComponent.h"
+#include "ChunkInitializable.h"
 #include "ReactToProjComponent.generated.h"
 
 // Declare a delegate so you can bind functions to it in Blueprints or C++
@@ -12,13 +13,15 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnProjOverlap);
 
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class LANERUNNERPROJECT_API UReactToProjComponent : public UActorComponent
+class LANERUNNERPROJECT_API UReactToProjComponent : public UActorComponent, public IChunkInitializable
 {
 	GENERATED_BODY()
 
 public:	
 	// Sets default values for this component's properties
 	UReactToProjComponent();
+
+	virtual void InitializeFromChunk_Implementation() override;
 
 protected:
 	// Called when the game starts

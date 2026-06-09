@@ -6,6 +6,7 @@
 #include "GI_UIStateSystem.h"
 #include "Kismet/GameplayStatics.h"
 
+
 void UMyGameInstance::Init()
 {
     Super::Init();
@@ -15,7 +16,6 @@ void UMyGameInstance::Init()
 void UMyGameInstance::Shutdown()
 {
     Super::Shutdown();
-
 }
 
 void UMyGameInstance::OnStart()
@@ -26,6 +26,19 @@ void UMyGameInstance::OnStart()
     UKismetSystemLibrary::ExecuteConsoleCommand(GetWorld(), TEXT("sg.PostProcessQuality 0"));
     UKismetSystemLibrary::ExecuteConsoleCommand(GetWorld(), TEXT("sg.EffectsQuality 0"));
     UKismetSystemLibrary::ExecuteConsoleCommand(GetWorld(), TEXT("sg.FoliageQuality 0"));
+}
+
+void UMyGameInstance::SetPlayer(APlayerCharacter* newPlayer)
+{
+    PlayerRef = newPlayer;
+    SetWorld(newPlayer->GetWorld());
+    OnPlayerSet.Broadcast(PlayerRef);
+}
+
+void UMyGameInstance::SetWorld(UWorld* newWorld)
+{
+    WorldRef = newWorld;
+    OnWorldSet.Broadcast(WorldRef);
 }
 
 bool UMyGameInstance::AllSystemsReady()

@@ -6,84 +6,112 @@
 #include "Kismet/GameplayStatics.h"
 #include "GI_ChunkDefinitionLoadSystem.h"
 #include "Components/BoxComponent.h"
+#include "PlayerCharacter.h"
 #include "GI_LevelSystem.h"
 
 void UGI_ChunkManagerSystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Collection.InitializeDependency<UGI_LevelSystem>();
 
-	auto* levelSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGI_LevelSystem>();
+	GI = Cast<UMyGameInstance>(GetGameInstance());
+	GI->OnPlayerSet.AddDynamic(this, &UGI_ChunkManagerSystem::OnPlayerSet);
+	if (GI->PlayerRef)
+	{
+		OnPlayerSet(GI->PlayerRef);
+	}
+
+	auto* levelSystem = GI->GetSubsystem<UGI_LevelSystem>();
 	if (levelSystem)
 	{
 		levelSystem->OnLevelExit.AddDynamic(this, &UGI_ChunkManagerSystem::ClearChunks);
 	}
-
-	UE_LOG(LogTemp, Log, TEXT("Chunk Manager Subsystem initialized after LevelSystemSubsystem"));
 }
 
-void UGI_ChunkManagerSystem::SpawnChunksFromLayoutData(FLevelLayoutData layoutData)
+void UGI_ChunkManagerSystem::OnPlayerSet(APlayerCharacter* player)
+{
+	player->OnDistanceSet.AddDynamic(this, &UGI_ChunkManagerSystem::OnPlayerDistanceUpdate);
+}
+
+void UGI_ChunkManagerSystem::Deinitialize()
+{
+	GI->WorldRef->GetTimerManager().ClearTimer(TickHandle);
+	Super::Deinitialize();
+}
+
+void UGI_ChunkManagerSystem::InitFromLayoutData(FLevelLayoutData layoutData)
 {
 	if (layoutData.Chunks.Num() == 0)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("No LevelLayoutData found!"));
+		UE_LOG(LogTemp, Warning, TEXT("Layout Data has 0 chunks!"));
 		return;
 	}
 
-	const int32 RepeatCount = 1; // repeat this many times for now
-	FVector SpawnCursor = FVector::ZeroVector;
+	CurrentLayoutData = layoutData;
+	InitLayoutDataSections();
 
-	UWorld* World = GetWorld();
-	if (!World) return;
+	CurrentSection = GetSectionForCurrentIndex();
+	SpawnChunksForCurrentSection();
+}
 
-	UGI_ChunkDefinitionLoadSystem* chunkLoadSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGI_ChunkDefinitionLoadSystem>();
+void UGI_ChunkManagerSystem::InitLayoutDataSections()
+{
+	UGI_ChunkDefinitionLoadSystem* chunkLoadSystem = GI->GetSubsystem<UGI_ChunkDefinitionLoadSystem>();
 	if (!chunkLoadSystem)
 	{
 		return;
 	}
 
-	FLevelChunkDefinition chunkDef;
+	LayoutDataSections.Empty();
+	FLevelSection Section;
 
-
-	for (int32 LoopIndex = 0; LoopIndex < RepeatCount; ++LoopIndex)
+	for (const FLevelChunkData Chunk : CurrentLayoutData.Chunks)
 	{
-		for (const FLevelChunkData Entry : layoutData.Chunks)
+		Section.Chunks.Add(Chunk);
+		FLevelChunkDefinition chunkDef;
+		if (chunkLoadSystem->GetChunkDefinition(Chunk.ChunkID, chunkDef))
 		{
-			if (!chunkLoadSystem->GetChunkDefinition(Entry.ChunkID, chunkDef))
-			{
-				continue;
-			}
-
-			FTransform SpawnTransform = FTransform();
-			SpawnTransform.AddToTranslation(SpawnCursor);
-
-			if (chunkDef.ChunkActor) // make sure it's valid
-			{
-				ALevelChunkActor* NewChunk = World->SpawnActorDeferred<ALevelChunkActor>(
-					chunkDef.ChunkActor.Get(),       // UClass*
-					SpawnTransform);
-
-				//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Magenta, FString::Printf(TEXT("start spawning chunk %s"), *Entry.ChunkID.ToString()));
-
-				if (NewChunk)
-				{
-					// Finish spawning
-					UGameplayStatics::FinishSpawningActor(NewChunk, SpawnTransform);
-					NewChunk->InitializeFromLayoutData(Entry);
-
-					SpawnCursor += FVector(GetChunkLength(NewChunk), 0.f, 0.f);
-
-					ActiveChunkActors.Add(NewChunk);
-					//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Magenta, FString::Printf(TEXT("finish spawning chunk %s"), *Entry.ChunkID.ToString()));
-				}
-
-				
-			}
-			else
-			{
-				//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, FString::Printf(TEXT("NO ACTOR FOUND for chunk %s"), *Entry.ChunkID.ToString()));
-			}
+			Section.SectionLength += chunkDef.Length;
+		}
+		if (Section.SectionLength >= MinSectionLength)
+		{
+			LayoutDataSections.Add(Section);
+			Section = FLevelSection();
 		}
 	}
+
+	//if final section remains with chunks < MinSectionLength, add to end of final section in LayoutDataSection
+	if (!Section.Chunks.IsEmpty())
+	{
+		FLevelSection finalSection = LayoutDataSections.IsEmpty() ? FLevelSection() : LayoutDataSections.Last();
+		for (const FLevelChunkData Chunk : Section.Chunks)
+		{
+			finalSection.Chunks.Add(Chunk);
+			FLevelChunkDefinition chunkDef;
+			if (chunkLoadSystem->GetChunkDefinition(Chunk.ChunkID, chunkDef))
+			{
+				finalSection.SectionLength += chunkDef.Length;
+			}
+		}
+		if (!LayoutDataSections.IsEmpty())
+		{
+			int finalIndex = LayoutDataSections.Num() - 1;
+			LayoutDataSections.RemoveAt(finalIndex);
+		}
+		LayoutDataSections.Add(finalSection);
+	}
+
+	CurrentSectionIndex = 0;
+	SectionSpawnXPos = 0;
+	NumLayoutDataSections = LayoutDataSections.Num();
+}
+
+FLevelSection UGI_ChunkManagerSystem::GetSectionForCurrentIndex()
+{
+	if (CurrentSectionIndex >= NumLayoutDataSections)
+	{
+		return LayoutDataSections[NumLayoutDataSections - 1];	//TODO: actually generate new sections on the fly instead of repeating last section endlessly
+	}
+	return LayoutDataSections[CurrentSectionIndex];
 }
 
 void UGI_ChunkManagerSystem::ClearChunks()
@@ -99,21 +127,63 @@ void UGI_ChunkManagerSystem::ClearChunks()
 	ActiveChunkActors.Empty();
 }
 
-float UGI_ChunkManagerSystem::GetChunkLength(ALevelChunkActor* chunkActor)
+void UGI_ChunkManagerSystem::SpawnChunksForCurrentSection()
 {
-	if (!chunkActor) return 0.f;
-
-	TArray<UBoxComponent*> BoxComponents;
-	chunkActor->GetComponents(BoxComponents);
-
-	for (UBoxComponent* BoxComp : BoxComponents)
+	FVector SpawnCursor = FVector(SectionSpawnXPos, 0, 0);
+	UGI_ChunkDefinitionLoadSystem* chunkLoadSystem = GI->GetSubsystem<UGI_ChunkDefinitionLoadSystem>();
+	if (!chunkLoadSystem)
 	{
-		if (BoxComp && BoxComp->ComponentHasTag(FName("BoundsBox")))
+		return;
+	}
+
+	FLevelChunkDefinition chunkDef;
+
+	for (const FLevelChunkData Entry : CurrentSection.Chunks)
+	{
+		if (!chunkLoadSystem->GetChunkDefinition(Entry.ChunkID, chunkDef))
 		{
-			FVector BoxExtent = BoxComp->GetScaledBoxExtent();
-			return BoxExtent.X * 2.f;
+			continue;
+		}
+
+		FTransform SpawnTransform = FTransform();
+		SpawnTransform.AddToTranslation(SpawnCursor);
+
+		if (chunkDef.ChunkActor)
+		{
+			ALevelChunkActor* NewChunk = GI->WorldRef->SpawnActorDeferred<ALevelChunkActor>(
+				chunkDef.ChunkActor.Get(),
+				SpawnTransform);
+
+			if (NewChunk)
+			{
+				// Finish spawning
+				UGameplayStatics::FinishSpawningActor(NewChunk, SpawnTransform);
+				NewChunk->InitializeFromLayoutData(Entry);
+
+				SpawnCursor += FVector(chunkDef.Length, 0.f, 0.f);
+
+				ActiveChunkActors.Add(NewChunk);
+			}
 		}
 	}
 
-	return 0.f;
+	NextSectionIncrementThreshold = SectionSpawnXPos + CurrentSection.SectionLength - SectionEndDistanceThreshold;
+	SectionSpawnXPos += CurrentSection.SectionLength;
+
+}
+
+void UGI_ChunkManagerSystem::OnPlayerDistanceUpdate(float distance)
+{
+	if (distance >= NextSectionIncrementThreshold)
+	{
+		IncrementSection();
+	}
+}
+
+void UGI_ChunkManagerSystem::IncrementSection()
+{
+	CurrentSectionIndex++;
+	CurrentSection = GetSectionForCurrentIndex();
+	SpawnChunksForCurrentSection();
+	UE_LOG(LogTemp, Log, TEXT("Increment to section %d"), CurrentSectionIndex);
 }

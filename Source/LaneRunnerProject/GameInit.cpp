@@ -15,14 +15,12 @@ AGameInit::AGameInit()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-
 }
 
 // Called when the game starts or when spawned
 void AGameInit::BeginPlay()
 {
 	Super::BeginPlay();
-	
 	
 }
 
@@ -31,7 +29,12 @@ void AGameInit::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (!HasBroadcastInitFinished)
+	if (!HasAssignedPlayerRef)
+	{
+		TryAssignPlayerRef();
+	}
+
+	if (!HasBroadcastInitFinished && HasAssignedPlayerRef)
 	{
 		UMyGameInstance* GI = Cast<UMyGameInstance>(GetGameInstance());
 		if (GI)
@@ -40,32 +43,33 @@ void AGameInit::Tick(float DeltaTime)
 			{
 				BroadcastInitFinished();
 
-				/*AActor* playerActor = UGameplayStatics::GetActorOfClass(GetWorld(), APlayerCharacter::StaticClass());
-
-				if (playerActor)
-				{
-					APlayerCharacter* playerRef = Cast<APlayerCharacter>(playerActor);
-					if (playerRef)
-					{
-						playerRef->SetCharacterType(InitCharacterType);
-					}
-				}*/
-
 				auto* uiStateSystem = GetGameInstance()->GetSubsystem<UGI_UIStateSystem>();
 				if (uiStateSystem)
 				{
 					uiStateSystem->EnterScreen(EUIState::MainMenu);
 					HasBroadcastInitFinished = true;
 				}
-
-				/*auto* levelSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGI_LevelSystem>();
-				if (levelSystem)
-				{
-					levelSystem->EnterLevel();
-					
-				}*/
 			}
 		}
+	}
+}
+
+void AGameInit::TryAssignPlayerRef()
+{
+	if (HasAssignedPlayerRef) return;
+	UE_LOG(LogTemp, Log, TEXT("Try assign player ref"));
+	UMyGameInstance* GI = Cast<UMyGameInstance>(GetGameInstance());
+	APlayerCharacter* Player = Cast<APlayerCharacter>(UGameplayStatics::GetActorOfClass(GetWorld(), APlayerCharacter::StaticClass()));
+
+	if (GI && Player)
+	{
+		GI->SetPlayer(Player);
+		HasAssignedPlayerRef = true;
+		UE_LOG(LogTemp, Log, TEXT("player ref ASSIGNED"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Log, TEXT("player ref FAIL"));
 	}
 }
 

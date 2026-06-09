@@ -5,18 +5,20 @@
 #include "Components/SplineComponent.h"
 #include "EProjectileDirection.h"
 #include "Components/BoxComponent.h"
+#include "ChunkInitializable.h"
 #include "LocationManagerComponent.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FLocationEvent);
 
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
-class LANERUNNERPROJECT_API ULocationManagerComponent : public UActorComponent
+class LANERUNNERPROJECT_API ULocationManagerComponent : public UActorComponent, public IChunkInitializable
 {
 	GENERATED_BODY()
 
 public:
 	ULocationManagerComponent();
+	virtual void InitializeFromChunk_Implementation() override;
 
 protected:
 	virtual void BeginPlay() override;
@@ -37,14 +39,14 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gravity")
 	bool bGravityEnabled = false;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gravity")
-	float GroundCheckDistance = 5.0f; // how far below actor to trace
-
 	UFUNCTION(BlueprintCallable, Category = "Gravity")
 	void SetGravityEnabled(bool bEnabled);
 
 	UFUNCTION(BlueprintCallable, Category = "Gravity")
 	bool IsGravityEnabled() const { return bGravityEnabled; }
+
+	UFUNCTION(BlueprintCallable)
+	void SetPhysicsDriven(bool physicsDriven);
 
 	/** === Runtime State === */
 	UFUNCTION(BlueprintCallable)

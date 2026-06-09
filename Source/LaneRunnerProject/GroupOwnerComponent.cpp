@@ -83,8 +83,8 @@ void UGroupOwnerComponent::DeactivateForVariant()
 			if (USpawnComponent* SpawnComp = Member->FindComponentByClass<USpawnComponent>())
 			{
 				SpawnComp->VariantPreventsSpawn = true;
-				SpawnComp->Despawn();
 				SpawnComp->ResetAsSpawned = false;
+				SpawnComp->Reset();
 
 			}
 		}
@@ -100,7 +100,7 @@ void UGroupOwnerComponent::ReactivateForVariant()
 			if (USpawnComponent* SpawnComp = Member->FindComponentByClass<USpawnComponent>())
 			{
 				SpawnComp->VariantPreventsSpawn = false;
-				//spawning handled by reset callback later
+				SpawnComp->Reset();
 			}
 		}
 	}

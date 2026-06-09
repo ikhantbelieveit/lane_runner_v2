@@ -20,12 +20,8 @@ UReactToProjComponent::UReactToProjComponent()
 	// ...
 }
 
-
-// Called when the game starts
-void UReactToProjComponent::BeginPlay()
+void UReactToProjComponent::InitializeFromChunk_Implementation()
 {
-	Super::BeginPlay();
-
 	if (!BoxComponent)
 	{
 		BoxComponent = GetOwner()->FindComponentByClass<UBoxComponent>();
@@ -41,7 +37,7 @@ void UReactToProjComponent::BeginPlay()
 		meshComp->OnComponentHit.AddDynamic(this, &UReactToProjComponent::HandleHit);
 	}
 
-	bReadyToReact = false;
+	bReadyToReact = true;
 
 	USpawnComponent* spawnComp = GetOwner()->FindComponentByClass<USpawnComponent>();
 	if (spawnComp)
@@ -49,6 +45,15 @@ void UReactToProjComponent::BeginPlay()
 		spawnComp->OnSpawn.AddDynamic(this, &UReactToProjComponent::OnSpawn);
 		spawnComp->OnDespawn.AddDynamic(this, &UReactToProjComponent::OnDespawn);
 	}
+}
+
+
+// Called when the game starts
+void UReactToProjComponent::BeginPlay()
+{
+	Super::BeginPlay();
+
+	
 }
 
 void UReactToProjComponent::OnSpawn()

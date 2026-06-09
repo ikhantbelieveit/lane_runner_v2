@@ -23,18 +23,13 @@ void ABaseCollectible::BeginPlay()
 {
 	Super::BeginPlay();
 
-	bReadyToCollect = false;
+	bReadyToCollect = !bIsPooledInstance;
+	Collected = false;
 
 	UBoxComponent* box = (UBoxComponent*)GetComponentByClass(UBoxComponent::StaticClass());
 	if (box)
 	{
 		box->OnComponentBeginOverlap.AddDynamic(this, &ABaseCollectible::HandleBeginOverlap);
-	}
-
-	auto* levelSystem = GetGameInstance()->GetSubsystem<UGI_LevelSystem>();
-	if (levelSystem)
-	{
-		levelSystem->CleanupBeforeReset.AddDynamic(this, &ABaseCollectible::OnLevelReset);
 	}
 
 	StartPos = GetActorLocation();
@@ -77,7 +72,6 @@ void ABaseCollectible::Tick(float DeltaTime)
 
 void ABaseCollectible::CheckOverlapOnInit()
 {
-
 	UBoxComponent* Box = Cast<UBoxComponent>(GetComponentByClass(UBoxComponent::StaticClass()));
 
 	TArray<UPrimitiveComponent*> Overlaps;
@@ -105,12 +99,14 @@ void ABaseCollectible::Collect()
 {
 	if (!bReadyToCollect)
 	{
+		UE_LOG(LogTemp, Log, TEXT("[CHUNK] COLLECT FAIL - item not ready to collect"));
 		//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("COLLECT FAIL - item not ready to collect"));
 		return;
 	}
 
 	if (GetIsCollected())
 	{
+		UE_LOG(LogTemp, Log, TEXT("[CHUNK] COLLECT FAIL - item already collected"));
 		//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("COLLECT FAIL - item already collected"));
 		return;
 	}
@@ -163,12 +159,6 @@ void ABaseCollectible::ResetCollectible()
 	{
 		LM->bScrollEnabled = LM->bStartScrollActive;
 	}
-}
-
-void ABaseCollectible::OnLevelReset()
-{
-	Collected = false;
-
 }
 
 void ABaseCollectible::HandleBeginOverlap(

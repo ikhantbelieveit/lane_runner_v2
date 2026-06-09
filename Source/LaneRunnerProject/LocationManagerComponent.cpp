@@ -11,10 +11,8 @@ ULocationManagerComponent::ULocationManagerComponent()
 	PrimaryComponentTick.bCanEverTick = true;
 }
 
-void ULocationManagerComponent::BeginPlay()
+void ULocationManagerComponent::InitializeFromChunk_Implementation()
 {
-	Super::BeginPlay();
-
 	// Cache player ref
 	UWorld* World = GetWorld();
 	if (World)
@@ -28,21 +26,17 @@ void ULocationManagerComponent::BeginPlay()
 	if (box)
 	{
 		BoxComp = box;
-		bPhysicsDriven = BoxComp->IsSimulatingPhysics();
-	}
-	
-	auto* levelSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGI_LevelSystem>();
-	if (levelSystem)
-	{
-		levelSystem->CleanupBeforeReset.AddDynamic(this, &ULocationManagerComponent::Reset);
 	}
 
 	TargetActor = GetOwner();
-	//TargetActor->GetComponentByClass(UBoxComponent::StaticClass());
-
 	StartPos = TargetActor->GetActorLocation();
 
 	Reset();
+}
+
+void ULocationManagerComponent::BeginPlay()
+{
+	Super::BeginPlay();
 }
 
 void ULocationManagerComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -98,7 +92,6 @@ void ULocationManagerComponent::SetGravityEnabled(bool bEnabled)
 {
 	bGravityEnabled = bEnabled;
 
-
 	if (bPhysicsDriven && BoxComp)
 	{
 		BoxComp->SetEnableGravity(bGravityEnabled);
@@ -153,14 +146,11 @@ void ULocationManagerComponent::ApplyAutoMove()
 		default: break;
 		}
 
-		ProjMove->ProjectileGravityScale = 0.f; // pure linear motion unless you want gravity
+		ProjMove->ProjectileGravityScale = 0.f;
 		ProjMove->Velocity = Dir * CurrentAutoMoveSpeed;
 		ProjMove->Activate(true);
 
 		IsAutoMoving = true;
-
-		//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, TEXT("APPLY AUTO MOVE"));
-		//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, FString::Printf(TEXT("AUTO MOVE SPEED: %s"), *ProjMove->Velocity.ToString()));
 	}
 }
 
@@ -176,9 +166,6 @@ void ULocationManagerComponent::SetAutoMoveDirection(EProjectileDirection newDir
 
 void ULocationManagerComponent::StartAutoMove(EProjectileDirection direction, float Speed, bool bUseStop, FVector stopCoords, bool despawnOnEnd)
 {
-
-	//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Magenta, TEXT("START AUTO MOVE"));
-
 	if (IsAutoMoving)
 	{
 		StopAutoMove(false);
@@ -208,8 +195,6 @@ void ULocationManagerComponent::StartAutoMove(EProjectileDirection direction, fl
 
 void ULocationManagerComponent::StopAutoMove(bool clampToEnd)
 {
-	//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Magenta, TEXT("STOP AUTO MOVE"));
-
 	UProjectileMovementComponent* projMoveComp = (UProjectileMovementComponent*)TargetActor->GetComponentByClass(UProjectileMovementComponent::StaticClass());
 	if (projMoveComp)
 	{
@@ -294,4 +279,9 @@ void ULocationManagerComponent::UpdateAutoMove(float DeltaTime)
 			return;
 		}
 	}
+}
+
+void ULocationManagerComponent::SetPhysicsDriven(bool physicsDriven)
+{
+	bPhysicsDriven = physicsDriven;
 }

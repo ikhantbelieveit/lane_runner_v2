@@ -24,7 +24,7 @@
 #include "PlayerCharacterData.h"
 #include "PlayerCharacter.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FPlayerCharacterEvent);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FPlayerCharacterEvent, float, PlayerVal);
 
 UCLASS()
 class LANERUNNERPROJECT_API APlayerCharacter : public ACharacter

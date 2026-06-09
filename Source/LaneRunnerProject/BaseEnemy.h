@@ -45,7 +45,6 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	UPaperSpriteComponent* AlertVFX;
 	UPaperSpriteComponent* MainVisuals;
 
 	UPaperFlipbookComponent* MainVisualsFlipbook;
@@ -68,8 +67,6 @@ protected:
 	bool TryPerformShoot(FName name);
 
 public:	
-	virtual void InitializeFromChunkData_Implementation(const FChunkSpawnEntry& Entry) override;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	EEnemyDetectBehaviour DetectBehaviour;
 
@@ -111,12 +108,6 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UPaperFlipbook* DefaultFlipbook;
-
-	UFUNCTION()
-	void OnLevelReset();
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool ShowAlertVFX = true;
 
 	UFUNCTION()
 	void SetAnim(FString animName);
@@ -172,4 +163,6 @@ public:
 	virtual void OnRemovedFromGroup_Implementation() override;
 	virtual ULocationManagerComponent* GetGroupManager_Implementation() const override { return GroupManagerRef; }
 	virtual AActor* GetGroupActor_Implementation() const override { return GroupActorRef; }
+
+	virtual void InitializeFromChunk_Implementation() override;
 };

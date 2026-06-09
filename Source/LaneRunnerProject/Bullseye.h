@@ -9,7 +9,7 @@
 #include "Bullseye.generated.h"
 
 UCLASS()
-class LANERUNNERPROJECT_API ABullseye : public AActor, public IChunkInitializable, public IGroupMemberInterface
+class LANERUNNERPROJECT_API ABullseye : public AActor, public IGroupMemberInterface
 {
 	GENERATED_BODY()
 	
@@ -24,7 +24,6 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-	virtual void InitializeFromChunkData_Implementation(const FChunkSpawnEntry& Entry) override;
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Group")

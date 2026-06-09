@@ -7,13 +7,14 @@
 #include "Components/BoxComponent.h"
 #include "BaseCollectible.h"
 #include "ECollectibleType.h"
+#include "ChunkInitializable.h"
 #include "DestructibleObjectComponent.generated.h"
 
 class ADeathDummy;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FDestructibleEvent);
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class LANERUNNERPROJECT_API UDestructibleObjectComponent : public UActorComponent
+class LANERUNNERPROJECT_API UDestructibleObjectComponent : public UActorComponent, public IChunkInitializable
 {
 	GENERATED_BODY()
 
@@ -33,6 +34,8 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
+	virtual void InitializeFromChunk_Implementation() override;
+
 	void OnHit();
 
 	void DestroyFromComp();
@@ -47,9 +50,6 @@ public:
 	int StartHealth = 1;
 
 	ECollisionEnabled::Type DefaultCollMode;
-
-	UFUNCTION()
-	void OnLevelReset();
 
 	// New integer property
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats")

@@ -94,6 +94,14 @@ bool UGI_ProjectileSystem::ProcessProjectileRequest(FProjectileRequestData reque
 				{
 					Projectile->SetFiringDirection(shootItem.Direction);
 					Projectile->SetupFromConfig();
+					if (ULocationManagerComponent* locManager = Projectile->FindComponentByClass<ULocationManagerComponent>())
+					{
+						if (locManager->Implements<UChunkInitializable>())
+						{
+							IChunkInitializable::Execute_InitializeFromChunk(locManager);
+						}
+					}
+
 					Projectile->Fire(shootItem.Direction, shootItem.ScrollWithPlayer);
 
 				}

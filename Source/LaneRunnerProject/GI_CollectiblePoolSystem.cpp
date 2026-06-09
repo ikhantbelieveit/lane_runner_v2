@@ -10,13 +10,14 @@
 
 void UGI_CollectiblePoolSystem::Initialize(FSubsystemCollectionBase& Collection)
 {
+    Super::Initialize(Collection);
+
     Collection.InitializeDependency<UGI_LevelSystem>();
 
     auto* levelSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGI_LevelSystem>();
     if (levelSystem)
     {
         levelSystem->CleanupBeforeReset.AddDynamic(this, &UGI_CollectiblePoolSystem::ResetAllPools);
-
     }
 
     if (UWorld* World = GetWorld())
@@ -99,17 +100,33 @@ ABaseCollectible* UGI_CollectiblePoolSystem::CreateNewCollectible(ECollectibleTy
     FActorSpawnParameters Params;
     Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
-    ABaseCollectible* NewCol =
-        World->SpawnActor<ABaseCollectible>(ClassToSpawn, FVector::ZeroVector, FRotator::ZeroRotator, Params);
+    ABaseCollectible* NewCol = GetWorld()->SpawnActorDeferred<ABaseCollectible>(
+        ClassToSpawn,
+        FTransform(FVector::ZeroVector));
 
     if (NewCol)
     {
+        // Finish spawning
+        UGameplayStatics::FinishSpawningActor(NewCol, FTransform(FVector::ZeroVector));
         NewCol->bIsPooledInstance = true;
-
         if (USpawnComponent* SpawnComp = NewCol->FindComponentByClass<USpawnComponent>())
         {
+            if (SpawnComp->Implements<UChunkInitializable>())
+            {
+                IChunkInitializable::Execute_InitializeFromChunk(SpawnComp);
+            }
             SpawnComp->ResetAsSpawned = false;
             SpawnComp->Despawn();
+        }
+
+        if (ULocationManagerComponent* locManager = NewCol->FindComponentByClass<ULocationManagerComponent>())
+        {
+            if (locManager->Implements<UChunkInitializable>())
+            {
+                IChunkInitializable::Execute_InitializeFromChunk(locManager);
+            }
+
+            locManager->SetPhysicsDriven(true);
         }
     }
 
@@ -159,8 +176,6 @@ ABaseCollectible* UGI_CollectiblePoolSystem::RequestCollectible(const FCollectib
             SpawnComp->Spawn(true, Request.bShouldScroll, true);
         }
     }
-
-    //GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("Spawn collectible from request - made new"));
     return NewCol;
 }
 
@@ -185,8 +200,6 @@ void UGI_CollectiblePoolSystem::ReturnCollectible(ABaseCollectible* Collectible)
 
 void UGI_CollectiblePoolSystem::ResetAllPools()
 {
-    //GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("ResetAllPools called"));
-    
     for (auto& Elem : Pools)
     {
         FCollectiblePool& Pool = Elem.Value;

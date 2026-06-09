@@ -21,9 +21,15 @@
 #include "GroupOwnerComponent.h"
 #include "GI_LevelThemeDataSystem.h"
 
+void UGI_LevelSystem::Initialize(FSubsystemCollectionBase& Collection)
+{
+    Super::Initialize(Collection);
+    GI = Cast<UMyGameInstance>(GetGameInstance());
+}
+
 void UGI_LevelSystem::OnGameOverDelayComplete()
 {
-	auto* uiStateSystem = GetGameInstance()->GetSubsystem<UGI_UIStateSystem>();
+	auto* uiStateSystem = GI->GetSubsystem<UGI_UIStateSystem>();
 
 	if (uiStateSystem)
 	{
@@ -38,14 +44,14 @@ void UGI_LevelSystem::SetGameState(EGameState newState)
 		return;
 	}
 
-	auto* uiStateSystem = GetGameInstance()->GetSubsystem<UGI_UIStateSystem>();
-	auto* audioSystem = GetGameInstance()->GetSubsystem<UGI_AudioSystem>();
-    auto* saveSystem = GetGameInstance()->GetSubsystem<UGI_SaveSystem>();
+	auto* uiStateSystem = GI->GetSubsystem<UGI_UIStateSystem>();
+	auto* audioSystem = GI->GetSubsystem<UGI_AudioSystem>();
+    auto* saveSystem = GI->GetSubsystem<UGI_SaveSystem>();
 
 	switch (newState)
 	{
     case EGameState::Paused:
-        UGameplayStatics::SetGamePaused(GetWorld(), true);
+        UGameplayStatics::SetGamePaused(GI->WorldRef, true);
         OnPause.Broadcast();
         break;
 	case EGameState::Lose:
@@ -69,7 +75,7 @@ void UGI_LevelSystem::SetGameState(EGameState newState)
 			audioSystem->StopMusic();
 		}
 
-		GetWorld()->GetTimerManager().SetTimer(
+        GI->WorldRef->GetTimerManager().SetTimer(
 			GameOverDelayHandle,
 			this,
 			&UGI_LevelSystem::OnGameOverDelayComplete,
@@ -93,7 +99,7 @@ void UGI_LevelSystem::SetGameState(EGameState newState)
 
         if (CurrentGameState == EGameState::Paused)
         {
-            UGameplayStatics::SetGamePaused(GetWorld(), false);
+            UGameplayStatics::SetGamePaused(GI->WorldRef, false);
             OnUnpause.Broadcast();
         }
         
@@ -115,20 +121,16 @@ void UGI_LevelSystem::OnPlayerTouchHazard(bool oneHitKill, bool overrideInvincib
 {
 	if (GetGameState() == EGameState::Active)
 	{
-		APlayerCharacter* player = Cast<APlayerCharacter>(UGameplayStatics::GetActorOfClass(GetWorld(), APlayerCharacter::StaticClass()));
-		if (player)
-		{
-			if (player->GetMercyInvincibleActive() && !overrideInvincibility)
-			{
-				return;
-			}
+        if (GI->PlayerRef->GetMercyInvincibleActive() && !overrideInvincibility)
+        {
+            return;
+        }
 
-			player->OnHitHazard(oneHitKill);
-			if (player->GetCurrentHealth() <= 0)
-			{
-				SetGameState(EGameState::Lose);
-			}
-		}
+        GI->PlayerRef->OnHitHazard(oneHitKill);
+        if (GI->PlayerRef->GetCurrentHealth() <= 0)
+        {
+            SetGameState(EGameState::Lose);
+        }
 	}
 }
 
@@ -139,7 +141,6 @@ void UGI_LevelSystem::ResetLevelStats()
 
 void UGI_LevelSystem::ResetFromLose()
 {
-
 	ResetLevelStats();
     RegenerateLevel();
 
@@ -170,7 +171,7 @@ void UGI_LevelSystem::OnPitfall()
 	{
 		KillPlayer();
 
-		auto* audioSystem = GetGameInstance()->GetSubsystem<UGI_AudioSystem>();
+		auto* audioSystem = GI->GetSubsystem<UGI_AudioSystem>();
 		if (audioSystem)
 		{
 			audioSystem->Play(EAudioKey::Pitfall);
@@ -191,15 +192,11 @@ void UGI_LevelSystem::AddToScore(int addValue)
 
 void UGI_LevelSystem::HealPlayerFromItem(int healValue)
 {
-    APlayerCharacter* player = Cast<APlayerCharacter>(UGameplayStatics::GetActorOfClass(GetWorld(), APlayerCharacter::StaticClass()));
-    if (player)
+    GI->PlayerRef->TryAddHealth(healValue);
+    auto* audioSystem = GI->GetSubsystem<UGI_AudioSystem>();
+    if (audioSystem)
     {
-        player->TryAddHealth(healValue);
-        auto* audioSystem = GetGameInstance()->GetSubsystem<UGI_AudioSystem>();
-        if (audioSystem)
-        {
-            audioSystem->Play(EAudioKey::HealPlayer);
-        }
+        audioSystem->Play(EAudioKey::HealPlayer);
     }
 }
 
@@ -210,13 +207,9 @@ int UGI_LevelSystem::GetScore()
 
 void UGI_LevelSystem::EnterLevel()
 {
-	APlayerCharacter* player = Cast<APlayerCharacter>(UGameplayStatics::GetActorOfClass(GetWorld(), APlayerCharacter::StaticClass()));
-	if (player)
-	{
-		player->ResetPlayer();
-	}
+    GI->PlayerRef->ResetPlayer();
 
-    auto* levelthemeSystem = GetGameInstance()->GetSubsystem<UGI_LevelThemeDataSystem>();
+    auto* levelthemeSystem = GI->GetSubsystem<UGI_LevelThemeDataSystem>();
     if (levelthemeSystem)
     {
         levelthemeSystem->SetLevelTheme(ELevelTheme::Desert_Basic);
@@ -224,7 +217,6 @@ void UGI_LevelSystem::EnterLevel()
 
     RegenerateLevel();
     CleanupBeforeReset.Broadcast();
-    UE_LOG(LogTemp, Warning, TEXT("[POOL] CleanupBeforeReset BROADCAST"));
 
 	ResetLevelStats();
 
@@ -244,13 +236,13 @@ void UGI_LevelSystem::ExitLevel()
 
 void UGI_LevelSystem::RegenerateLevel()
 {
-    auto* chunkSystem = GetGameInstance()->GetSubsystem<UGI_ChunkManagerSystem>();
+    auto* chunkSystem = GI->GetSubsystem<UGI_ChunkManagerSystem>();
     chunkSystem->ClearChunks();
 
 
     FLevelLayoutData levelLayoutData;
 
-    if (auto* gameInit = Cast<AGameInit>(UGameplayStatics::GetActorOfClass(GetWorld(), AGameInit::StaticClass())))
+    if (auto* gameInit = Cast<AGameInit>(UGameplayStatics::GetActorOfClass(GI->WorldRef, AGameInit::StaticClass())))
     {
         switch (gameInit->InitType)
         {
@@ -260,7 +252,7 @@ void UGI_LevelSystem::RegenerateLevel()
         case EInitLevelType::UsePremadeLevel:
         {
             levelLayoutData = gameInit->PremadeLevelAsset->Layout;
-            auto* generationSystem = GetGameInstance()->GetSubsystem<UGI_LevelGenerationSystem>();
+            auto* generationSystem = GI->GetSubsystem<UGI_LevelGenerationSystem>();
             int seed = gameInit->LevelGenSettingsAsset->GetSeed();
            // GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, FString::Printf(TEXT("[LEVEL] Applying random elements to premade level with seed: %d"), seed));
             UE_LOG(LogTemp, Log, TEXT("[LEVEL] Randomizing level with seed: %d"), seed);
@@ -270,7 +262,7 @@ void UGI_LevelSystem::RegenerateLevel()
             
             break;
         case EInitLevelType::GenerateFromSettings:
-            auto* generationSystem = GetGameInstance()->GetSubsystem<UGI_LevelGenerationSystem>();
+            auto* generationSystem = GI->GetSubsystem<UGI_LevelGenerationSystem>();
             int seed = gameInit->LevelGenSettingsAsset->GetSeed();
             //GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, FString::Printf(TEXT("[LEVEL] Generating level with seed: %d"), seed));
             UE_LOG(LogTemp, Log, TEXT("[LEVEL] Generating level with seed: %d"), seed);
@@ -284,7 +276,7 @@ void UGI_LevelSystem::RegenerateLevel()
 
     }
 
-    chunkSystem->SpawnChunksFromLayoutData(levelLayoutData);
+    chunkSystem->InitFromLayoutData(levelLayoutData);
 }
 
 void UGI_LevelSystem::TriggerContinue()
@@ -306,7 +298,7 @@ void UGI_LevelSystem::SaveLevelStats()
     int currentScore = ScoreResult.TotalScore;
     int currentDistance = ScoreResult.DistanceBonus.BonusValue;
 
-	auto* saveSystem = GetGameInstance()->GetSubsystem<UGI_SaveSystem>();
+	auto* saveSystem = GI->GetSubsystem<UGI_SaveSystem>();
 	if (saveSystem)
 	{
 		if (saveSystem->HasExistingSave())
@@ -470,7 +462,7 @@ void UGI_LevelSystem::ExecuteSingleEvent(const FLevelEventData& Event)
 
             for (FWarningSignData signData : group->WarningSigns)
             {
-                auto* warningSignSystem = GetGameInstance()->GetSubsystem<UGI_WarningSignSystem>();
+                auto* warningSignSystem = GI->GetSubsystem<UGI_WarningSignSystem>();
                 if (warningSignSystem)
                 {
                     warningSignSystem->RequestWarningSign(signData);
@@ -639,7 +631,6 @@ void UGI_LevelSystem::ExecuteSingleEvent(const FLevelEventData& Event)
             {
                 if (USpawnComponent* SpawnComp = child->FindComponentByClass<USpawnComponent>())
                 {
-                    
                     SpawnComp->Spawn(Drop, false, false);
                 }
                 else
@@ -761,23 +752,9 @@ void UGI_LevelSystem::CalculateScoreResult(FLevelScoreResult& result)
 {
     result.BasePoints = GetScore();
 
-    APlayerCharacter* playerRef = nullptr;
-
-    TArray<AActor*> FoundActors;
-    UGameplayStatics::GetAllActorsOfClass(GetWorld(), APlayerCharacter::StaticClass(), FoundActors);
-
-    if (FoundActors.Num() > 0)
-    {
-        AActor* foundActor = FoundActors[0];
-        playerRef = Cast<APlayerCharacter>(foundActor);
-    }
-
     result.DistanceBonus = FLevelScoreBonus();
 
-    if (playerRef)
-    {
-        result.DistanceBonus.BonusValue = playerRef->GetDistanceTravelled_Meters();
-    }
+    result.DistanceBonus.BonusValue = GI->PlayerRef->GetDistanceTravelled_Meters();
 
     result.DistanceBonus.Multiplier = 0.45f;
     result.DistanceBonus.TotalBonus = result.DistanceBonus.BonusValue * result.DistanceBonus.Multiplier;

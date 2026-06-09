@@ -8,6 +8,7 @@
 #include "ELevelEventType.h"
 #include "EProjectileDirection.h"
 #include "MySaveGame.h"
+#include "MyGameInstance.h"
 #include "GI_LevelSystem.generated.h"
 
 USTRUCT(BlueprintType)
@@ -103,6 +104,8 @@ protected:
 
 	void CalculateScoreResult(FLevelScoreResult& result);
 
+	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
+
 
 public:
 	FLevelScoreResult GetScoreResult() const {
@@ -180,4 +183,7 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void HealPlayerFromItem(int healValue);
+
+private:
+	UMyGameInstance* GI;
 };

@@ -9,18 +9,14 @@
 
 void ULevelUIWidget::Initialise()
 {
-	TArray<AActor*> FoundActors;
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), APlayerCharacter::StaticClass(), FoundActors);
-
-	if (FoundActors.Num() > 0)
+	GI = Cast<UMyGameInstance>(GetGameInstance());
+	GI->OnPlayerSet.AddDynamic(this, &ULevelUIWidget::OnPlayerSet);
+	if (GI->PlayerRef)
 	{
-		AActor* foundActor = FoundActors[0];
-		APlayerCharacter* player = Cast<APlayerCharacter>(foundActor);
-		player->OnHealthSet.AddDynamic(this, &ULevelUIWidget::OnHealthUpdate);
-		player->OnDistanceSet.AddDynamic(this, &ULevelUIWidget::OnDistanceUpdate);
+		OnPlayerSet(GI->PlayerRef);
 	}
 
-	auto* levelSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGI_LevelSystem>();
+	auto* levelSystem = GI->GetSubsystem<UGI_LevelSystem>();
 	if (levelSystem)
 	{
 		levelSystem->OnScoreSet.AddDynamic(this, &ULevelUIWidget::OnScoreUpdate);
@@ -35,10 +31,16 @@ void ULevelUIWidget::Initialise()
 	}
 }
 
+void ULevelUIWidget::OnPlayerSet(APlayerCharacter* player)
+{
+	player->OnHealthSet.AddDynamic(this, &ULevelUIWidget::OnHealthUpdate);
+	player->OnDistanceSet.AddDynamic(this, &ULevelUIWidget::OnDistanceUpdate);
+}
+
 void ULevelUIWidget::OnScoreUpdate()
 {
 	int score = 0;
-	auto* levelSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGI_LevelSystem>();
+	auto* levelSystem = GI->GetSubsystem<UGI_LevelSystem>();
 	if (levelSystem)
 	{
 		score = levelSystem->GetScore();
@@ -53,20 +55,8 @@ void ULevelUIWidget::OnScoreUpdate()
 	}
 }
 
-void ULevelUIWidget::OnHealthUpdate()
+void ULevelUIWidget::OnHealthUpdate(float health)
 {
-	int health = 0;
-
-	TArray<AActor*> FoundActors;
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), APlayerCharacter::StaticClass(), FoundActors);
-
-	if (FoundActors.Num() > 0)
-	{
-		AActor* foundActor = FoundActors[0];
-		APlayerCharacter* player = Cast<APlayerCharacter>(foundActor);
-		health = player->CurrentHealth;
-	}
-
 	if (HealthText)
 	{
 		FString healthString = FString::FromInt(health);
@@ -75,26 +65,14 @@ void ULevelUIWidget::OnHealthUpdate()
 	}
 }
 
-void ULevelUIWidget::OnDistanceUpdate()
+void ULevelUIWidget::OnDistanceUpdate(float distance)
 {
-	float distance = 0.0f;
-
-	TArray<AActor*> FoundActors;
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), APlayerCharacter::StaticClass(), FoundActors);
-
-	if (FoundActors.Num() > 0)
+	if (DistanceValueText)
 	{
-		AActor* foundActor = FoundActors[0];
-		APlayerCharacter* player = Cast<APlayerCharacter>(foundActor);
-		distance = player->GetDistanceTravelled_Meters();
-		distance = FMath::RoundToInt(distance);
-
-		if (DistanceValueText)
-		{
-			FString distanceString = FString::FromInt(distance);
-			FText text = FText::FromString(distanceString);
-			DistanceValueText->SetText(text);
-		}
+		float distanceMeters = GI->PlayerRef->GetDistanceTravelled_Meters();
+		FString distanceString = FString::FromInt(distanceMeters);
+		FText text = FText::FromString(distanceString);
+		DistanceValueText->SetText(text);
 	}
 }
 
@@ -104,7 +82,7 @@ void ULevelUIWidget::ShowPauseUI()
 	{
 		PauseUIOverlay->SetVisibility(ESlateVisibility::Visible);
 		
-		if (auto* uiSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGI_UIStateSystem>())
+		if (auto* uiSystem = GI->GetSubsystem<UGI_UIStateSystem>())
 		{
 			uiSystem->ApplyInputMode(PauseUIOverlay->PauseInputMode);
 		}
