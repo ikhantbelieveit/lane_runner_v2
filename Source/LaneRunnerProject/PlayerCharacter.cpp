@@ -725,9 +725,7 @@ void APlayerCharacter::ResetPlayer()
 	CurrentLaneIndex = 2;
 
 
-	FVector ResetPos = FVector(200, 0, 120);
-	ResetPos.Y = 0.f;
-	SetActorLocation(ResetPos);
+	SetActorLocation(FVector(SpawnPos.X, 0, SpawnPos.Z));
 
 
 	if (MainVisualsFlipbookComponent)
