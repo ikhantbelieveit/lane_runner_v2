@@ -75,7 +75,6 @@ void ABullseyeGroup::InitializeFromChunk_Implementation()
                 IChunkInitializable::Execute_InitializeFromChunk(spawnComp);
                 if (!StartSpawned)
                 {
-                    UE_LOG(LogTemp, Log, TEXT("I want to despawn group member %s"), *Child->GetName());
                     spawnComp->Despawn();
                 }
                 continue;

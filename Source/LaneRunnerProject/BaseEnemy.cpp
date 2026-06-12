@@ -26,6 +26,127 @@ void ABaseEnemy::BeginPlay()
 	
 }
 
+void ABaseEnemy::InitializeFromChunk_Implementation()
+{
+	ULineOfSightComponent* lineOfSight = GetComponentByClass<ULineOfSightComponent>();
+	if (lineOfSight)
+	{
+		lineOfSight->OnDetectPlayer.AddDynamic(this, &ABaseEnemy::OnLineOfSightDetect);
+	}
+
+	UPaperFlipbookComponent* foundMainVisualsFlipbook = nullptr;
+
+	TArray<UPaperSpriteComponent*> spriteComps;
+	TArray<UPaperFlipbookComponent*> flipbookComps;
+
+	GetComponents<UPaperSpriteComponent>(spriteComps);
+	GetComponents<UPaperFlipbookComponent>(flipbookComps);
+
+	for (UPaperSpriteComponent* sprite : spriteComps)
+	{
+		if (!sprite)
+		{
+			continue;
+		}
+
+		if (sprite->ComponentHasTag("MainVisuals"))
+		{
+			MainVisuals = sprite;
+			break;
+		}
+	}
+
+	for (UPaperFlipbookComponent* flipbook : flipbookComps)
+	{
+		if (!flipbook)
+		{
+			continue;
+		}
+
+		if (flipbook->ComponentHasTag("MainVisuals"))
+		{
+			MainVisualsFlipbook = flipbook;
+			break;
+		}
+	}
+
+	TArray<UDestructibleObjectComponent*> destructibleComps;
+
+	GetComponents<UDestructibleObjectComponent>(destructibleComps);
+
+	for (UDestructibleObjectComponent* destructible : destructibleComps)
+	{
+		if (!destructible)
+		{
+			continue;
+		}
+
+		if (destructible->ComponentHasTag("MainDestructible"))
+		{
+			destructible->OnDestroyed.AddDynamic(this, &ABaseEnemy::OnKilled);
+			break;
+		}
+	}
+
+	TArray<UBoxComponent*> boxComps;
+	GetComponents<UBoxComponent>(boxComps);
+
+	for (UBoxComponent* box : boxComps)
+	{
+		if (box->ComponentHasTag("PhysicsBox"))
+		{
+			PhysicsBox = box;
+			break;
+		}
+	}
+
+	UTimedActionComponent* actionComponent = GetComponentByClass<UTimedActionComponent>();
+	if (actionComponent)
+	{
+		actionComponent->PerformActionEvent.AddDynamic(this, &ABaseEnemy::PerformTimedAction);
+		actionComponent->StartDelay = TimedActionOffset;
+	}
+
+	TArray<USceneComponent*> sceneComponents;
+	GetComponents<USceneComponent>(sceneComponents);
+
+	ProjectileOrigins.Empty();
+	for (USceneComponent* comp : sceneComponents)
+	{
+		if (!comp) continue;
+
+		for (const FName& tag : comp->ComponentTags)
+		{
+			FString tagStr = tag.ToString();
+			if (tagStr.StartsWith(TEXT("PROJ_")))
+			{
+				// Strip prefix to get clean key name
+				FString originName = tagStr.Mid(5);
+				ProjectileOrigins.Add(FName(*originName), comp);
+				break;
+			}
+		}
+	}
+}
+
+void ABaseEnemy::ResetOnChunkRequest_Implementation()
+{
+	PerformedOneOffShoot = false;
+	PerformedAdvance = false;
+	IsAlive = true;
+	IsAlert = false;
+
+	if (MainVisuals)
+	{
+		MainVisuals->SetSprite(IdleSprite);
+	}
+	
+	if (MainVisualsFlipbook)
+	{
+		MainVisualsFlipbook->SetFlipbook(DefaultFlipbook);
+	}
+}
+
 bool ABaseEnemy::HasPerformedDetectAction()
 {
 	switch (DetectBehaviour)
@@ -175,153 +296,6 @@ void ABaseEnemy::OnRemovedFromGroup_Implementation()
 	UE_LOG(LogTemp, Log, TEXT("%s removed from group"), *GetName());
 	GroupActorRef = nullptr;
 	GroupManagerRef = nullptr;
-}
-
-void ABaseEnemy::InitializeFromChunk_Implementation()
-{
-	ULineOfSightComponent* lineOfSight = GetComponentByClass<ULineOfSightComponent>();
-	if (lineOfSight)
-	{
-		lineOfSight->OnDetectPlayer.AddDynamic(this, &ABaseEnemy::OnLineOfSightDetect);
-	}
-
-	UPaperSpriteComponent* foundAlertSprite = nullptr;
-	UPaperSpriteComponent* foundMainVisuals = nullptr;
-
-
-	UPaperFlipbookComponent* foundMainVisualsFlipbook = nullptr;
-
-	TArray<UPaperSpriteComponent*> spriteComps;
-	TArray<UPaperFlipbookComponent*> flipbookComps;
-
-	GetComponents<UPaperSpriteComponent>(spriteComps);
-	GetComponents<UPaperFlipbookComponent>(flipbookComps);
-
-	for (UPaperSpriteComponent* sprite : spriteComps)
-	{
-		if (!sprite)
-		{
-			continue;
-		}
-
-		if (sprite->ComponentHasTag("AlertSprite"))
-		{
-			foundAlertSprite = sprite;
-		}
-
-		if (sprite->ComponentHasTag("MainVisuals"))
-		{
-			foundMainVisuals = sprite;
-		}
-	}
-
-	for (UPaperFlipbookComponent* flipbook : flipbookComps)
-	{
-		if (!flipbook)
-		{
-			continue;
-		}
-
-		if (flipbook->ComponentHasTag("MainVisuals"))
-		{
-			foundMainVisualsFlipbook = flipbook;
-		}
-	}
-
-	if (foundMainVisuals)
-	{
-		MainVisuals = foundMainVisuals;
-		MainVisuals->SetSprite(IdleSprite);
-	}
-
-	if (foundMainVisualsFlipbook)
-	{
-		MainVisualsFlipbook = foundMainVisualsFlipbook;
-		MainVisualsFlipbook->SetFlipbook(DefaultFlipbook);
-	}
-
-	UDestructibleObjectComponent* foundDestructible = nullptr;
-
-	TArray<UDestructibleObjectComponent*> destructibleComps;
-
-	GetComponents<UDestructibleObjectComponent>(destructibleComps);
-
-	for (UDestructibleObjectComponent* destructible : destructibleComps)
-	{
-		if (!destructible)
-		{
-			continue;
-		}
-
-		if (destructible->ComponentHasTag("MainDestructible"))
-		{
-			foundDestructible = destructible;
-			break;
-		}
-	}
-
-	if (foundDestructible)
-	{
-		foundDestructible->OnDestroyed.AddDynamic(this, &ABaseEnemy::OnKilled);
-	}
-
-	IsAlive = true;
-
-	TArray<USceneComponent*> sceneComponents;
-	GetComponents<USceneComponent>(sceneComponents);
-
-	for (USceneComponent* comp : sceneComponents)
-	{
-		if (!comp) continue;
-
-		for (const FName& tag : comp->ComponentTags)
-		{
-			FString tagStr = tag.ToString();
-			if (tagStr.StartsWith(TEXT("PROJ_")))
-			{
-				// Strip prefix to get clean key name
-				FString originName = tagStr.Mid(5);
-				ProjectileOrigins.Add(FName(*originName), comp);
-				break;
-			}
-		}
-	}
-
-	TArray<UBoxComponent*> boxComps;
-	GetComponents<UBoxComponent>(boxComps);
-
-	for (UBoxComponent* box : boxComps)
-	{
-		if (box->ComponentHasTag("PhysicsBox"))
-		{
-			PhysicsBox = box;
-			break;
-		}
-	}
-
-	UTimedActionComponent* actionComponent = GetComponentByClass<UTimedActionComponent>();
-	if (actionComponent)
-	{
-		actionComponent->PerformActionEvent.AddDynamic(this, &ABaseEnemy::PerformTimedAction);
-		actionComponent->StartDelay = TimedActionOffset;
-		if (TimedActionStartInstant)
-		{
-			actionComponent->StartAction();
-		}
-	}
-
-	PerformedOneOffShoot = false;
-	PerformedAdvance = false;
-
-	if (MainVisuals)
-	{
-		MainVisuals->SetSprite(IdleSprite);
-	}
-
-	if (MainVisualsFlipbook)
-	{
-		MainVisualsFlipbook->SetFlipbook(DefaultFlipbook);
-	}
 }
 
 void ABaseEnemy::PerformJump()

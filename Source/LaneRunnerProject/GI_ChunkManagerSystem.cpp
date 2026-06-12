@@ -8,6 +8,7 @@
 #include "Components/BoxComponent.h"
 #include "PlayerCharacter.h"
 #include "GI_LevelSystem.h"
+#include "GI_LevelChunkPoolSystem.h"
 
 void UGI_ChunkManagerSystem::Initialize(FSubsystemCollectionBase& Collection)
 {
@@ -116,13 +117,7 @@ FLevelSection UGI_ChunkManagerSystem::GetSectionForCurrentIndex()
 
 void UGI_ChunkManagerSystem::ClearChunks()
 {
-	for (ALevelChunkActor* ChunkActor : ActiveChunkActors)
-	{
-		if (ChunkActor)
-		{
-			ChunkActor->Destroy();
-		}
-	}
+	GI->GetSubsystem<UGI_LevelChunkPoolSystem>()->ResetAllPools();
 
 	ActiveChunkActors.Empty();
 }
@@ -138,7 +133,9 @@ void UGI_ChunkManagerSystem::SpawnChunksForCurrentSection()
 
 	FLevelChunkDefinition chunkDef;
 
-	for (const FLevelChunkData Entry : CurrentSection.Chunks)
+	UGI_LevelChunkPoolSystem* poolSystem = GI->GetSubsystem<UGI_LevelChunkPoolSystem>();
+
+	for (FLevelChunkData Entry : CurrentSection.Chunks)
 	{
 		if (!chunkLoadSystem->GetChunkDefinition(Entry.ChunkID, chunkDef))
 		{
@@ -147,24 +144,14 @@ void UGI_ChunkManagerSystem::SpawnChunksForCurrentSection()
 
 		FTransform SpawnTransform = FTransform();
 		SpawnTransform.AddToTranslation(SpawnCursor);
+		Entry.SpawnLocation = SpawnTransform.GetLocation();
 
-		if (chunkDef.ChunkActor)
-		{
-			ALevelChunkActor* NewChunk = GI->WorldRef->SpawnActorDeferred<ALevelChunkActor>(
-				chunkDef.ChunkActor.Get(),
-				SpawnTransform);
+		ALevelChunkActor* NewChunk = poolSystem->RequestChunk(Entry);
 
-			if (NewChunk)
-			{
-				// Finish spawning
-				UGameplayStatics::FinishSpawningActor(NewChunk, SpawnTransform);
-				NewChunk->InitializeFromLayoutData(Entry);
+		SpawnCursor += FVector(chunkDef.Length, 0.f, 0.f);
+		ActiveChunkActors.Add(NewChunk);
 
-				SpawnCursor += FVector(chunkDef.Length, 0.f, 0.f);
-
-				ActiveChunkActors.Add(NewChunk);
-			}
-		}
+		UE_LOG(LogTemp, Log, TEXT("[LEVEL] place chunk %s in level"), *Entry.ChunkID.ToString());
 	}
 
 	NextSectionIncrementThreshold = SectionSpawnXPos + CurrentSection.SectionLength - SectionEndDistanceThreshold;

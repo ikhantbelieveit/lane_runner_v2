@@ -7,16 +7,19 @@
 #include "Components/BoxComponent.h"
 #include "ChunkInitializable.h"
 #include "ECollectibleType.h"
+#include "ChunkInitializable.h"
 #include "BaseCollectible.generated.h"
 
 UCLASS()
-class LANERUNNERPROJECT_API ABaseCollectible : public AActor
+class LANERUNNERPROJECT_API ABaseCollectible : public AActor, public IChunkInitializable
 {
 	GENERATED_BODY()
 	
 public:	
 	// Sets default values for this actor's properties
 	ABaseCollectible();
+	virtual void InitializeFromChunk_Implementation() override;
+	virtual void ResetOnChunkRequest_Implementation() override;
 
 protected:
 	// Called when the game starts
@@ -65,18 +68,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	bool bIsPooledInstance = true;
 
-	//bool ResetAsSpawned = true;
-
 	UFUNCTION()
-	void CheckOverlapOnInit();
+	void CheckOverlapOnSpawn();
 
 	UFUNCTION()
 	void OnSpawn();
-
-	UFUNCTION()
-	void OnDespawn();
-
-
-private:
-	FVector StartPos;
 };

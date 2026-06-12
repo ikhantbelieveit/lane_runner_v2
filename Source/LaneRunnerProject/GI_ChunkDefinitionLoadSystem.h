@@ -7,6 +7,7 @@
 #include "LevelChunkDefinitionAsset.h"
 #include "ELevelChunkType.h"
 #include "GameUtility.h"
+#include "MyGameInstance.h"
 #include "GI_ChunkDefinitionLoadSystem.generated.h"
 
 /**
@@ -56,6 +57,20 @@ public:
 		return true;
 	}
 
+	TArray<FLevelChunkDefinition> GetAllDefinitions() const
+	{
+		TArray<FLevelChunkDefinition> returnArr;
+
+		for (const auto& pair : ChunkDef_LUT)
+		{
+			const FLevelChunkDefinition& def = pair.Value;
+
+			returnArr.Add(def);
+		}
+
+		return returnArr;
+	}
+
 protected:
 	bool HasInitialisedFromConfig;
 	FTimerHandle TickHandle;
@@ -87,4 +102,7 @@ protected:
 
 		return returnArr;
 	}
+
+private:
+	UMyGameInstance* GI;
 };

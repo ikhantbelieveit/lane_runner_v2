@@ -15,14 +15,12 @@
 ABaseCollectible::ABaseCollectible()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 
 }
 
-void ABaseCollectible::BeginPlay()
+void ABaseCollectible::InitializeFromChunk_Implementation()
 {
-	Super::BeginPlay();
-
 	bReadyToCollect = !bIsPooledInstance;
 	Collected = false;
 
@@ -32,14 +30,23 @@ void ABaseCollectible::BeginPlay()
 		box->OnComponentBeginOverlap.AddDynamic(this, &ABaseCollectible::HandleBeginOverlap);
 	}
 
-	StartPos = GetActorLocation();
-
 	auto* spawnComp = (USpawnComponent*)GetComponentByClass<USpawnComponent>();
 	if (spawnComp)
 	{
 		spawnComp->OnSpawn.AddDynamic(this, &ABaseCollectible::OnSpawn);
-		spawnComp->OnDespawn.AddDynamic(this, &ABaseCollectible::OnDespawn);
 	}
+}
+
+void ABaseCollectible::ResetOnChunkRequest_Implementation()
+{
+	ResetCollectible();
+}
+
+void ABaseCollectible::BeginPlay()
+{
+	Super::BeginPlay();
+
+	
 }
 
 void ABaseCollectible::OnSpawn()
@@ -49,18 +56,7 @@ void ABaseCollectible::OnSpawn()
 
 	if (UWorld* World = GetWorld())
 	{
-		World->GetTimerManager().SetTimer(OverlapEnableTimer, this, &ABaseCollectible::CheckOverlapOnInit, 0.2f, false);
-	}
-}
-
-void ABaseCollectible::OnDespawn()
-{
-	ResetCollectible();
-
-	if (bIsPooledInstance)
-	{
-		auto* Pool = GetWorld()->GetGameInstance()->GetSubsystem<UGI_CollectiblePoolSystem>();
-		Pool->ReturnCollectible(this);
+		World->GetTimerManager().SetTimer(OverlapEnableTimer, this, &ABaseCollectible::CheckOverlapOnSpawn, 0.2f, false);
 	}
 }
 
@@ -70,7 +66,7 @@ void ABaseCollectible::Tick(float DeltaTime)
 
 }
 
-void ABaseCollectible::CheckOverlapOnInit()
+void ABaseCollectible::CheckOverlapOnSpawn()
 {
 	UBoxComponent* Box = Cast<UBoxComponent>(GetComponentByClass(UBoxComponent::StaticClass()));
 
@@ -99,15 +95,13 @@ void ABaseCollectible::Collect()
 {
 	if (!bReadyToCollect)
 	{
-		UE_LOG(LogTemp, Log, TEXT("[CHUNK] COLLECT FAIL - item not ready to collect"));
-		//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("COLLECT FAIL - item not ready to collect"));
+		UE_LOG(LogTemp, Log, TEXT("COLLECT FAIL - item not ready to collect"));
 		return;
 	}
 
 	if (GetIsCollected())
 	{
-		UE_LOG(LogTemp, Log, TEXT("[CHUNK] COLLECT FAIL - item already collected"));
-		//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("COLLECT FAIL - item already collected"));
+		UE_LOG(LogTemp, Log, TEXT("COLLECT FAIL - item already collected"));
 		return;
 	}
 
@@ -148,6 +142,11 @@ void ABaseCollectible::Collect()
 	{
 		audioSystem->Play(EAudioKey::CoinGet);
 	}
+
+	if (auto* poolSystem = GetWorld()->GetGameInstance()->GetSubsystem<UGI_CollectiblePoolSystem>())
+	{
+		poolSystem->ReturnCollectible(this);
+	}
 }
 
 void ABaseCollectible::ResetCollectible()
@@ -169,7 +168,6 @@ void ABaseCollectible::HandleBeginOverlap(
 	bool bFromSweep,
 	const FHitResult& SweepResult)
 {
-
 	if (!OtherActor || OtherActor == this)
 	{
 		return;

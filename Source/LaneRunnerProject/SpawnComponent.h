@@ -15,9 +15,8 @@ class LANERUNNERPROJECT_API USpawnComponent : public UActorComponent, public ICh
 	GENERATED_BODY()
 
 public:	
-	// Sets default values for this component's properties
 	USpawnComponent();
-	virtual void InitializeFromChunk_Implementation() override;
+	virtual void TeardownFromChunk_Implementation() override;
 
 protected:
 	// Called when the game starts
@@ -28,7 +27,6 @@ protected:
 	bool bIsPooledInstance;
 
 public:	
-	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	UFUNCTION(BlueprintCallable)
@@ -50,6 +48,18 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FName DespawnedCollisionTag = FName("NoCollision");
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FName SpawnedCollisionTag_SightBlocker = FName("QueryOnly");
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FName DespawnedCollisionTag_SightBlocker = FName("NoCollision");
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FName SpawnedCollisionTag_LineOfSight = FName("OverlapAllDynamic");
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FName DespawnedCollisionTag_LineOfSight = FName("NoCollision");
 
 	UPROPERTY(BlueprintAssignable)
 	FSpawnEvent OnSpawn;

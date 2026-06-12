@@ -37,6 +37,11 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void ApplyVariant();
 
+	UFUNCTION(BlueprintCallable)
+	void TeardownChildren();
+
+	UFUNCTION(BlueprintCallable)
+	void ResetChildren();
 
 	void InitializeFromLayoutData(const FLevelChunkData& InChunkData);
 
@@ -62,5 +67,6 @@ protected:
 		bool bFromSweep,
 		const FHitResult& SweepResult);
 
+public:
 	FName ChunkID;
 };

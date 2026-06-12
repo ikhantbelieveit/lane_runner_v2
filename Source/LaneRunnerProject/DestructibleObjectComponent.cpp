@@ -22,7 +22,7 @@ UDestructibleObjectComponent::UDestructibleObjectComponent()
 {
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
-	PrimaryComponentTick.bCanEverTick = true;
+	PrimaryComponentTick.bCanEverTick = false;
 
 	// ...
 }
@@ -76,6 +76,12 @@ void UDestructibleObjectComponent::InitializeFromChunk_Implementation()
     ResetDestroy();
 }
 
+void UDestructibleObjectComponent::ResetOnChunkRequest_Implementation()
+{
+    CurrentHealth = StartHealth;
+    ResetDestroy();
+}
+
 void UDestructibleObjectComponent::OnHit()
 {
 	if (GetIsDestroyed())
@@ -104,7 +110,6 @@ void UDestructibleObjectComponent::DestroyFromComp()
 {
     if (Destroyed)
     {
-        GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, TEXT("IT IS ALREADY DESTROYED YOU FOOL"));
         return;
     }
 
@@ -199,7 +204,6 @@ void UDestructibleObjectComponent::DestroyFromComp()
 void UDestructibleObjectComponent::ResetDestroy()
 {
 	CurrentHealth = StartHealth;
-
 	Destroyed = false;
 }
 

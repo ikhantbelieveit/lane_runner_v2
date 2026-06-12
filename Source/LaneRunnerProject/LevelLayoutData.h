@@ -33,6 +33,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<FChunkVariantEntry> ActiveVariants;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FVector SpawnLocation = FVector::ZeroVector;
 };
 
 USTRUCT(BlueprintType)

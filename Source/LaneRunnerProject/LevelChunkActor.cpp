@@ -103,6 +103,52 @@ void ALevelChunkActor::InitialiseChildren()
     }
 }
 
+void ALevelChunkActor::TeardownChildren()
+{
+    TArray<AActor*> ChildActors;
+    GetAllChildActors(ChildActors);
+
+    for (AActor* Actor : ChildActors)
+    {
+        if (Actor->Implements<UChunkInitializable>())
+        {
+            IChunkInitializable::Execute_TeardownFromChunk(Actor);
+        }
+        TArray<UActorComponent*> ChildActorComps;
+        Actor->GetComponents(ChildActorComps);
+        for (UActorComponent* Comp : ChildActorComps)
+        {
+            if (Comp->Implements<UChunkInitializable>())
+            {
+                IChunkInitializable::Execute_TeardownFromChunk(Comp);
+            }
+        }
+    }
+}
+
+void ALevelChunkActor::ResetChildren()
+{
+    TArray<AActor*> ChildActors;
+    GetAllChildActors(ChildActors);
+
+    for (AActor* Actor : ChildActors)
+    {
+        if (Actor->Implements<UChunkInitializable>())
+        {
+            IChunkInitializable::Execute_ResetOnChunkRequest(Actor);
+        }
+        TArray<UActorComponent*> ChildActorComps;
+        Actor->GetComponents(ChildActorComps);
+        for (UActorComponent* Comp : ChildActorComps)
+        {
+            if (Comp->Implements<UChunkInitializable>())
+            {
+                IChunkInitializable::Execute_ResetOnChunkRequest(Comp);
+            }
+        }
+    }
+}
+
 void ALevelChunkActor::OnConstruction(const FTransform& Transform)
 {
     Super::OnConstruction(Transform);

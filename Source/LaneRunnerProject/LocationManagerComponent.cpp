@@ -29,8 +29,19 @@ void ULocationManagerComponent::InitializeFromChunk_Implementation()
 	}
 
 	TargetActor = GetOwner();
-	StartPos = TargetActor->GetActorLocation();
 
+	if (auto* rootComp = TargetActor->GetRootComponent())
+	{
+		UE_LOG(LogTemp, Log, TEXT("Actor %s has root component - use as StartPos"), *rootComp->GetOwner()->GetName());
+		StartPos = rootComp->GetRelativeLocation();
+	}
+
+	Reset();
+}
+
+void ULocationManagerComponent::TeardownFromChunk_Implementation()
+{
+	UE_LOG(LogTemp, Log, TEXT("[HELLO] trigger teardown on location manager for actor %s"), *TargetActor->GetName());
 	Reset();
 }
 
@@ -82,10 +93,14 @@ void ULocationManagerComponent::Reset()
 
 	if (IsAutoMoving)
 	{
-		StopAutoMove(false);
+		StopAutoMove(false, false);
 	}
 
-	TargetActor->SetActorLocation(StartPos);
+	if (auto* rootComp = TargetActor->GetRootComponent())
+	{
+		rootComp->SetRelativeLocation(StartPos);
+		UE_LOG(LogTemp, Log, TEXT("Actor %s has root component - return to start pos on reset"), *rootComp->GetOwner()->GetName());
+	}
 }
 
 void ULocationManagerComponent::SetGravityEnabled(bool bEnabled)
@@ -193,7 +208,7 @@ void ULocationManagerComponent::StartAutoMove(EProjectileDirection direction, fl
 	}
 }
 
-void ULocationManagerComponent::StopAutoMove(bool clampToEnd)
+void ULocationManagerComponent::StopAutoMove(bool clampToEnd, bool allowDespawn)
 {
 	UProjectileMovementComponent* projMoveComp = (UProjectileMovementComponent*)TargetActor->GetComponentByClass(UProjectileMovementComponent::StaticClass());
 	if (projMoveComp)
@@ -227,7 +242,7 @@ void ULocationManagerComponent::StopAutoMove(bool clampToEnd)
 		}
 	}
 
-	if (bDespawnOnAutoMoveEnd)
+	if (bDespawnOnAutoMoveEnd && allowDespawn)
 	{
 		if (UGroupOwnerComponent* ownerComp = TargetActor->GetComponentByClass<UGroupOwnerComponent>())
 		{

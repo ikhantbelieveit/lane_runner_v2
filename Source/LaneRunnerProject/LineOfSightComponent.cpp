@@ -15,6 +15,11 @@ ULineOfSightComponent::ULineOfSightComponent()
 	// ...
 }
 
+void ULineOfSightComponent::TeardownFromChunk_Implementation()
+{
+	DetectsPlayer = false;
+}
+
 
 // Called when the game starts
 void ULineOfSightComponent::BeginPlay()
@@ -70,7 +75,6 @@ void ULineOfSightComponent::BeginPlay()
 
 void ULineOfSightComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
-
 	if (!CurrentZone || !CurrentZone->SightBox || !PlayerInSightBox)
 	{
 		return;
@@ -134,8 +138,6 @@ void ULineOfSightComponent::HandleBeginOverlap(UPrimitiveComponent* OverlappedCo
 			{
 				CurrentZone = &Pair.Value;
 				PlayerInSightBox = true;
-
-				
 				break;
 			}
 		}

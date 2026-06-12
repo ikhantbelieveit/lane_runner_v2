@@ -756,7 +756,7 @@ void APlayerCharacter::ResetPlayer()
 	SetAnimState(ECharacterAnimState::Grounded);
 
 	DistanceTravelled = 0.0f;
-	LastFramePos = ResetPos;
+	LastFramePos = SpawnPos;
 }
 
 void APlayerCharacter::SetAnimState(ECharacterAnimState newState)

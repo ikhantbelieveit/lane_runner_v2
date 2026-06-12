@@ -3,10 +3,13 @@
 
 #include "GI_ChunkDefinitionLoadSystem.h"
 #include "MyGameInstance.h"
+#include "GI_LevelChunkPoolSystem.h"
 
 void UGI_ChunkDefinitionLoadSystem::Initialize(FSubsystemCollectionBase& Collection)
 {
     Super::Initialize(Collection);
+
+    GI = Cast<UMyGameInstance>(GetGameInstance());
 
     if (UWorld* World = GetWorld())
     {
@@ -24,10 +27,7 @@ void UGI_ChunkDefinitionLoadSystem::Initialize(FSubsystemCollectionBase& Collect
 
 void UGI_ChunkDefinitionLoadSystem::Deinitialize()
 {
-    if (UWorld* World = GetWorld())
-    {
-        World->GetTimerManager().ClearTimer(TickHandle);
-    }
+    GI->WorldRef->GetTimerManager().ClearTimer(TickHandle);
     Super::Deinitialize();
 }
 
@@ -45,18 +45,17 @@ void UGI_ChunkDefinitionLoadSystem::TickSubsystem(float DeltaTime)
 
 bool UGI_ChunkDefinitionLoadSystem::InitialiseFromConfig()
 {
-    UMyGameInstance* GI = Cast<UMyGameInstance>(GetGameInstance());
-    if (GI)
-    {
-        FChunkDefLoadConfig configData = GI->ConfigData->ChunkLoadConfig->ConfigData;
-        ChunkDef_LUT.Empty();
+    FChunkDefLoadConfig configData = GI->ConfigData->ChunkLoadConfig->ConfigData;
+    ChunkDef_LUT.Empty();
 
-        for (const ULevelChunkDefinitionAsset* Entry : configData.ChunkDefs)
-        {
-            ChunkDef_LUT.Add(Entry->Definition.ChunkID, Entry->Definition);
-        }
-        return true;
+    for (const ULevelChunkDefinitionAsset* Entry : configData.ChunkDefs)
+    {
+        ChunkDef_LUT.Add(Entry->Definition.ChunkID, Entry->Definition);
     }
 
-    return false;
+    if (auto* poolSystem = GI->GetSubsystem<UGI_LevelChunkPoolSystem>())
+    {
+        poolSystem->InitOnChunkLoadComplete();
+    }
+    return true;
 }

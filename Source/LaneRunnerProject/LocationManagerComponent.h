@@ -19,6 +19,8 @@ class LANERUNNERPROJECT_API ULocationManagerComponent : public UActorComponent, 
 public:
 	ULocationManagerComponent();
 	virtual void InitializeFromChunk_Implementation() override;
+	virtual void TeardownFromChunk_Implementation() override;
+	
 
 protected:
 	virtual void BeginPlay() override;
@@ -77,7 +79,7 @@ public:
 	void SetAutoMoveSpeed(float newSpeed);
 	void SetAutoMoveDirection(EProjectileDirection newDirection);
 	void StartAutoMove(EProjectileDirection direction, float Speed, bool bUseStop, FVector stopCoords, bool despawnOnEnd);
-	void StopAutoMove(bool clampToEnd);
+	void StopAutoMove(bool clampToEnd, bool allowDespawn = true);
 
 	void UpdateAutoMove(float DeltaTime);
 

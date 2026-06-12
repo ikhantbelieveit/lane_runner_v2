@@ -50,6 +50,8 @@ bool UGI_LevelGenerationSystem::GenerateLevelLayout(FLevelGenerationSettings set
 		{
 			excludeChunks.Add(generalChunkDef.ChunkID);	//prevent a chunk from appearing twice
 		}
+
+		UE_LOG(LogTemp, Log, TEXT("[LEVEL] level should include chunk %s"), *generalChunk.ChunkID.ToString());
 	}
 
 	return true;

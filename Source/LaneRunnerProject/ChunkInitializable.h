@@ -26,9 +26,15 @@ class LANERUNNERPROJECT_API IChunkInitializable
 	GENERATED_BODY()
 
 public:
+	//happens once on chunk creation
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Chunk")
 	void InitializeFromChunk();
 
+	//happens when chunk returned to pool
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Chunk")
 	void TeardownFromChunk();
+
+	//happens every time a chunk is requested
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Chunk")
+	void ResetOnChunkRequest();
 };

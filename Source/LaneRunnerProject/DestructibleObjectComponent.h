@@ -35,6 +35,7 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	virtual void InitializeFromChunk_Implementation() override;
+	virtual void ResetOnChunkRequest_Implementation() override;
 
 	void OnHit();
 

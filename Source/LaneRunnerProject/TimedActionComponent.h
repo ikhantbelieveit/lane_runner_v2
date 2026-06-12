@@ -5,18 +5,20 @@
 #include "CoreMinimal.h"
 #include "SpawnComponent.h"
 #include "Components/ActorComponent.h"
+#include "ChunkInitializable.h"
 #include "TimedActionComponent.generated.h"
 
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FTimedActionEvent);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class LANERUNNERPROJECT_API UTimedActionComponent : public UActorComponent
+class LANERUNNERPROJECT_API UTimedActionComponent : public UActorComponent, public IChunkInitializable
 {
     GENERATED_BODY()
 
 public:
     UTimedActionComponent();
+    virtual void InitializeFromChunk_Implementation() override;
 
 protected:
     virtual void BeginPlay() override;

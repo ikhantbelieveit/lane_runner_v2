@@ -6,6 +6,7 @@
 #include "Components/ActorComponent.h"
 #include "Components/BoxComponent.h"
 #include "EProjectileDirection.h"
+#include "ChunkInitializable.h"
 #include "LineOfSightComponent.generated.h"
 
 USTRUCT(BlueprintType)
@@ -40,13 +41,15 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerDetect);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerLoseSight);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class LANERUNNERPROJECT_API ULineOfSightComponent : public UActorComponent
+class LANERUNNERPROJECT_API ULineOfSightComponent : public UActorComponent, public IChunkInitializable
 {
 	GENERATED_BODY()
 
 public:	
 	// Sets default values for this component's properties
 	ULineOfSightComponent();
+
+	virtual void TeardownFromChunk_Implementation() override;
 
 protected:
 	// Called when the game starts

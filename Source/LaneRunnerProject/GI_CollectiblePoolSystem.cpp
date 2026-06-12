@@ -77,6 +77,7 @@ bool UGI_CollectiblePoolSystem::InitialiseFromConfig()
         for (int32 i = 0; i < Entry.InitialPoolSize; ++i)
         {
             ABaseCollectible* Col = CreateNewCollectible(Entry.Type);
+            UE_LOG(LogTemp, Log, TEXT("[HELLO] created new collectible %s"), *Col->GetName());
             if (Col)
             {
                 Pools[Entry.Type].Inactive.Add(Col);
@@ -109,6 +110,12 @@ ABaseCollectible* UGI_CollectiblePoolSystem::CreateNewCollectible(ECollectibleTy
         // Finish spawning
         UGameplayStatics::FinishSpawningActor(NewCol, FTransform(FVector::ZeroVector));
         NewCol->bIsPooledInstance = true;
+
+        if (NewCol->Implements<UChunkInitializable>())
+        {
+            IChunkInitializable::Execute_InitializeFromChunk(NewCol);
+        }
+
         if (USpawnComponent* SpawnComp = NewCol->FindComponentByClass<USpawnComponent>())
         {
             if (SpawnComp->Implements<UChunkInitializable>())
@@ -145,6 +152,19 @@ ABaseCollectible* UGI_CollectiblePoolSystem::RequestCollectible(const FCollectib
     {
         if (ABaseCollectible* Col = Pool.Inactive[i].Get())
         {
+            if (Col->Implements<UChunkInitializable>())
+            {
+                IChunkInitializable::Execute_ResetOnChunkRequest(Col);
+            }
+
+            for (auto* comp : Col->GetComponents())
+            {
+                if (comp->Implements<UChunkInitializable>())
+                {
+                    IChunkInitializable::Execute_ResetOnChunkRequest(comp);
+                }
+            }
+
             Pool.Inactive.Remove(Col);
             Pool.Active.Add(Col);
 
@@ -187,6 +207,19 @@ void UGI_CollectiblePoolSystem::ReturnCollectible(ABaseCollectible* Collectible)
         return;
     }
 
+    if (Collectible->Implements<UChunkInitializable>())
+    {
+        IChunkInitializable::Execute_TeardownFromChunk(Collectible);
+    }
+
+    for (auto* comp : Collectible->GetComponents())
+    {
+        if (comp->Implements<UChunkInitializable>())
+        {
+            IChunkInitializable::Execute_TeardownFromChunk(comp);
+        }
+    }
+
     ECollectibleType Type = Collectible->Type;
 
     if (!Pools.Contains(Type))
@@ -200,20 +233,18 @@ void UGI_CollectiblePoolSystem::ReturnCollectible(ABaseCollectible* Collectible)
 
 void UGI_CollectiblePoolSystem::ResetAllPools()
 {
-    for (auto& Elem : Pools)
+    TMap<ECollectibleType, FCollectiblePool> PoolsCache = TMap<ECollectibleType, FCollectiblePool>(Pools);
+    for (auto& Elem : PoolsCache)
     {
         FCollectiblePool& Pool = Elem.Value;
 
-        for (auto& WeakCol : Pool.Active)
+        TArray<TWeakObjectPtr<ABaseCollectible>> ActiveCache = TArray<TWeakObjectPtr<ABaseCollectible>>(Pool.Active);
+
+        for (auto& WeakCol : ActiveCache)
         {
             if (ABaseCollectible* Col = WeakCol.Get())
             {
-                if (USpawnComponent* SpawnComp = Col->FindComponentByClass<USpawnComponent>())
-                {
-                    SpawnComp->Despawn();
-                }
-
-                Pool.Inactive.Add(Col);
+                ReturnCollectible(Col);
             }
         }
 

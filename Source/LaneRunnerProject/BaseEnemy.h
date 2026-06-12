@@ -165,4 +165,5 @@ public:
 	virtual AActor* GetGroupActor_Implementation() const override { return GroupActorRef; }
 
 	virtual void InitializeFromChunk_Implementation() override;
+	virtual void ResetOnChunkRequest_Implementation() override;
 };

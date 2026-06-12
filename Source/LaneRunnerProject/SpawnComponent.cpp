@@ -22,25 +22,10 @@ USpawnComponent::USpawnComponent()
 	// ...
 }
 
-void USpawnComponent::InitializeFromChunk_Implementation()
+void USpawnComponent::TeardownFromChunk_Implementation()
 {
-	AActor* Owner = GetOwner();
-	if (!Owner)
-	{
-		return;
-	}
-
-	if (ABaseCollectible* Collectible = Cast<ABaseCollectible>(Owner))
-	{
-		if (Collectible->bIsPooledInstance)
-		{
-			return;
-		}
-	}
-
-	Reset();
+	Despawn();
 }
-
 
 // Called when the game starts
 void USpawnComponent::BeginPlay()
@@ -91,21 +76,21 @@ void USpawnComponent::Spawn(bool drop, bool scrollInstant, bool scrollOnReach)
 	{
 		if (!box) continue;
 
-		if (box->ComponentHasTag("IgnoreSpawnInit"))
+		box->SetGenerateOverlapEvents(true);
+
+		if (box->ComponentHasTag("SightBox"))
 		{
+			box->SetCollisionProfileName(SpawnedCollisionTag_LineOfSight);
 			continue;
 		}
 
 		if (box->ComponentHasTag("SightBlocker"))
 		{
-			box->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-		}
-		else
-		{
-			box->SetCollisionProfileName(SpawnedCollisionTag);
+			box->SetCollisionProfileName(SpawnedCollisionTag_SightBlocker);
+			continue;
 		}
 
-		box->SetGenerateOverlapEvents(true);
+		box->SetCollisionProfileName(SpawnedCollisionTag);
 	}
 
 	UPaperSpriteComponent* sprite = Cast<UPaperSpriteComponent>(Owner->GetComponentByClass(UPaperSpriteComponent::StaticClass()));
@@ -163,7 +148,10 @@ void USpawnComponent::Spawn(bool drop, bool scrollInstant, bool scrollOnReach)
 
 void USpawnComponent::Despawn()
 {
+	FString ownerName = GetOwner()->GetName();
 	AActor* Owner = GetOwner();
+
+	UE_LOG(LogTemp, Log, TEXT("despawn actor %s"), *ownerName);
 
 	UStaticMeshComponent* mesh = Cast<UStaticMeshComponent>(Owner->GetComponentByClass(UStaticMeshComponent::StaticClass()));
 	if (mesh)
@@ -178,7 +166,19 @@ void USpawnComponent::Despawn()
 	{
 		if (!box) continue;
 
+		if (box->ComponentHasTag("SightBox"))
+		{
+			box->SetCollisionProfileName(DespawnedCollisionTag_LineOfSight);
+			continue;
+		}
+
+		if (box->ComponentHasTag("SightBlocker"))
+		{
+			box->SetCollisionProfileName(DespawnedCollisionTag_SightBlocker);
+			continue;
+		}
 		box->SetCollisionProfileName(DespawnedCollisionTag);
+		continue;
 	}
 
 	UPaperSpriteComponent* sprite = Cast<UPaperSpriteComponent>(Owner->GetComponentByClass(UPaperSpriteComponent::StaticClass()));

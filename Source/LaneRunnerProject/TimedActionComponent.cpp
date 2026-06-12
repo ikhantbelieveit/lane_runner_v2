@@ -11,10 +11,8 @@ UTimedActionComponent::UTimedActionComponent()
     bLooping = true;
 }
 
-void UTimedActionComponent::BeginPlay()
+void UTimedActionComponent::InitializeFromChunk_Implementation()
 {
-    Super::BeginPlay();
-
     if (RandomStartDelay)
     {
         StartDelay = FMath::RandRange(RandomStartDelayMin, RandomStartDelayMax);
@@ -26,11 +24,13 @@ void UTimedActionComponent::BeginPlay()
         SpawnComponent->OnSpawn.AddDynamic(this, &UTimedActionComponent::OnSpawned);
         SpawnComponent->OnDespawn.AddDynamic(this, &UTimedActionComponent::OnDespawned);
     }
+}
 
-    if (StartOnPlay && (!SpawnComponent || SpawnComponent->GetCurrentSpawned()))
-    {
-        StartAction();
-    }
+void UTimedActionComponent::BeginPlay()
+{
+    Super::BeginPlay();
+
+    
 }
 
 void UTimedActionComponent::PerformAction()
