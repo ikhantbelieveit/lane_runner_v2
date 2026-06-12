@@ -300,13 +300,13 @@ void ABaseEnemy::OnRemovedFromGroup_Implementation()
 
 void ABaseEnemy::PerformJump()
 {
-	if (!PhysicsBox)
-	{
-		return;
-	}
-
 	FVector jumpVector = FVector(0.0f, 0.0f, JumpVelocity);
-	PhysicsBox->AddImpulse(jumpVector, NAME_None, true);
+	if (auto* projMoveComp = FindComponentByClass<UProjectileMovementComponent>())
+	{
+		projMoveComp->SetUpdatedComponent(GetRootComponent());
+		projMoveComp->Velocity = jumpVector;
+		projMoveComp->Activate();
+	}
 }
 
 void ABaseEnemy::PerformNextTimedShoot()

@@ -50,7 +50,7 @@ public:
 	FName DespawnedCollisionTag = FName("NoCollision");
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName SpawnedCollisionTag_SightBlocker = FName("QueryOnly");
+	FName SpawnedCollisionTag_SightBlocker = FName("IgnoreOnlyPawn");
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FName DespawnedCollisionTag_SightBlocker = FName("NoCollision");

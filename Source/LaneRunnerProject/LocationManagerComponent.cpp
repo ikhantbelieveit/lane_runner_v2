@@ -22,27 +22,30 @@ void ULocationManagerComponent::InitializeFromChunk_Implementation()
 		bHasPlayerRef = (PlayerRef != nullptr);
 	}
 
-	UBoxComponent* box = Cast<UBoxComponent>(GetOwner()->GetComponentByClass(UBoxComponent::StaticClass()));
+	TargetActor = GetOwner();
+
+	UBoxComponent* box = Cast<UBoxComponent>(TargetActor->GetComponentByClass(UBoxComponent::StaticClass()));
 	if (box)
 	{
 		BoxComp = box;
 	}
 
-	TargetActor = GetOwner();
-
 	if (auto* rootComp = TargetActor->GetRootComponent())
 	{
-		UE_LOG(LogTemp, Log, TEXT("Actor %s has root component - use as StartPos"), *rootComp->GetOwner()->GetName());
 		StartPos = rootComp->GetRelativeLocation();
 	}
 
 	Reset();
 }
 
+void ULocationManagerComponent::ResetOnChunkRequest_Implementation()
+{
+	Reset();
+}
+
 void ULocationManagerComponent::TeardownFromChunk_Implementation()
 {
-	UE_LOG(LogTemp, Log, TEXT("[HELLO] trigger teardown on location manager for actor %s"), *TargetActor->GetName());
-	Reset();
+	StopAutoMove(false, false);
 }
 
 void ULocationManagerComponent::BeginPlay()
@@ -99,7 +102,6 @@ void ULocationManagerComponent::Reset()
 	if (auto* rootComp = TargetActor->GetRootComponent())
 	{
 		rootComp->SetRelativeLocation(StartPos);
-		UE_LOG(LogTemp, Log, TEXT("Actor %s has root component - return to start pos on reset"), *rootComp->GetOwner()->GetName());
 	}
 }
 

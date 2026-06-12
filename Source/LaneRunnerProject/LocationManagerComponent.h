@@ -19,6 +19,7 @@ class LANERUNNERPROJECT_API ULocationManagerComponent : public UActorComponent, 
 public:
 	ULocationManagerComponent();
 	virtual void InitializeFromChunk_Implementation() override;
+	virtual void ResetOnChunkRequest_Implementation() override;
 	virtual void TeardownFromChunk_Implementation() override;
 	
 
